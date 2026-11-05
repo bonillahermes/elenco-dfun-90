@@ -3,3 +3,5 @@ node_modules/
 .firebase/
 .DS_Store
 datos/
+fotos/
+docs/

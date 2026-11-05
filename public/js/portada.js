@@ -1,6 +1,6 @@
 // Portada pública (#v-inicio): telón que se abre una vez y recorrido fijo de la función.
 // Horas, bloques y danzas salen de montaje.js; aquí solo va la presentación de cada bloque.
-import { BLOQUES, DZ, fmt } from "./montaje.js";
+import { BLOQUES, DANZAS, DZ, fmt } from "./montaje.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -43,6 +43,7 @@ export function iniciarPortada() {
   telon(raiz, quieto);
   recorrido(raiz, quieto);
   ecoLogin(raiz);
+  cuenta(raiz);
 }
 
 // El telón se abre una sola vez: al terminar se retira, para que no vuelva a correr al regresar a la portada.
@@ -107,4 +108,16 @@ function ecoLogin(raiz) {
   const copiar = () => { eco.textContent = origen.textContent; };
   new MutationObserver(copiar).observe(origen, { childList: true, characterData: true, subtree: true });
   copiar();
+}
+
+// Cuántas danzas y bloques tiene la función, en palabras, desde montaje.js. El HTML trae el mismo texto de respaldo.
+const PALABRAS = ["cero", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte"];
+const enLetras = (n, masculino) => (masculino && n === 1 ? "un" : PALABRAS[n] || String(n));
+export const textoCuenta = (danzas = DANZAS.length, bloques = BLOQUES.length) => {
+  const t = `${enLetras(danzas)} ${danzas === 1 ? "danza" : "danzas"} en ${enLetras(bloques, true)} ${bloques === 1 ? "bloque" : "bloques"}.`;
+  return t[0].toUpperCase() + t.slice(1);
+};
+function cuenta(raiz) {
+  const e = $("#po-cuenta", raiz);
+  if (e) e.textContent = textoCuenta();
 }
