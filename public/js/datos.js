@@ -79,6 +79,8 @@ function storeFirebase(notificar) {
   s.guardarElenco = (id, danzas) => fb.fs.setDoc(fb.fs.doc(fb.db, "elenco", id), { danzas, ...meta() });
   s.crearPersona = (p) => { const id = nuevoId(); return fb.fs.setDoc(fb.fs.doc(fb.db, "personas", id), { ...p, creado: Date.now() }).then(() => id); };
   s.actualizarPersona = (id, patch) => fb.fs.updateDoc(fb.fs.doc(fb.db, "personas", id), patch);
+  // Borra a la persona y sus danzas en una sola escritura (las reglas lo permiten solo al administrador).
+  s.borrarPersona = (id) => { const b = fb.fs.writeBatch(fb.db); b.delete(fb.fs.doc(fb.db, "elenco", id)); b.delete(fb.fs.doc(fb.db, "personas", id)); return b.commit(); };
   s.definir = (d, v) => {
     const def = { ...s.datos.definidas }; if (v) def[d] = true; else delete def[d];
     return fb.fs.setDoc(fb.fs.doc(fb.db, "config", "estado"), { definidas: def });
@@ -127,6 +129,7 @@ function storeLocal(notificar) {
   s.guardarElenco = (id, danzas) => { s.datos.elenco[id] = danzas; return guardar(); };
   s.crearPersona = (p) => { const id = nuevoId(); s.datos.personas.push({ id, ...p, creado: Date.now() }); return guardar().then(() => id); };
   s.actualizarPersona = (id, patch) => { Object.assign(s.datos.personas.find((p) => p.id === id) || {}, patch); return guardar(); };
+  s.borrarPersona = (id) => { s.datos.personas = s.datos.personas.filter((p) => p.id !== id); delete s.datos.elenco[id]; return guardar(); };
   s.definir = (d, v) => { if (v) s.datos.definidas[d] = true; else delete s.datos.definidas[d]; return guardar(); };
   s.importar = (personas, elenco) => { s.datos.personas = personas; s.datos.elenco = elenco; return guardar(); };
   return s;

@@ -59,3 +59,19 @@
 #v-panel .pendientes{margin:0;padding-left:18px;display:grid;gap:8px;font-size:15px;color:var(--in-gris)}
 #v-panel .pendientes li.bad,#v-panel .pendientes li.bad .linkbtn{color:var(--bad)}
 #v-panel .rolcard h3{font-family:var(--in-body);font-size:15px;font-weight:700;margin-top:4px}
+
+/* Por persona */
+.p-head{display:grid;gap:4px}
+.p-head h2{font-family:var(--in-display);font-weight:400;font-size:clamp(26px,2.8vw,36px);line-height:1.1}
+.p-head p{margin:0}
+.tl .dz-fila{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.tl .dz-fila .btn{flex-shrink:0}
+#p-datos[open]{display:grid;gap:14px}
+.p-form{margin-top:4px}
+
+/* Acciones que borran datos: separadas y en rojo. */
+.zona-cuidado{border-color:var(--bad)}
+#p-datos .zona-cuidado{display:grid;gap:8px;justify-items:start;padding-top:14px;border-top:1px solid var(--line)}
+.zona-cuidado p{margin:0}
+.btn.peligro{background:transparent;color:var(--bad);border-color:var(--bad)}
+.btn.peligro:hover{background:var(--bad);color:#fff}

@@ -219,19 +219,30 @@
 
     <section id="v-persona" class="view" hidden style="display:grid;gap:14px">
       <div class="card" style="display:grid;gap:12px">
-        <div class="field"><label for="p-sel">Persona</label><select id="p-sel"></select></div>
-        <div id="p-head" class="hint"></div>
-        <form id="p-form" class="grid2" autocomplete="off">
-          <div class="field" data-admin><label for="p-correo">Correo UNAL</label><input type="text" id="p-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
-          <div class="field"><label for="p-rol">Rol</label><select id="p-rol"><option value="">Sin definir</option><option>Hombre</option><option>Mujer</option></select></div>
-          <div class="field"><label for="p-vin">Vínculo</label><select id="p-vin"><option value="">Sin definir</option><option>Estudiante</option><option>Egresado</option></select></div>
-          <div class="field" style="align-self:end"><button class="btn small" type="submit">Guardar datos</button></div>
-        </form>
+        <div class="grid2">
+          <div class="field"><label for="p-q">Buscar persona</label><input type="text" id="p-q" placeholder="Escribe parte del nombre" autocomplete="off"></div>
+          <div class="field"><label for="p-sel">Persona</label><select id="p-sel"></select></div>
+        </div>
+        <div id="p-head" class="p-head"></div>
       </div>
       <div class="cols">
         <div style="display:grid;gap:8px"><h3>Su programa</h3><div class="tl" id="p-tl"></div></div>
         <div style="display:grid;gap:8px"><h3>Qué más puede bailar</h3><ul class="list" id="p-opts"></ul></div>
       </div>
+      <details id="p-datos" class="card">
+        <summary>Datos de la persona</summary>
+        <form id="p-form" class="grid2 p-form" autocomplete="off">
+          <div class="field"><label for="p-nombre">Nombre completo</label><input type="text" id="p-nombre" maxlength="120"></div>
+          <div class="field" data-admin><label for="p-correo">Correo UNAL</label><input type="text" id="p-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
+          <div class="field"><label for="p-rol">Rol</label><select id="p-rol"><option value="">Sin definir</option><option>Hombre</option><option>Mujer</option></select></div>
+          <div class="field"><label for="p-vin">Vínculo</label><select id="p-vin"><option value="">Sin definir</option><option>Estudiante</option><option>Egresado</option></select></div>
+          <div class="field" style="align-self:end"><button class="btn small ghost" type="submit">Guardar datos</button></div>
+        </form>
+        <div class="zona-cuidado" data-admin>
+          <p class="hint">Borrar quita a la persona del grupo junto con todas sus danzas, para todos los usuarios. No se puede deshacer.</p>
+          <button class="btn small peligro" type="button" id="p-borrar">Borrar a esta persona</button>
+        </div>
+      </details>
       <details id="p-ficha" class="card"><summary>Ver lo que ve esta persona al ingresar</summary><div id="p-ficha-c" class="mine" style="margin-top:12px"></div></details>
     </section>
 
@@ -276,12 +287,13 @@
       </form>
       <div class="card" style="display:grid;gap:10px">
         <h2>Respaldo en Excel</h2>
-        <p class="hint" style="margin:0">Los cambios se guardan solos en la base de datos. Exportar descarga una copia del elenco. Restaurar reemplaza todas las personas y asignaciones con las del archivo; úselo solo en caso de emergencia.</p>
-        <div class="row">
-          <button class="btn ghost small" type="button" id="xls">Exportar a Excel</button>
-          <label class="btn ghost small" for="imp" style="cursor:pointer" data-admin>Restaurar desde Excel</label>
-          <input type="file" id="imp" accept=".xlsx" hidden>
-        </div>
+        <p class="hint" style="margin:0">Los cambios se guardan solos en la base de datos. Exportar descarga una copia del elenco en Excel.</p>
+        <div class="row"><button class="btn ghost small" type="button" id="xls">Exportar a Excel</button></div>
+      </div>
+      <div class="card zona-cuidado" data-admin style="display:grid;gap:10px">
+        <h2>Restaurar desde Excel</h2>
+        <p class="hint" style="margin:0">Reemplaza todas las personas y asignaciones con las del archivo, para todos los usuarios. Úsalo solo en caso de emergencia y exporta antes una copia.</p>
+        <div class="row"><label class="btn small peligro" for="imp" style="cursor:pointer">Elegir archivo y restaurar</label><input type="file" id="imp" accept=".xlsx" hidden></div>
       </div>
     </section>
   </div>

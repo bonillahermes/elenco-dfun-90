@@ -212,11 +212,20 @@ $("#v-danza").addEventListener("click", async (e) => {
 
 /* Por persona */
 function renderPersonaSel() {
-  const cur = $("#p-sel").value;
+  const cur = $("#p-sel").value, q = norm($("#p-q").value);
   const esAdmin = rolActivo === "admin" && store.sesion?.admin;
-  $("#p-sel").innerHTML = D().personas.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}${p.rol ? ` (${isH(p) ? "H" : "M"})` : ""}${esAdmin && !p.correo ? " · sin correo" : ""}</option>`).join("");
-  if (cur && persona(cur)) $("#p-sel").value = cur;
+  // La búsqueda reduce la lista; la persona abierta se conserva aunque no coincida.
+  const ps = D().personas.filter((p) => !q || norm(p.nombre).includes(q) || p.id === cur);
+  $("#p-sel").innerHTML = ps.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}${p.rol ? ` (${isH(p) ? "H" : "M"})` : ""}${esAdmin && !p.correo ? ", sin correo" : ""}</option>`).join("");
+  if (cur && ps.some((p) => p.id === cur)) $("#p-sel").value = cur;
 }
+$("#p-q").addEventListener("input", () => {
+  const q = norm($("#p-q").value), primera = D().personas.find((p) => norm(p.nombre).includes(q));
+  if (q && primera) $("#p-sel").value = primera.id;
+  renderPersonaSel(); if (q && primera) $("#p-sel").value = primera.id; renderPersona();
+});
+// Nombre del bloque solo cuando aporta (en Guabina o Rajaleña, el bloque se llama igual que la danza).
+const bloqueDe = (X) => (BQ[X.b].nombre !== X.label ? BQ[X.b].nombre : "");
 function timelineHTML(p) {
   const S = motor.asig(p.id), cs = cambios(S);
   if (!S.length) return `<div><span class="hint">Sin danzas asignadas.</span></div>`;
@@ -224,32 +233,46 @@ function timelineHTML(p) {
   S.forEach((d, i) => {
     if (i) { const c = cs.find((c) => c.a === d); if (c) { const n = nivel(c.min); h += `<div class="chg ${n === "ok" ? "" : n === "warn" ? "warn" : "bad"}">Cambio de vestuario: ${c.min} min</div>`; } }
     const X = DZ[d], pr = motor.revisar(p, S, d);
-    h += `<div class="dz"><time>${X.s} – ${X.e}</time><div><b>${esc(X.label)}</b> <span class="hint">· ${esc(BQ[X.b].nombre)}</span>${pr.bad ? `<div class="msg bad">${esc(pr.why)}</div>` : ""}</div></div>`;
+    h += `<div class="dz" data-d="${esc(d)}"><time>${X.s} – ${X.e}</time><div class="dz-fila"><div><b>${esc(X.label)}</b>${bloqueDe(X) ? ` <span class="hint">${esc(bloqueDe(X))}</span>` : ""}${defTag(d)}${pr.bad ? `<div class="msg bad">${esc(pr.why)}</div>` : ""}</div><button class="btn small ghost" type="button" data-act="quitar">Quitar</button></div></div>`;
   });
   return h;
 }
 function renderPersona() {
   const p = persona($("#p-sel").value);
-  if (!p) { $("#p-head").textContent = "No hay personas cargadas."; $("#p-tl").innerHTML = ""; $("#p-opts").innerHTML = ""; $("#p-form").hidden = true; return; }
-  $("#p-form").hidden = false;
-  const S = motor.asig(p.id), cs = cambios(S), mx = maxDe(p);
-  $("#p-head").innerHTML = `${rolTag(p)} ${S.length} danza${S.length === 1 ? "" : "s"}${mx ? ` de ${mx} posibles` : ""} · ${cs.length} cambio${cs.length === 1 ? "" : "s"} de vestuario${p.correo ? ` · ${esc(p.correo)}` : " · sin correo vinculado"}`;
-  if (document.activeElement?.closest("#p-form") == null) { $("#p-correo").value = p.correo || ""; $("#p-rol").value = p.rol || ""; $("#p-vin").value = p.vinculo || ""; }
+  if (!p) { $("#p-head").textContent = D().personas.length ? "Nadie coincide con la búsqueda." : "No hay personas cargadas."; $("#p-tl").innerHTML = ""; $("#p-opts").innerHTML = ""; $("#p-datos").hidden = true; return; }
+  $("#p-datos").hidden = false;
+  const S = motor.asig(p.id), cs = cambios(S), mx = maxDe(p), esAdmin = rolActivo === "admin" && store.sesion?.admin;
+  $("#p-head").innerHTML = `<h2>${esc(p.nombre)} ${rolTag(p)}</h2><p class="hint">${pl(S.length, "danza", "danzas")}${mx ? ` de ${mx} posibles` : ""}. ${pl(cs.length, "cambio", "cambios")} de vestuario. ${p.correo ? esc(p.correo) : "Sin correo vinculado: no puede ver su programa."}</p>`;
+  // Al cambiar de persona, el administrador ve abiertos los datos si falta el correo.
+  if ($("#p-datos").dataset.id !== p.id) { $("#p-datos").dataset.id = p.id; $("#p-datos").open = esAdmin && !p.correo; }
+  if (document.activeElement?.closest("#p-form") == null) { $("#p-nombre").value = p.nombre || ""; $("#p-correo").value = p.correo || ""; $("#p-rol").value = p.rol || ""; $("#p-vin").value = p.vinculo || ""; }
   $("#p-tl").innerHTML = timelineHTML(p);
   if ($("#p-ficha").open) $("#p-ficha-c").innerHTML = fichaHTML(p, false);
   const ord = { ok: 1, warn: 2, block: 3, na: 4 };
   $("#p-opts").innerHTML = DANZAS.map((d) => [d, motor.evaluar(p, d.id)]).filter(([, ev]) => ev.st !== "on").sort((a, b) => ord[a[1].st] - ord[b[1].st] || a[0].ini - b[0].ini)
-    .map(([d, ev]) => `<li class="item ${ev.st === "na" ? "block" : ev.st}" data-d="${esc(d.id)}"><span><b>${esc(d.label)}</b> <span class="hint">${d.s}</span>${defTag(d.id)}<span class="why">${esc(ev.why || "")}</span></span>${ev.st === "ok" || ev.st === "warn" ? `<button class="btn small" data-act="add">Asignar</button>` : ""}</li>`).join("");
+    .map(([d, ev]) => `<li class="item ${ev.st === "na" ? "block" : ev.st}${postulo(p, d.id) ? " post" : ""}" data-d="${esc(d.id)}"><span><b>${esc(d.label)}</b> <span class="hint">${d.s}</span>${defTag(d.id)}${postulo(p, d.id) ? ' <span class="tag post">Se postuló</span>' : ""}<span class="why">${esc(ev.why || "")}</span></span>${ev.st === "ok" || ev.st === "warn" ? `<button class="btn small" data-act="add">Asignar</button>` : ""}</li>`).join("");
 }
 $("#p-sel").addEventListener("change", () => { $("#p-correo").blur(); renderPersona(); });
 $("#p-ficha").addEventListener("toggle", () => renderPersona());
+$("#p-tl").addEventListener("click", (e) => { const dz = e.target.closest(".dz[data-d]"); if (dz && e.target.closest('[data-act="quitar"]')) { const p = persona($("#p-sel").value); if (p) alternar(p, dz.dataset.d); } });
+$("#p-borrar").addEventListener("click", async () => {
+  const p = persona($("#p-sel").value); if (!p) return;
+  if (!store.sesion?.admin || rolActivo !== "admin") return msg("Solo el administrador puede borrar personas.", "bad");
+  const n = motor.asig(p.id).length;
+  if (!(await confirmar(`Borrar a ${p.nombre}`, `Se quitará del grupo${n ? ` junto con sus ${pl(n, "danza", "danzas")}` : ""}, para todos los usuarios. No se puede deshacer.`))) return;
+  try { await store.borrarPersona(p.id); $("#p-sel").value = ""; msg(`Se borró a ${p.nombre} del grupo.`, "ok"); }
+  catch (err) { msg("No se pudo borrar. Revise sus permisos.", "bad"); console.error(err); }
+});
 $("#p-opts").addEventListener("click", (e) => { const li = e.target.closest("li[data-d]"); if (li && e.target.closest('[data-act="add"]')) { const p = persona($("#p-sel").value); if (p) alternar(p, li.dataset.d); } });
 $("#p-form").addEventListener("submit", async (e) => {
   e.preventDefault(); const p = persona($("#p-sel").value); if (!p) return;
+  const nombre = $("#p-nombre").value.replace(/\s+/g, " ").trim();
+  if (!nombre) return msg("Escriba el nombre completo.", "bad");
+  if (D().personas.some((x) => x.id !== p.id && norm(x.nombre) === norm(nombre))) return msg("Ya hay otra persona con ese nombre.", "bad");
   const correo = store.sesion?.admin ? $("#p-correo").value.trim().toLowerCase() : (p.correo || "");
   if (correo && !/^[^@\s]+@unal\.edu\.co$/.test(correo)) return msg("El correo debe terminar en @unal.edu.co.", "bad");
   if (correo && D().personas.some((x) => x.id !== p.id && x.correo === correo)) return msg("Ese correo ya está vinculado a otra persona.", "bad");
-  try { await store.actualizarPersona(p.id, { correo, rol: $("#p-rol").value, vinculo: $("#p-vin").value }); msg(`Datos de ${p.nombre} guardados.`, "ok"); document.activeElement?.blur(); }
+  try { await store.actualizarPersona(p.id, { nombre, correo, rol: $("#p-rol").value, vinculo: $("#p-vin").value }); msg(`Datos de ${nombre} guardados.`, "ok"); document.activeElement?.blur(); }
   catch (err) { msg("No se pudo guardar.", "bad"); }
 });
 
