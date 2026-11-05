@@ -41,7 +41,7 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 - Administrador: hyate@unal.edu.co (Hermes). Todo lo del maestro, más restaurar datos desde Excel y borrar personas.
 - Maestro: bsilvab@unal.edu.co (Bryan Nicolás Silva Bermúdez) y el administrador. Arma el elenco. Lista en `MAESTROS` (config.js) y en `maestro()` de firestore.rules.
 - Bailarín: cualquier cuenta UNAL cuyo correo esté vinculado a una persona; ve su propio programa.
-- Un mismo usuario puede tener varios roles: si es maestro y bailarín, el encabezado ofrece "Elenco | Mi programa".
+- Un mismo usuario puede tener varios roles. El selector "Ver como" (encabezado y panel de Inicio) cambia el rol activo: Administrador, Maestro o Bailarín. Es solo de interfaz; los permisos reales los dan las reglas de Firestore. Se recuerda en localStorage (`dfun-v2-rol`).
 
 ## Principio de uso
 - La operación diaria no usa Excel: todo se guarda en Firestore. El Excel es solo respaldo (exportar) o restauración de emergencia.

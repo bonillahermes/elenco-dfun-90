@@ -201,7 +201,7 @@ $("#f-new").addEventListener("submit", async (e) => {
 $("#xls").addEventListener("click", () => { try { exportarExcel(D(), motor); msg("Archivo exportado.", "ok"); } catch (e) { msg("No se pudo exportar: " + e.message, "bad"); } });
 $("#imp").addEventListener("change", async (e) => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
-  if (!store.sesion?.admin) return msg("Solo el administrador puede restaurar datos.", "bad");
+  if (!store.sesion?.admin || rolActivo !== "admin") return msg("Solo el administrador puede restaurar datos.", "bad");
   try {
     const { personas, elenco } = await leerExcel(f);
     if (D().personas.length && !(await confirmar("Reemplazar todos los datos", `Se cargarán ${personas.length} personas y se borrarán las ${D().personas.length} actuales con sus asignaciones. Esto afecta a todos los usuarios.`))) return;
@@ -289,6 +289,7 @@ function renderBailarin() {
   const s = store.sesion, p = D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo);
   let h = "";
   if (!D().personas.length) h += `<div class="card"><p class="hint" style="margin:0">Cargando el elenco…</p></div>`;
+  else if (!p && store.sesion.maestro) h += vincularHTML() || `<div class="card"><p class="hint" style="margin:0">Todos los nombres ya tienen correo vinculado.</p></div>`;
   else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero no aparece en el elenco. ${store.sesion.maestro ? "Puedes vincularlo tú mismo desde Inicio." : "Pídele al maestro que lo agregue a tu nombre."}</p></div>`;
   else h += fichaHTML(p, true);
   h += `<div style="display:grid;gap:8px"><h3>Programa de la función</h3><div class="tl">${programaHTML(true)}</div></div>`;
@@ -300,7 +301,16 @@ const notas = { "Guabina": "mantilla", "Guaneña y Bambuco sureño": "bebé", "F
 const nombreInicio = { "Guaneña y Bambuco sureño": "Guaneña y Danza de Nariño" };
 $("#momentos").innerHTML = BLOQUES.map((b) => `<li class="momento"><time>${fmt(b.ini)} p. m.</time><h3>${esc(b.nombre)}</h3><ul>${b.danzas.map((d) =>
   `<li>${esc(nombreInicio[d] || DZ[d].label)}${notas[d] ? ` <small>· ${esc(notas[d])}</small>` : ""}</li>`).join("")}</ul></li>`).join("");
-let verPortada = true, vista = "panel";
+let verPortada = true, vista = "panel", rolActivo = null;
+try { rolActivo = localStorage.getItem("dfun-v2-rol"); } catch (e) {}
+// Roles que puede usar la sesión y el rol con el que está viendo la página.
+const rolesDe = (s) => [...(s.admin ? ["admin"] : []), ...(s.maestro ? ["maestro"] : []), "bailarin"];
+const NOMBRE_ROL = { admin: "Administrador", maestro: "Maestro", bailarin: "Bailarín" };
+function permisos(s) {
+  const roles = rolesDe(s);
+  if (!roles.includes(rolActivo)) rolActivo = roles[0];
+  return { rol: rolActivo, roles, admin: rolActivo === "admin", maestro: rolActivo === "admin" || rolActivo === "maestro" };
+}
 const yoDe = (s) => D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo) || null;
 function ir(v) { vista = v; verPortada = false; render(); window.scrollTo(0, 0); }
 document.addEventListener("click", async (e) => {
@@ -309,6 +319,7 @@ document.addEventListener("click", async (e) => {
   if (e.target.closest("[data-portada]")) { verPortada = true; render(); window.scrollTo(0, 0); return; }
   const v = e.target.closest("[data-vista]"); if (v) return ir(v.dataset.vista);
   if (e.target.id === "salir") { verPortada = true; vista = "panel"; store.salir(); return; }
+  if (e.target.closest("[data-rol]")) { rolActivo = e.target.closest("[data-rol]").dataset.rol; try { localStorage.setItem("dfun-v2-rol", rolActivo); } catch (err) {} return ir(rolActivo === "bailarin" ? "bailarin" : "panel"); }
   if (e.target.id === "vincular") {
     const id = $("#vincular-sel").value, p = persona(id); if (!p) return;
     if (p.correo && p.correo !== store.sesion.correo) return msg(`${p.nombre} ya está vinculado a otro correo.`, "bad");
@@ -319,15 +330,21 @@ document.addEventListener("click", async (e) => {
 });
 
 /* ---------- panel de inicio (después de ingresar) ---------- */
+function vincularHTML() {
+  const ps = D().personas.filter((p) => !p.correo);
+  if (!ps.length) return "";
+  return `<div class="card" style="display:grid;gap:10px"><h3>Vincula tu nombre</h3><p class="hint" style="margin:0">Elige tu nombre del elenco para ver tu propio programa como bailarín.</p>
+    <div class="row"><select id="vincular-sel" style="max-width:360px">${ps.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}</option>`).join("")}</select><button class="btn small" id="vincular" type="button">Vincular</button></div></div>`;
+}
 function renderPanel() {
-  const s = store.sesion, yo = yoDe(s), ps = D().personas;
+  const s = store.sesion, yo = yoDe(s), ps = D().personas, P = permisos(s);
   const nombre = (yo?.nombre || (s.nombre && !s.nombre.includes("@") ? s.nombre : s.correo.split("@")[0])).split(" ")[0];
   const S = yo ? motor.asig(yo.id) : [];
   const tarjetas = [];
-  if (s.maestro) {
+  if (P.maestro) {
     const conDanza = ps.filter((p) => motor.asig(p.id).length).length, malos = motor.conProblemas().length;
     const completas = DANZAS.filter((d) => { const b = motor.balance(d.id), c = CUPOS[d.id] || {}; return (c.Hombre ?? 0) === b.h && (c.Mujer ?? 0) === b.m; }).length;
-    tarjetas.push(`<article class="card rolcard"><span class="badge">${s.admin ? "Administrador · Maestro" : "Maestro"}</span><h2>Armar el elenco</h2>
+    tarjetas.push(`<article class="card rolcard"><span class="badge">${NOMBRE_ROL[P.rol]}</span><h2>Armar el elenco</h2>
       <p class="hint">${ps.length ? `${conDanza} de ${ps.length} personas con danza · ${completas} de ${DANZAS.length} danzas con cupo completo${malos ? ` · <b style="color:var(--bad)">${malos} con reglas rotas</b>` : ""}` : "Aún no hay personas cargadas."}</p>
       <ul class="encontraras">
         <li><b>Matriz</b>: asigna danzas con un toque; el semáforo dice quién puede entrar y por qué.</li>
@@ -339,9 +356,9 @@ function renderPanel() {
       </ul>
       <button class="btn" type="button" data-vista="maestro">Ir al elenco</button></article>`);
   }
-  if (yo || !s.maestro) {
+  if (yo || P.rol === "bailarin") {
     tarjetas.push(`<article class="card rolcard"><span class="badge">Bailarín</span><h2>Mi programa</h2>
-      <p class="hint">${yo ? (S.length ? `Bailas ${pl(S.length, "danza", "danzas")}: ${S.map((d) => DZ[d].label).join(", ")}. Primera salida a escena: ${DZ[S[0]].s} p. m.` : "Aún no tienes danzas asignadas.") : `Tu correo ${esc(s.correo)} aún no está vinculado a un nombre del elenco. Pídeselo al maestro.`}</p>
+      <p class="hint">${yo ? (S.length ? `Bailas ${pl(S.length, "danza", "danzas")}: ${S.map((d) => DZ[d].label).join(", ")}. Primera salida a escena: ${DZ[S[0]].s} p. m.` : "Aún no tienes danzas asignadas.") : `Tu correo ${esc(s.correo)} aún no está vinculado a un nombre del elenco.${s.maestro ? " Vincúlalo aquí abajo." : " Pídeselo al maestro."}`}</p>
       <ul class="encontraras">
         <li><b>Llamados del día</b>: llegada, ensayo general, calentamiento y función.</li>
         <li><b>Una ficha por danza</b>: hora, qué va antes y después en escena y cuánto tiempo tienes para cambiarte.</li>
@@ -349,17 +366,20 @@ function renderPanel() {
         <li><b>El elenco</b> con el que bailas cada danza.</li>
         <li><b>Recomendaciones</b>: cambios rápidos, prendas que entregas o recibes y objetos en escena.</li>
       </ul>
-      ${yo || !s.maestro ? `<button class="btn" type="button" data-vista="bailarin">Ver mi programa</button>` : ""}</article>`);
+      ${yo ? `<button class="btn" type="button" data-vista="bailarin">Ver mi programa</button>` : ""}</article>`);
   }
-  let vincular = "";
-  if (s.maestro && !yo && ps.length) {
-    vincular = `<div class="card" style="display:grid;gap:10px"><h3>¿También bailas?</h3><p class="hint" style="margin:0">Vincula tu correo a tu nombre del elenco para ver tu propio programa.</p>
-      <div class="row"><select id="vincular-sel" style="max-width:360px">${ps.filter((p) => !p.correo).map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}</option>`).join("")}</select><button class="btn small" id="vincular" type="button">Vincular</button></div></div>`;
-  }
+  const vincular = s.maestro && !yo ? vincularHTML() : "";
+  const cambioRol = P.roles.length > 1 ? `<div class="card" style="display:grid;gap:10px"><h3>Cambiar de rol</h3><p class="hint" style="margin:0">Estás viendo la página como <b>${NOMBRE_ROL[P.rol]}</b>. Cambia para ver exactamente lo que ve cada rol.</p><div class="row">${P.roles.map((r) => `<button class="btn small ${r === P.rol ? "" : "ghost"}" type="button" data-rol="${r}">${NOMBRE_ROL[r]}</button>`).join("")}</div></div>` : "";
   $("#v-panel").innerHTML = `<div class="panel-h"><h2 class="sec-t">Hola, ${esc(nombre)}</h2><p class="sec-sub">Gala 90 años · miércoles 18 de noviembre · función a las 7:10 p. m.</p></div>
-    <div class="rolgrid">${tarjetas.join("")}</div>${vincular}
+    <div class="rolgrid">${tarjetas.join("")}</div>${vincular}${cambioRol}
     <p class="hint"><button class="linkbtn" type="button" data-portada>Ver la portada del grupo</button></p>`;
 }
+
+document.addEventListener("change", (e) => {
+  if (e.target.id !== "rol-sel") return;
+  rolActivo = e.target.value; try { localStorage.setItem("dfun-v2-rol", rolActivo); } catch (err) {}
+  ir(rolActivo === "bailarin" ? "bailarin" : vista === "bailarin" ? "panel" : vista === "maestro" && rolActivo !== "bailarin" ? "maestro" : "panel");
+});
 
 /* ---------- render general ---------- */
 function render() {
@@ -375,16 +395,16 @@ function render() {
   $("#user").hidden = !listo;
   if (!listo) return;
   motor = crearMotor(D());
-  const yo = yoDe(s);
-  if (vista === "maestro" && !s.maestro) vista = "panel";
-  const rolTxt = s.admin ? "Administrador" : s.maestro ? "Maestro" : yo ? "Bailarín" : "";
-  const nav = [["panel", "Inicio"], ...(s.maestro ? [["maestro", "Elenco"]] : []), ...(yo || !s.maestro ? [["bailarin", "Mi programa"]] : [])];
-  $("#user").innerHTML = `<div class="seg" role="group" aria-label="Secciones">${nav.map(([k, t]) => `<button type="button" data-vista="${k}" aria-pressed="${vista === k}">${t}</button>`).join("")}</div><span>${esc(s.correo)}${rolTxt ? ` <span class="badge">${rolTxt}</span>` : ""}</span><button class="btn ghost small" id="salir" type="button">Salir</button>`;
+  const yo = yoDe(s), P = permisos(s);
+  if (vista === "maestro" && !P.maestro) vista = "panel";
+  const nav = [["panel", "Inicio"], ...(P.maestro ? [["maestro", "Elenco"]] : []), ...(yo || P.rol === "bailarin" ? [["bailarin", "Mi programa"]] : [])];
+  const selRol = P.roles.length > 1 ? `<label class="rolsel"><span class="hint">Ver como</span><select id="rol-sel" aria-label="Ver como">${P.roles.map((r) => `<option value="${r}" ${r === P.rol ? "selected" : ""}>${NOMBRE_ROL[r]}</option>`).join("")}</select></label>` : `<span class="badge">${NOMBRE_ROL[P.rol]}</span>`;
+  $("#user").innerHTML = `<div class="seg" role="group" aria-label="Secciones">${nav.map(([k, t]) => `<button type="button" data-vista="${k}" aria-pressed="${vista === k}">${t}</button>`).join("")}</div>${selRol}<span class="hint">${esc(s.correo)}</span><button class="btn ghost small" id="salir" type="button">Salir</button>`;
   if (enPortada) return;
   $("#v-panel").hidden = vista !== "panel";
   $("#v-maestro").hidden = vista !== "maestro";
   $("#v-bailarin").hidden = vista !== "bailarin";
-  document.querySelectorAll("[data-admin]").forEach((el) => (el.hidden = !s.admin));
+  document.querySelectorAll("[data-admin]").forEach((el) => (el.hidden = !P.admin));
   if (s.error) msg(s.error, "bad");
   if (vista === "panel") renderPanel();
   else if (vista === "maestro") { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); renderVestuario(); $("#prog").innerHTML = programaHTML(false); }
