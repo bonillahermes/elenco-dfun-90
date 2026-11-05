@@ -1,6 +1,6 @@
 /* Portada pública, dirección "La noche en 70 minutos" (referencia: docs/mockup-portada.html).
    Fondo concreto del León de Greiff, un color de vestuario por bloque, alineada a la izquierda como un programa de mano.
-   Todo vive bajo #v-inicio para no tocar la aplicación. Movimiento: el telón al cargar y las fotos que rotan en la apertura; el carrusel solo se mueve cuando uno lo desliza. */
+   Todo vive bajo #v-inicio para no tocar la aplicación. Movimiento: el telón al cargar y las fotos que rotan en la apertura; el carrusel pasa de una foto a otra con un fundido. */
 
 #v-inicio{
   --po-concreto:#E6E4E0; --po-concreto-2:#D9D6D0; --po-tinta:#141414; --po-gris:#57544F;
@@ -79,36 +79,38 @@
 #v-inicio .po-cita{font-family:var(--po-display);font-style:italic;font-size:clamp(24px,2.6vw,34px);line-height:1.25;color:var(--po-vinotinto);max-width:30ch}
 #v-inicio .po-lead{color:var(--po-gris);max-width:48ch}
 
-/* 3. Carrusel: fotos con su frase. Desplazamiento horizontal nativo con imán (funciona sin JavaScript). */
-#v-inicio .po-galeria{background:var(--po-tinta);color:#fff;padding-block:clamp(72px,10vw,140px);overflow:hidden}
+/* 3. Carrusel sobre fondo negro: foto y frase lado a lado. Sin JavaScript las diapositivas van una debajo de otra;
+   con .po-vivo (portada.js) se apilan en la misma celda y se cruzan con un fundido. */
+#v-inicio .po-galeria{background:var(--po-tinta);color:#fff}
+#v-inicio .po-galeria > .po-in{padding-block:clamp(72px,10vw,140px)}
 #v-inicio .po-galeria h2{font-size:clamp(40px,6vw,84px);line-height:1;max-width:14ch}
-#v-inicio .po-galeria-sub{margin-top:18px;max-width:44ch;color:rgba(255,255,255,.78);font-size:clamp(17px,1.8vw,21px)}
-/* La pista arranca alineada con el texto y se sale por la derecha. */
-#v-inicio .po-pista{--po-borde:max(20px,calc((100% - 1180px) / 2));list-style:none;margin:clamp(40px,6vw,64px) 0 0;padding:0 var(--po-borde) 4px;display:flex;gap:clamp(12px,1.6vw,20px);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:var(--po-borde);scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-#v-inicio .po-pista::-webkit-scrollbar{display:none}
-#v-inicio .po-pista:focus-visible{outline-offset:-3px}
-#v-inicio .po-d{flex:0 0 min(84vw,520px);scroll-snap-align:start;display:grid;grid-template-rows:auto 1fr;border-radius:6px;overflow:hidden;background:var(--po-c,var(--po-vinotinto));color:var(--po-t,#fff)}
-#v-inicio .po-d picture{display:block;aspect-ratio:4/3;background:var(--po-chal)}
+#v-inicio .po-diapos{list-style:none;margin:clamp(40px,6vw,72px) 0 0;padding:0;display:grid;gap:56px}
+#v-inicio .po-d{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,72px);align-items:center}
+#v-inicio .po-d picture{display:block;aspect-ratio:3/2;border-radius:6px;overflow:hidden;background:#000}
 #v-inicio .po-d img{width:100%;height:100%;object-fit:cover;max-width:none}
-#v-inicio .po-frase{margin:0;padding:clamp(22px,2.6vw,36px);min-height:5.4em;display:flex;align-items:flex-end;font-family:var(--po-display);font-style:italic;font-size:clamp(24px,2.4vw,34px);line-height:1.18;text-wrap:balance}
-#v-inicio .po-d-vinotinto{--po-c:var(--po-vinotinto)}
-#v-inicio .po-d-rajalena{--po-c:var(--po-rajalena)}
-#v-inicio .po-d-chal{--po-c:var(--po-chal)}
-#v-inicio .po-d-panoleta{--po-c:var(--po-panoleta)}
-#v-inicio .po-d-arcos{--po-c:var(--po-arcos)}
-#v-inicio .po-d-vela{--po-c:var(--po-vela);--po-t:var(--po-tinta)}
-/* Cierre: en pantallas anchas, la foto de las manos y su frase lado a lado. */
-@media (min-width:761px){
-  #v-inicio .po-d-fin{flex-basis:min(88vw,1040px);grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:1fr}
-  #v-inicio .po-d-fin picture{aspect-ratio:auto;height:100%}
-  #v-inicio .po-d-fin .po-frase{font-size:clamp(30px,3.2vw,46px)}
-}
-#v-inicio .po-controles{margin-top:24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#v-inicio .po-frase{margin:0;font-family:var(--po-display);font-style:italic;font-size:clamp(28px,3.2vw,46px);line-height:1.16;text-wrap:balance;max-width:16ch}
+#v-inicio .po-diapos.po-vivo{gap:0;touch-action:pan-y}
+#v-inicio .po-diapos.po-vivo > .po-d{grid-area:1 / 1;opacity:0;visibility:hidden;transition:opacity 1.2s ease-in-out,visibility 0s linear 1.2s}
+#v-inicio .po-diapos.po-vivo > .po-d.po-on{opacity:1;visibility:visible;transition:opacity 1.2s ease-in-out,visibility 0s}
+/* La frase llega un instante después de la foto. */
+#v-inicio .po-diapos.po-vivo > .po-d .po-frase{opacity:0;transition:opacity .9s ease-in-out}
+#v-inicio .po-diapos.po-vivo > .po-d.po-on .po-frase{opacity:1;transition-delay:.35s}
+#v-inicio .po-controles{margin-top:32px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 #v-inicio .po-controles[hidden]{display:none}
-#v-inicio .po-ctl{appearance:none;font:600 15px/1 var(--po-body);padding:12px 20px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;cursor:pointer;touch-action:manipulation;transition:background-color .2s,border-color .2s}
+#v-inicio .po-ctl{appearance:none;font:600 15px/1 var(--po-body);padding:12px 20px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;cursor:pointer;touch-action:manipulation;transition:border-color .2s}
 #v-inicio .po-ctl:hover{border-color:#fff}
-#v-inicio .po-ctl:disabled{opacity:.35;cursor:default}
-#v-inicio .po-cuenta-d{margin-left:8px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.75);font-size:15px}
+#v-inicio .po-ctl-pausa{border-color:transparent;padding-inline:4px;text-decoration:underline;text-decoration-color:rgba(255,255,255,.4);text-underline-offset:4px}
+#v-inicio .po-ctl-pausa:hover{border-color:transparent;text-decoration-color:#fff}
+#v-inicio .po-cuenta-d{margin:0 8px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.75);font-size:15px}
+@media (max-width:760px){
+  #v-inicio .po-d{grid-template-columns:minmax(0,1fr);align-items:start;gap:24px}
+  #v-inicio .po-d picture{aspect-ratio:4/3}
+  #v-inicio .po-frase{max-width:none}
+  #v-inicio .po-controles{gap:8px}
+  #v-inicio .po-ctl{font-size:14px;padding:11px 14px}
+  #v-inicio .po-ctl-pausa{padding-inline:2px}
+  #v-inicio .po-cuenta-d{margin:0 4px;font-size:14px;white-space:nowrap}
+}
 
 /* 4. La gala */
 #v-inicio .po-gala .po-in{padding-block:clamp(72px,10vw,140px);display:grid;gap:28px}
@@ -135,7 +137,7 @@
 }
 @media (prefers-reduced-motion:reduce){
   #v-inicio .po-telon,#v-inicio .po-pausa{display:none}
-  #v-inicio .po-foto picture,#v-inicio .po-foto img,#v-inicio .po-btn,#v-inicio .po-ctl{transition:none}
-  #v-inicio .po-pista{scroll-behavior:auto}
+  #v-inicio .po-foto picture,#v-inicio .po-foto img,#v-inicio .po-btn,#v-inicio .po-ctl,#v-inicio .po-diapos.po-vivo > .po-d,#v-inicio .po-diapos.po-vivo > .po-d .po-frase{transition:none}
+  #v-inicio .po-ctl-pausa{display:none}
   #v-inicio .po-foto.po-vivo picture.po-on img{transform:none}
 }

@@ -58,41 +58,55 @@ function hero(raiz, quieto) {
   }
 }
 
-// Carrusel: se desliza de forma nativa; aquí solo van los botones Anterior y Siguiente y el contador.
+// Carrusel: una diapositiva a la vez, con fundido. Avanza solo cada 7 s; se detiene con Pausar, al pasar el
+// cursor o el foco por encima, fuera de pantalla y con la pestaña oculta. Con movimiento reducido no avanza solo.
 function carrusel(raiz, quieto) {
-  const pista = $("#po-pista", raiz), ctl = $("#po-controles", raiz), cuenta = $("#po-cuenta-d", raiz);
-  if (!pista || !ctl) return;
-  const items = [...pista.children];
-  const [antes, despues] = ctl.querySelectorAll("[data-carrusel]");
-  // Índice de la diapositiva alineada con el borde izquierdo de la pista.
-  const indice = () => {
-    const borde = pista.getBoundingClientRect().left + (parseFloat(getComputedStyle(pista).paddingLeft) || 0);
-    let mejor = 0, dist = Infinity;
-    items.forEach((it, k) => { const d = Math.abs(it.getBoundingClientRect().left - borde); if (d < dist) { dist = d; mejor = k; } });
-    return mejor;
+  const lista = $("#po-diapos", raiz), ctl = $("#po-controles", raiz), cuenta = $("#po-cuenta-d", raiz), pausa = $("#po-pausa-c", raiz);
+  if (!lista || !ctl) return;
+  const items = [...lista.children];
+  if (items.length < 2) return;
+  let actual = 0, pausado = quieto.matches, encima = false, visible = true;
+  const mostrar = (k) => {
+    actual = (k + items.length) % items.length;
+    items.forEach((it, j) => {
+      it.classList.toggle("po-on", j === actual);
+      if (j === actual) it.removeAttribute("aria-hidden"); else it.setAttribute("aria-hidden", "true");
+    });
+    cuenta.textContent = `${actual + 1} de ${items.length}`;
   };
-  const alFinal = () => pista.scrollLeft + pista.clientWidth >= pista.scrollWidth - 2;
-  const actualizar = () => {
-    const k = alFinal() ? items.length - 1 : indice();
-    cuenta.textContent = `${k + 1} de ${items.length}`;
-    antes.disabled = pista.scrollLeft <= 2;
-    despues.disabled = alFinal();
-  };
-  const ir = (paso) => {
-    const k = Math.min(Math.max(indice() + paso, 0), items.length - 1);
-    const destino = pista.scrollLeft + items[k].getBoundingClientRect().left - pista.getBoundingClientRect().left - (parseFloat(getComputedStyle(pista).paddingLeft) || 0);
-    pista.scrollTo({ left: destino, behavior: quieto.matches ? "instant" : "smooth" });
-  };
-  ctl.addEventListener("click", (e) => { const b = e.target.closest("[data-carrusel]"); if (b) ir(Number(b.dataset.carrusel)); });
-  pista.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") { e.preventDefault(); ir(1); }
-    else if (e.key === "ArrowLeft") { e.preventDefault(); ir(-1); }
+  lista.classList.add("po-vivo");
+  mostrar(0);
+
+  // El reloj vuelve a empezar con cada cambio, para que nunca salte justo después de un clic o un deslizamiento.
+  let reloj = 0;
+  const programar = () => { clearTimeout(reloj); reloj = setTimeout(() => { if (!pausado && !encima && visible && !document.hidden && !raiz.hidden) mostrar(actual + 1); programar(); }, 7000); };
+  const manual = (k) => { mostrar(k); programar(); };
+  programar();
+  if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.3 }).observe(lista);
+  lista.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") encima = true; });
+  lista.addEventListener("pointerleave", () => { encima = false; });
+  ctl.addEventListener("focusin", () => { encima = true; });
+  ctl.addEventListener("focusout", () => { encima = false; });
+
+  ctl.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-carrusel]");
+    if (b) manual(actual + Number(b.dataset.carrusel));
   });
-  let pendiente = false;
-  pista.addEventListener("scroll", () => { if (pendiente) return; pendiente = true; requestAnimationFrame(() => { pendiente = false; actualizar(); }); }, { passive: true });
-  addEventListener("resize", actualizar);
+  if (pausa) pausa.addEventListener("click", () => {
+    pausado = !pausado;
+    pausa.setAttribute("aria-pressed", String(pausado));
+    pausa.textContent = pausado ? "Reanudar" : "Pausar";
+  });
+  // Deslizar con el dedo: más de 40 px en horizontal cambia de diapositiva.
+  let x0 = null, y0 = 0;
+  lista.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse") { x0 = e.clientX; y0 = e.clientY; } });
+  lista.addEventListener("pointerup", (e) => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0, dy = e.clientY - y0; x0 = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) manual(actual + (dx < 0 ? 1 : -1));
+  });
+  lista.addEventListener("pointercancel", () => { x0 = null; });
   ctl.hidden = false;
-  actualizar();
 }
 
 // #login-msg está junto al botón de la apertura; se repite junto al botón del elenco para quien ingresó desde abajo.
