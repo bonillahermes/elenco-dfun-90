@@ -12,10 +12,20 @@ test("dentro de un bloque no hay cambio de vestuario", () => {
   assert.deepEqual(cambios(["Cumbia", "Pilanderas"]), []);
 });
 
-test("bloques seguidos sin intervención son incompatibles", () => {
-  assert.equal(motor({ h: ["Guaneña y Bambuco sureño"] }).evaluar(H("h"), "Fandanguillo").st, "block");
-  assert.equal(motor({ h: ["Chicha"] }).evaluar(H("h"), "Palo negro").st, "block");
-  assert.equal(motor({ h: ["Palo negro"] }).evaluar(H("h"), "Cumbia").st, "block");
+test("bloques seguidos sin intervención: imposible para mujeres", () => {
+  assert.equal(motor({ m: ["Guaneña y Bambuco sureño"] }).evaluar(M("m"), "Fandanguillo").st, "block");
+  assert.equal(motor({ m: ["Chicha"] }).evaluar(M("m"), "Palo negro").st, "block");
+  assert.equal(motor({ m: ["Palo negro"] }).evaluar(M("m"), "Cumbia").st, "block");
+});
+
+test("bloques seguidos sin intervención: los hombres pueden, con advertencia", () => {
+  const e = motor({ h: ["Guaneña y Bambuco sureño"] }).evaluar(H("h"), "Fandanguillo");
+  assert.equal(e.st, "warn");
+  assert.match(e.why, /Cambio inmediato/);
+  assert.equal(motor({ h: ["Chicha"] }).evaluar(H("h"), "Palo negro").st, "warn");
+  const S = ["Chicha", "Palo negro", "Cumbia"], m = motor({ h: S });
+  assert.ok(S.every((d) => !m.revisar(H("h"), S, d).bad));
+  assert.equal(m.conProblemas().length, 0);
 });
 
 test("por danza: Arcos y Palo negro sí, Palo negro y Pilanderas sí", () => {

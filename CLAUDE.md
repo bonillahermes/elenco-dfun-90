@@ -27,6 +27,7 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 ## Reglas del montaje (dadas por el maestro)
 - 7 bloques; dentro de un bloque se comparte vestuario.
 - Entre danzas de bloques distintos: 0 min = imposible, 1 a 4 min = cambio rápido (advertencia), 5 o más = normal. Se evalúa por pares consecutivos de las danzas de cada persona.
+- Los hombres son pocos: para ellos 0 min no bloquea, queda como "cambio inmediato" (advertencia). Se ajusta en `REGLAS.bloqueaSinTiempo` de montaje.js.
 - Guaneña y Danza de Nariño son una sola columna. Cortadeña exige Fandanguillo. Bullerengue es solo de mujeres y no comparte gente con Cumbia. Cumbia sugiere Pilanderas (no obliga).
 - Mujeres: máximo 4 danzas. Hombres: sin límite.
 - Cupos fijos por danza y rol (`CUPOS` en montaje.js, de la matriz de vestuario): no se puede asignar por encima del cupo.

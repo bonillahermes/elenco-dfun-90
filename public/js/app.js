@@ -131,7 +131,7 @@ function timelineHTML(p) {
   if (!S.length) return `<div><span class="hint">Sin danzas asignadas.</span></div>`;
   let h = "";
   S.forEach((d, i) => {
-    if (i) { const c = cs.find((c) => c.a === d); if (c) { const n = nivel(c.min); h += `<div class="chg ${n === "ok" ? "" : n === "warn" ? "warn" : "bad"}">Cambio de vestuario: ${c.min} min</div>`; } }
+    if (i) { const c = cs.find((c) => c.a === d); if (c) { const n = nivel(c.min, p.rol); h += `<div class="chg ${n === "ok" ? "" : n === "warn" ? "warn" : "bad"}">Cambio de vestuario: ${c.min} min</div>`; } }
     const X = DZ[d], pr = motor.revisar(p, S, d);
     h += `<div class="dz"><time>${X.s} – ${X.e}</time><div><b>${esc(X.label)}</b> <span class="hint">· ${esc(BQ[X.b].nombre)}</span>${pr.bad ? `<div class="msg bad">${esc(pr.why)}</div>` : ""}</div></div>`;
   });
@@ -256,7 +256,8 @@ function vecinos(d) {
 function recomendaciones(p) {
   const S = motor.asig(p.id), cs = cambios(S), out = [];
   cs.forEach((c) => {
-    if (c.min < REGLAS.margenRapido) out.push(`Cambio rápido de ${c.min} min entre ${DZ[c.de].label} y ${DZ[c.a].label}: deja el vestuario de ${DZ[c.a].label} listo en el camerino, en el orden en que te lo pones, antes de que empiece la función.`);
+    if (c.min <= 0) out.push(`Sales de ${DZ[c.de].label} y entras directo a ${DZ[c.a].label}, sin tiempo entre las dos: pide al maestro qué prendas cambias, lleva el vestuario de ${DZ[c.a].label} puesto debajo o listo junto al escenario, y busca a alguien que te ayude a cambiarte.`);
+    else if (c.min < REGLAS.margenRapido) out.push(`Cambio rápido de ${c.min} min entre ${DZ[c.de].label} y ${DZ[c.a].label}: deja el vestuario de ${DZ[c.a].label} listo en el camerino, en el orden en que te lo pones, antes de que empiece la función.`);
     else out.push(`Tienes ${c.min} min para cambiarte entre ${DZ[c.de].label} y ${DZ[c.a].label}.`);
   });
   BLOQUES.forEach((b) => { const en = S.filter((d) => DZ[d].b === b.id); if (en.length > 1) out.push(`${en.map((d) => DZ[d].label).join(" y ")} usan el mismo vestuario: no te cambias entre ellas.`); });

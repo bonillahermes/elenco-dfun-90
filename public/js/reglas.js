@@ -5,7 +5,8 @@
 import { DANZAS, DZ, BLOQUES, REGLAS, CUPOS } from "./montaje.js";
 
 export const ordenar = (ds) => ds.filter((d) => DZ[d]).sort((a, b) => DZ[a].ini - DZ[b].ini);
-export const nivel = (min) => (min <= 0 ? "block" : min < REGLAS.margenRapido ? "warn" : "ok");
+// rol opcional: sin rol, 0 min bloquea (vista general); con rol, se aplica REGLAS.bloqueaSinTiempo.
+export const nivel = (min, rol) => (min <= 0 && (REGLAS.bloqueaSinTiempo[rol] ?? true) ? "block" : min < REGLAS.margenRapido ? "warn" : "ok");
 export const maxDe = (p) => REGLAS.maxDanzas[p.rol] ?? null;
 
 // Cambios de vestuario: pares consecutivos de danzas en bloques distintos.
@@ -40,8 +41,9 @@ export function crearMotor(estado) {
     const peor = peorDe(cambios(N).filter((c) => add.includes(c.de) || add.includes(c.a)));
     const extra = add.length > 1 ? ` · incluye ${add.slice(1).map((x) => DZ[x].label).join(", ")}` : "";
     const def = add.some(definida);
-    if (peor && nivel(peor.min) === "block") return { st: "block", why: `Sin tiempo: ${DZ[peor.de].label} → ${DZ[peor.a].label} (0 min)` };
-    if (peor && nivel(peor.min) === "warn") return { st: "warn", why: `Cambio rápido: ${DZ[peor.de].label} → ${DZ[peor.a].label} (${peor.min} min)${extra}`, add, def };
+    const n = peor && nivel(peor.min, p.rol);
+    if (n === "block") return { st: "block", why: `Sin tiempo: ${DZ[peor.de].label} → ${DZ[peor.a].label} (0 min)` };
+    if (n === "warn") return { st: "warn", why: `${peor.min <= 0 ? "Cambio inmediato" : "Cambio rápido"}: ${DZ[peor.de].label} → ${DZ[peor.a].label} (${peor.min} min)${extra}`, add, def };
     return { st: "ok", why: (peor ? `Cambio de ${peor.min} min` : "Sin cambio de vestuario") + extra, add, def };
   }
 
@@ -54,8 +56,9 @@ export function crearMotor(estado) {
     const mx = maxDe(p); if (mx && S.length > mx) return { bad: true, why: `${S.length} danzas (máximo ${mx})` };
     const c = cupo(d, p.rol); if (c !== null && ocupados(d, p.rol) > c) return { bad: true, why: `Cupo excedido (${ocupados(d, p.rol)} de ${c})` };
     const peor = peorDe(cambios(S).filter((c) => c.de === d || c.a === d));
-    if (peor && peor.min <= 0) return { bad: true, why: `Sin tiempo: ${DZ[peor.de].label} → ${DZ[peor.a].label}` };
-    if (peor && peor.min < REGLAS.margenRapido) return { warn: true, why: `Cambio rápido de ${peor.min} min` };
+    const n = peor && nivel(peor.min, p.rol);
+    if (n === "block") return { bad: true, why: `Sin tiempo: ${DZ[peor.de].label} → ${DZ[peor.a].label}` };
+    if (n === "warn") return { warn: true, why: peor.min <= 0 ? `Cambio inmediato: ${DZ[peor.de].label} → ${DZ[peor.a].label}` : `Cambio rápido de ${peor.min} min` };
     return { why: "Asignado" };
   }
 

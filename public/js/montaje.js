@@ -31,6 +31,8 @@ export const DANZAS = [
 export const REGLAS = {
   maxDanzas: { Mujer: 4, Hombre: null }, // null = sin límite
   margenRapido: 5, // minutos: 0 = imposible, 1 a 4 = cambio rápido, 5 o más = normal
+  // Los hombres son pocos: para ellos 0 min no bloquea, queda como cambio rápido (advertencia).
+  bloqueaSinTiempo: { Mujer: true, Hombre: false },
 };
 
 export const PROGRAMA = [
