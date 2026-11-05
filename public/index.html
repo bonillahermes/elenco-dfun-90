@@ -149,6 +149,7 @@
       <div class="user" id="user" hidden></div>
     </div>
     <h1>Elenco DFUN 90 años</h1>
+    <p class="modo-admin" id="modo-admin" hidden>Modo administrador: puedes vincular correos, borrar personas y restaurar datos. Esos cambios afectan a todos.</p>
 
     <div class="msg" id="status" role="status"></div>
   </header>
@@ -181,9 +182,16 @@
           <label class="chip"><input type="radio" name="frol" value="" checked><span>Todos</span></label>
           <label class="chip"><input type="radio" name="frol" value="Hombre"><span>Hombres</span></label>
           <label class="chip"><input type="radio" name="frol" value="Mujer"><span>Mujeres</span></label>
-          <label class="chip" id="f-sincorreo" hidden><input type="radio" name="frol" value="sincorreo"><span>Sin correo</span></label>
         </div>
       </div>
+      <div class="chips" role="radiogroup" aria-label="Mostrar">
+        <label class="chip"><input type="radio" name="fest" value="" checked><span>Todas las personas</span></label>
+        <label class="chip"><input type="radio" name="fest" value="problemas"><span>Con problemas <b data-cuenta="problemas"></b></span></label>
+        <label class="chip"><input type="radio" name="fest" value="sindanza"><span>Sin danza <b data-cuenta="sindanza"></b></span></label>
+        <label class="chip"><input type="radio" name="fest" value="postulados"><span>Postulaciones pendientes <b data-cuenta="postulados"></b></span></label>
+        <label class="chip" id="f-sincorreo" hidden><input type="radio" name="fest" value="sincorreo"><span>Sin correo <b data-cuenta="sincorreo"></b></span></label>
+      </div>
+      <div id="mx-panel"></div>
       <div class="legend">
         <span><i class="sw" style="background:var(--ink);color:var(--bg)">✓</i>Asignado</span>
         <span><i class="sw" style="color:var(--ok)">●</i>Disponible</span>

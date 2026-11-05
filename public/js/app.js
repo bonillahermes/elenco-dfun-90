@@ -78,10 +78,26 @@ function show(v) {
 }
 $(".tabs").addEventListener("click", (e) => { const t = e.target.closest(".tab"); if (t) { e.preventDefault(); show(t.dataset.view); } });
 
+// Grupos de personas que el maestro necesita encontrar rápido. Los usan el resumen, los filtros de la matriz y el Inicio.
+const pendientesDe = (p) => (p.postulaciones || []).filter((d) => DZ[d] && !motor.asig(p.id).includes(d));
+function grupos() {
+  const ps = D().personas, problemas = new Set(motor.conProblemas().map((p) => p.id));
+  return {
+    problemas: ps.filter((p) => problemas.has(p.id)),
+    sindanza: ps.filter((p) => !motor.asig(p.id).length),
+    postulados: ps.filter((p) => pendientesDe(p).length),
+    sincorreo: ps.filter((p) => !p.correo),
+  };
+}
+const enlaceFiltro = (f, texto, cls = "") => `<button type="button" class="linkbtn sum-link ${cls}" data-filtro="${f}">${texto}</button>`;
 function renderSummary() {
-  const ps = D().personas, asg = ps.filter((p) => motor.asig(p.id).length), malos = motor.conProblemas().length;
-  const sinCorreo = ps.filter((p) => !p.correo).length;
-  $("#summary").innerHTML = `<span><b>${ps.length}</b> en el grupo</span><span><span class="dot H"></span><b>${ps.filter(isH).length}</b> hombres</span><span><span class="dot M"></span><b>${ps.filter(isM).length}</b> mujeres</span><span><b>${asg.length}</b> con danza asignada</span>${malos ? `<span style="color:var(--bad)"><b style="color:var(--bad)">${malos}</b> con asignaciones que rompen reglas</span>` : ""}${sinCorreo && ps.length ? `<span><b>${sinCorreo}</b> sin correo vinculado</span>` : ""}`;
+  const ps = D().personas, G = grupos(), esAdmin = rolActivo === "admin" && store.sesion?.admin;
+  const partes = [`<span><b>${ps.length}</b> en el grupo</span>`, `<span><span class="dot H"></span><b>${ps.filter(isH).length}</b> hombres</span>`, `<span><span class="dot M"></span><b>${ps.filter(isM).length}</b> mujeres</span>`, `<span><b>${ps.length - G.sindanza.length}</b> con danza</span>`];
+  if (G.problemas.length) partes.push(enlaceFiltro("problemas", `<b>${G.problemas.length}</b> con asignaciones que rompen reglas`, "bad"));
+  if (G.sindanza.length && ps.length) partes.push(enlaceFiltro("sindanza", `<b>${G.sindanza.length}</b> sin danza`));
+  if (G.postulados.length) partes.push(enlaceFiltro("postulados", `<b>${G.postulados.length}</b> con postulaciones pendientes`));
+  if (G.sincorreo.length && ps.length) partes.push(esAdmin ? enlaceFiltro("sincorreo", `<b>${G.sincorreo.length}</b> sin correo vinculado`) : `<span><b>${G.sincorreo.length}</b> sin correo vinculado</span>`);
+  $("#summary").innerHTML = partes.join("");
 }
 
 const bstart = (i) => (i === 0 || DANZAS[i - 1].b !== DANZAS[i].b ? "bstart" : "");
@@ -89,8 +105,12 @@ function renderMatriz() {
   const t = $("#mx"), q = norm($("#q").value), fr = document.querySelector('input[name="frol"]:checked').value;
   const esAdmin = rolActivo === "admin" && store.sesion?.admin;
   $("#f-sincorreo").hidden = !esAdmin;
-  if (!esAdmin && fr === "sincorreo") { document.querySelector('input[name="frol"][value=""]').checked = true; return renderMatriz(); }
-  const ps = D().personas.filter((p) => (!q || norm(p.nombre).includes(q)) && (fr === "sincorreo" ? esAdmin && !p.correo : !fr || p.rol === fr));
+  let fe = document.querySelector('input[name="fest"]:checked').value;
+  if (!esAdmin && fe === "sincorreo") { document.querySelector('input[name="fest"][value=""]').checked = true; fe = ""; }
+  const G = grupos(), en = fe ? new Set(G[fe].map((p) => p.id)) : null;
+  document.querySelectorAll("[data-cuenta]").forEach((b) => { const n = G[b.dataset.cuenta].length; b.textContent = n ? `(${n})` : ""; });
+  renderPanelMatriz(fe, G);
+  const ps = D().personas.filter((p) => (!q || norm(p.nombre).includes(q)) && (!fr || p.rol === fr) && (!en || en.has(p.id)));
   t.tHead.innerHTML = `<tr class="b"><th class="name"></th>${BLOQUES.map((b) => `<th colspan="${b.danzas.length}" class="bstart" title="${esc(b.nombre)}">${esc(b.corto || b.nombre)}</th>`).join("")}</tr>
   <tr class="d"><th class="name">Nombre</th>${DANZAS.map((d, i) => `<th class="${bstart(i)}"><span>${esc(d.label)}${motor.definida(d.id) ? " ★" : ""}</span><small>${d.s}</small></th>`).join("")}</tr>`;
   if (!ps.length) { t.tBodies[0].innerHTML = `<tr><td class="name" colspan="${DANZAS.length + 1}" style="padding:16px">${D().personas.length ? "Nadie coincide con la búsqueda." : "Aún no hay personas. Cárguelas desde la pestaña Datos."}</td></tr>`; t.tFoot.innerHTML = ""; return; }
@@ -113,7 +133,28 @@ $("#mx").addEventListener("click", (e) => {
   const c = e.target.closest(".cell[data-d]"); if (c) alternar(p, c.dataset.d);
 });
 $("#q").addEventListener("input", renderMatriz);
-document.querySelectorAll('input[name="frol"]').forEach((i) => i.addEventListener("change", renderMatriz));
+document.querySelectorAll('input[name="frol"], input[name="fest"]').forEach((i) => i.addEventListener("change", renderMatriz));
+// Panel sobre la matriz según el filtro: los problemas, con su motivo y un botón para corregirlos.
+function renderPanelMatriz(fe, G) {
+  const caja = $("#mx-panel");
+  if (fe === "problemas") {
+    // Un renglón por persona y motivo; si el motivo afecta varias danzas (por ejemplo, más de 4), un botón por danza.
+    const filas = G.problemas.flatMap((p) => {
+      const S = motor.asig(p.id), porMotivo = new Map();
+      S.forEach((d) => { const r = motor.revisar(p, S, d); if (r.bad) porMotivo.set(r.why, [...(porMotivo.get(r.why) || []), d]); });
+      return [...porMotivo].map(([why, ds]) => `<li class="item block" data-id="${esc(p.id)}"><span><b>${esc(p.nombre)}</b> ${rolTag(p)}<span class="why">${ds.length > 1 ? esc(why) + ". Quita una de sus danzas." : `${esc(DZ[ds[0]].label)}: ${esc(why)}`}</span></span><span class="row">${ds.map((d) => `<button class="btn small ghost" type="button" data-quitar="${esc(d)}">Quitar ${esc(DZ[d].label)}</button>`).join("")}<button class="btn small ghost" type="button" data-ver-persona>Ver persona</button></span></li>`);
+    });
+    caja.innerHTML = `<div class="card mx-panel"><h3>Asignaciones que rompen reglas</h3>${filas.length ? `<p class="hint">Quita la danza que sobra o abre la persona para revisar su programa completo.</p><ul class="list">${filas.join("")}</ul>` : `<p class="hint">No hay asignaciones que rompan reglas.</p>`}</div>`;
+  } else if (fe === "postulados") caja.innerHTML = `<p class="hint mx-nota">Se muestran quienes se postularon a alguna danza en la que aún no están. La casilla con anillo es la danza a la que se postularon.</p>`;
+  else if (fe === "sindanza") caja.innerHTML = `<p class="hint mx-nota">Personas del grupo que todavía no tienen ninguna danza.</p>`;
+  else if (fe === "sincorreo") caja.innerHTML = `<p class="hint mx-nota">Sin correo vinculado no pueden ver su programa. Vincúlalo en Por persona.</p>`;
+  else caja.innerHTML = "";
+}
+$("#mx-panel").addEventListener("click", (e) => {
+  const li = e.target.closest("li[data-id]"); if (!li) return; const p = persona(li.dataset.id); if (!p) return;
+  const q = e.target.closest("[data-quitar]"); if (q) return alternar(p, q.dataset.quitar);
+  if (e.target.closest("[data-ver-persona]")) { $("#p-sel").value = p.id; renderPersona(); show("persona"); }
+});
 
 /* Por danza */
 $("#d-sel").innerHTML = DANZAS.map((d) => `<option value="${esc(d.id)}">${esc(d.label)}</option>`).join("");
@@ -127,7 +168,8 @@ function estadoCupo(d) {
   const sobran = [fH < 0 && pl(-fH, "hombre", "hombres"), fM < 0 && pl(-fM, "mujer", "mujeres")].filter(Boolean);
   const st = sobran.length ? "bad" : faltan.length ? "falta" : "ok";
   const txt = sobran.length ? `Excede el cupo en ${sobran.join(" y ")}.` : faltan.length ? `Faltan ${faltan.join(" y ")} para completar el cupo.` : "Cupo completo.";
-  return { b, H, M, fH, fM, st, txt, faltan };
+  const corto = sobran.length ? `sobran ${sobran.join(" y ")}` : faltan.length ? `faltan ${faltan.join(" y ")}` : "completa";
+  return { b, H, M, fH, fM, st, txt, corto, faltan };
 }
 // Fila de danzas con su estado: permite saltar de una a otra y ver de un vistazo qué falta.
 function renderDanzaChips() {
@@ -372,7 +414,14 @@ document.addEventListener("click", async (e) => {
   if (e.target.closest("[data-inicio]")) return ir("panel");
   if (e.target.closest("[data-portada]")) { verPortada = true; render(); window.scrollTo(0, 0); return; }
   const v = e.target.closest("[data-vista]"); if (v) return ir(v.dataset.vista);
-  if (e.target.closest("[data-ir-sincorreo]")) { const r = document.querySelector('input[name="frol"][value="sincorreo"]'); if (r) r.checked = true; show("matriz"); return ir("maestro"); }
+  const fl = e.target.closest("[data-filtro]");
+  if (fl) {
+    const r = document.querySelector(`input[name="fest"][value="${fl.dataset.filtro}"]`); if (r) r.checked = true;
+    document.querySelector('input[name="frol"][value=""]').checked = true; $("#q").value = "";
+    show("matriz"); if (vista !== "maestro") return ir("maestro"); return render();
+  }
+  const dz = e.target.closest("[data-ir-danza]");
+  if (dz) { $("#d-sel").value = dz.dataset.irDanza; show("danza"); return ir("maestro"); }
   if (e.target.id === "salir") { verPortada = true; vista = "panel"; store.salir(); return; }
   if (e.target.closest("[data-rol]")) { rolActivo = e.target.closest("[data-rol]").dataset.rol; try { localStorage.setItem("dfun-v2-rol", rolActivo); } catch (err) {} return ir(rolActivo === "bailarin" ? "bailarin" : "panel"); }
   if (e.target.id === "vincular" || e.target.closest("[data-vincular-id]")) {
@@ -408,19 +457,20 @@ function renderPanel() {
   const S = yo ? motor.asig(yo.id) : [];
   const tarjetas = [];
   if (P.maestro) {
-    const conDanza = ps.filter((p) => motor.asig(p.id).length).length, malos = motor.conProblemas().length;
-    const completas = DANZAS.filter((d) => { const b = motor.balance(d.id), c = CUPOS[d.id] || {}; return (c.Hombre ?? 0) === b.h && (c.Mujer ?? 0) === b.m; }).length;
+    const G = grupos(), estados = DANZAS.map((d) => [d, estadoCupo(d.id)]), incompletas = estados.filter(([, e]) => e.st !== "ok");
+    // Pendientes: cada uno lleva directo a donde se resuelve.
+    const pend = [];
+    if (G.problemas.length) pend.push(`<li class="bad">${enlaceFiltro("problemas", `${pl(G.problemas.length, "persona tiene", "personas tienen")} asignaciones que rompen reglas`)}</li>`);
+    incompletas.slice(0, 5).forEach(([d, e]) => pend.push(`<li class="${e.st === "bad" ? "bad" : ""}"><button type="button" class="linkbtn" data-ir-danza="${esc(d.id)}">${esc(d.label)}</button>: ${esc(e.corto)}</li>`));
+    if (incompletas.length > 5) pend.push(`<li><button type="button" class="linkbtn" data-ir-danza="${esc(incompletas[5][0].id)}">${pl(incompletas.length - 5, "danza más", "danzas más")} sin cupo completo</button></li>`);
+    if (G.sindanza.length && ps.length) pend.push(`<li>${enlaceFiltro("sindanza", `${pl(G.sindanza.length, "persona", "personas")} sin danza`)}</li>`);
+    if (G.postulados.length) pend.push(`<li>${enlaceFiltro("postulados", `${pl(G.postulados.length, "persona tiene", "personas tienen")} postulaciones sin asignar`)}</li>`);
+    if (P.admin && G.sincorreo.length && ps.length) pend.push(`<li>${enlaceFiltro("sincorreo", `${pl(G.sincorreo.length, "persona", "personas")} sin correo vinculado: no podrán ver su programa`)}</li>`);
     tarjetas.push(`<article class="card rolcard"><span class="badge">${NOMBRE_ROL[P.rol]}</span><h2>Armar el elenco</h2>
-      <p class="hint">${ps.length ? `${conDanza} de ${ps.length} personas tienen danza. ${completas} de ${DANZAS.length} danzas tienen el cupo completo.${malos ? ` <b style="color:var(--bad)">${malos} con reglas rotas.</b>` : ""}` : "Aún no hay personas cargadas."}</p>
-      <ul class="encontraras">
-        <li><b>Matriz</b>: asigna danzas con un toque; el semáforo dice quién puede entrar y por qué.</li>
-        <li><b>Por danza</b>: cupo, parejas, disponibles por rol y quién no puede.</li>
-        <li><b>Por persona</b>: programa de cada bailarín, su correo y lo que él ve al ingresar.</li>
-        <li><b>Logística</b>: cambios de vestuario, presión de camerino y balance por danza.</li>
-        <li><b>Vestuario</b>: disponible frente a cupo, faltantes y piezas que pasan de mano.</li>
-        <li><b>Programa</b> y <b>Datos</b>: minuto a minuto, inscribir personas y respaldo en Excel.</li>
-      </ul>
-      <button class="btn" type="button" data-vista="maestro">Ir al elenco</button></article>`);
+      <p class="hint">${ps.length ? `${ps.length - G.sindanza.length} de ${ps.length} personas tienen danza. ${estados.length - incompletas.length} de ${DANZAS.length} danzas tienen el cupo completo.` : "Aún no hay personas cargadas. Inscríbelas en Elenco, pestaña Datos."}</p>
+      ${ps.length ? `<h3>Pendientes</h3>${pend.length ? `<ul class="pendientes">${pend.join("")}</ul>` : `<p class="hint">Todo en orden: cupos completos y ninguna regla rota.</p>`}` : ""}
+      <button class="btn" type="button" data-vista="maestro">Ir al elenco</button>
+      <p class="hint">En Elenco están la matriz, cada danza, cada persona, la logística, el vestuario, el programa y los datos.</p></article>`);
   }
   if (yo || P.rol === "bailarin") {
     tarjetas.push(`<article class="card rolcard"><span class="badge">Bailarín</span><h2>Mi programa</h2>
@@ -435,11 +485,8 @@ function renderPanel() {
       ${yo ? `<button class="btn" type="button" data-vista="bailarin">Ver mi programa</button>` : ""}</article>`);
   }
   const vincular = P.admin && !yo ? vincularHTML(s) : "";
-  const sinCorreo = ps.filter((p) => !p.correo);
-  const aviso = P.admin && ps.length && sinCorreo.length ? `<div class="card aviso" style="display:grid;gap:8px"><h3>${sinCorreo.length} de ${ps.length} personas sin correo vinculado</h3><p class="hint" style="margin:0">No podrán ver su programa al ingresar. ${sinCorreo.filter((p) => motor.asig(p.id).length).length} de ellas ya tienen danzas asignadas. Vincúlalas en <b>Elenco</b>, pestaña <b>Por persona</b>, o con el filtro "Sin correo" de la matriz.</p><div class="row"><button class="btn small" type="button" data-ir-sincorreo>Ver quiénes faltan</button></div></div>` : "";
-  const cambioRol = P.roles.length > 1 ? `<div class="card" style="display:grid;gap:10px"><h3>Cambiar de rol</h3><p class="hint" style="margin:0">Estás viendo la página como <b>${NOMBRE_ROL[P.rol]}</b>. Cambia para ver exactamente lo que ve cada rol.</p><div class="row">${P.roles.map((r) => `<button class="btn small ${r === P.rol ? "" : "ghost"}" type="button" data-rol="${r}">${NOMBRE_ROL[r]}</button>`).join("")}</div></div>` : "";
   $("#v-panel").innerHTML = `<div class="panel-h"><h2 class="sec-t">Hola, ${esc(nombre)}</h2><p class="sec-sub">Gala 90 años, miércoles 18 de noviembre. La función empieza a las 7:10 p. m.</p></div>
-    ${aviso}<div class="rolgrid">${tarjetas.join("")}</div>${vincular}${cambioRol}
+    <div class="rolgrid">${tarjetas.join("")}</div>${vincular}
     <p class="hint"><button class="linkbtn" type="button" data-portada>Ver la portada del grupo</button></p>`;
 }
 
@@ -461,6 +508,7 @@ function render() {
   $("#login-msg").textContent = s.estado === "dominio" ? `${s.correo} no es una cuenta @unal.edu.co. Ingrese con su correo de la universidad.` : s.estado === "error" ? s.msg : "";
   $("#v-cargando").hidden = true;
   $("#user").hidden = !listo;
+  $("#modo-admin").hidden = !(listo && permisos(s).admin);
   if (!listo) return;
   motor = crearMotor(D());
   const yo = yoDe(s), P = permisos(s);

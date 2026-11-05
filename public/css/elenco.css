@@ -43,3 +43,19 @@
 .no-pueden summary{font-family:var(--display);font-size:16px}
 .no-pueden[open]{display:grid;gap:8px}
 .no-pueden p{margin:6px 0 0}
+
+/* Resumen con enlaces, filtros y panel de problemas sobre la matriz. */
+.summary .sum-link{color:var(--ink);text-decoration-color:var(--line);text-underline-offset:3px;font-size:inherit}
+.summary .sum-link:hover{text-decoration-color:currentColor}
+.summary .sum-link.bad,.summary .sum-link.bad b{color:var(--bad)}
+.chip b{font-weight:600;font-variant-numeric:tabular-nums}
+.mx-panel{display:grid;gap:10px}
+.mx-panel .item{flex-wrap:wrap}
+.mx-panel .row{gap:6px}
+.mx-nota{margin:0}
+.modo-admin{margin:0;font-size:14px;color:var(--warn);font-family:var(--in-body)}
+
+/* Inicio: pendientes con enlace. */
+#v-panel .pendientes{margin:0;padding-left:18px;display:grid;gap:8px;font-size:15px;color:var(--in-gris)}
+#v-panel .pendientes li.bad,#v-panel .pendientes li.bad .linkbtn{color:var(--bad)}
+#v-panel .rolcard h3{font-family:var(--in-body);font-size:15px;font-weight:700;margin-top:4px}
