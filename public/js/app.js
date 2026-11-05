@@ -1,4 +1,4 @@
-import { BLOQUES, DANZAS, DZ, BQ, PROGRAMA, REGLAS, fmt } from "./montaje.js";
+import { BLOQUES, DANZAS, DZ, BQ, PROGRAMA, REGLAS, CUPOS, VESTUARIO, PIEZAS_COMPARTIDAS, LLAMADOS, fmt } from "./montaje.js";
 import { crearMotor, cambios, nivel, maxDe } from "./reglas.js";
 import { crearStore } from "./datos.js";
 import { leerExcel, exportarExcel } from "./excel.js";
@@ -49,7 +49,7 @@ async function alternar(p, d) {
 }
 
 /* ---------- maestro: pestañas ---------- */
-const VIEWS = ["matriz", "danza", "persona", "logistica", "programa", "datos"];
+const VIEWS = ["matriz", "danza", "persona", "logistica", "vestuario", "programa", "datos"];
 function show(v) {
   document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === v));
   VIEWS.forEach((x) => ($("#v-" + x).hidden = x !== v));
@@ -79,7 +79,9 @@ function renderMatriz() {
       return `<td class="${bstart(i)}"><button class="${cls}" data-d="${esc(d.id)}" title="${esc(d.label)}: ${esc(tip)}" aria-label="${esc(d.label)}, ${esc(p.nombre)}: ${esc(tip)}"></button></td>`;
     }).join("")}</tr>`;
   }).join("");
-  t.tFoot.innerHTML = `<tr><td class="name">Hombres / Mujeres</td>${DANZAS.map((d, i) => { const b = motor.balance(d.id); return `<td class="${bstart(i)}" title="${b.h} hombres, ${b.m} mujeres">${b.h}/${b.m}</td>`; }).join("")}</tr>`;
+  const cupoTxt = (n, c) => (c ? `<span style="color:${n > c ? "var(--bad)" : n === c ? "var(--ok)" : "inherit"}">${n}/${c}</span>` : "–");
+  t.tFoot.innerHTML = `<tr><td class="name">Hombres (asignados/cupo)</td>${DANZAS.map((d, i) => `<td class="${bstart(i)}">${cupoTxt(motor.balance(d.id).h, CUPOS[d.id]?.Hombre)}</td>`).join("")}</tr>
+  <tr><td class="name">Mujeres (asignadas/cupo)</td>${DANZAS.map((d, i) => `<td class="${bstart(i)}">${cupoTxt(motor.balance(d.id).m, CUPOS[d.id]?.Mujer)}</td>`).join("")}</tr>`;
 }
 $("#mx").addEventListener("click", (e) => {
   const tr = e.target.closest("tr[data-id]"); if (!tr) return; const p = persona(tr.dataset.id); if (!p) return;
@@ -96,7 +98,8 @@ function renderDanza() {
   const d = $("#d-sel").value, X = DZ[d], b = motor.balance(d);
   $("#d-head").innerHTML = `Bloque ${X.b} · ${esc(BQ[X.b].nombre)} · ${X.s} a ${X.e}${X.soloMujeres ? " · solo mujeres" : ""}${X.pareja ? " · en parejas" : ""}${X.requiere ? ` · exige ${DZ[X.requiere].label}` : ""}${defTag(d)}`;
   const pend = X.pareja ? Math.abs(b.h - b.m) : 0;
-  $("#d-kpis").innerHTML = `<div class="kpi"><b>${b.h}</b><span>hombres asignados</span></div><div class="kpi"><b>${b.m}</b><span>mujeres asignadas</span></div>${X.pareja ? `<div class="kpi"><b>${b.par}</b><span>parejas${pend ? ` · faltan ${pend} ${b.h > b.m ? "mujer(es)" : "hombre(s)"}` : ""}</span></div>` : ""}`;
+  const cu = CUPOS[d] || {};
+  $("#d-kpis").innerHTML = `<div class="kpi"><b>${b.h}${cu.Hombre != null ? ` / ${cu.Hombre}` : ""}</b><span>hombres asignados / cupo</span></div><div class="kpi"><b>${b.m}${cu.Mujer != null ? ` / ${cu.Mujer}` : ""}</b><span>mujeres asignadas / cupo</span></div>${X.pareja ? `<div class="kpi"><b>${b.par}</b><span>parejas${pend ? ` · faltan ${pend} ${b.h > b.m ? "mujer(es)" : "hombre(s)"}` : ""}</span></div>` : ""}`;
   $("#d-actions").innerHTML = `<button class="btn ghost small" data-act="def">${motor.definida(d) ? "Quitar marca de definida" : "Marcar como definida"}</button><span class="hint">Una danza definida se puede cambiar, pero pide confirmación.</span>`;
   const g = { on: [], ok: [], warn: [], block: [] };
   D().personas.forEach((p) => { const ev = motor.evaluar(p, d); if (g[ev.st]) g[ev.st].push([p, ev]); });
@@ -137,11 +140,13 @@ function renderPersona() {
   $("#p-head").innerHTML = `${rolTag(p)} ${S.length} danza${S.length === 1 ? "" : "s"}${mx ? ` de ${mx} posibles` : ""} · ${cs.length} cambio${cs.length === 1 ? "" : "s"} de vestuario${p.correo ? ` · ${esc(p.correo)}` : " · sin correo vinculado"}`;
   if (document.activeElement?.closest("#p-form") == null) { $("#p-correo").value = p.correo || ""; $("#p-rol").value = p.rol || ""; $("#p-vin").value = p.vinculo || ""; }
   $("#p-tl").innerHTML = timelineHTML(p);
+  if ($("#p-ficha").open) $("#p-ficha-c").innerHTML = fichaHTML(p, false);
   const ord = { ok: 1, warn: 2, block: 3, na: 4 };
   $("#p-opts").innerHTML = DANZAS.map((d) => [d, motor.evaluar(p, d.id)]).filter(([, ev]) => ev.st !== "on").sort((a, b) => ord[a[1].st] - ord[b[1].st] || a[0].ini - b[0].ini)
     .map(([d, ev]) => `<li class="item ${ev.st === "na" ? "block" : ev.st}" data-d="${esc(d.id)}"><span><b>${esc(d.label)}</b> <span class="hint">${d.s}</span>${defTag(d.id)}<span class="why">${esc(ev.why || "")}</span></span>${ev.st === "ok" || ev.st === "warn" ? `<button class="btn small" data-act="add">Asignar</button>` : ""}</li>`).join("");
 }
 $("#p-sel").addEventListener("change", () => { $("#p-correo").blur(); renderPersona(); });
+$("#p-ficha").addEventListener("toggle", () => renderPersona());
 $("#p-opts").addEventListener("click", (e) => { const li = e.target.closest("li[data-d]"); if (li && e.target.closest('[data-act="add"]')) { const p = persona($("#p-sel").value); if (p) alternar(p, li.dataset.d); } });
 $("#p-form").addEventListener("submit", async (e) => {
   e.preventDefault(); const p = persona($("#p-sel").value); if (!p) return;
@@ -164,9 +169,9 @@ function renderLogistica() {
   $("#l-trans").innerHTML = `<tr><th>Transición</th><th>Margen</th><th>Se cambian</th><th>Presión</th><th>Quiénes</th></tr>` + ts.map((t) =>
     `<tr><td><b>${esc(t.A.nombre)}</b> → <b>${esc(t.B.nombre)}</b><div class="hint">${fmt(t.A.fin)} a ${fmt(t.B.ini)}</div></td><td>${tag(t.min)}</td><td>${t.gente.length}</td><td><div class="bar"><i style="width:${(t.presion / maxP) * 100}%"></i></div></td><td class="hint">${t.gente.map((g) => `${esc(g.p.nombre)} (${esc(DZ[g.c.de].label)}, ${g.c.min} min)`).join(", ") || "Nadie"}</td></tr>`).join("")
     + `<tr><td colspan="5" class="hint">El margen es entre bloques seguidos; 0 min significa que nadie pasa directo del uno al otro. Quien llega desde una danza anterior aparece con su propio margen entre paréntesis.</td></tr>`;
-  $("#l-bal").innerHTML = `<tr><th>Danza</th><th>Hora</th><th>Hombres</th><th>Mujeres</th><th>Parejas</th><th>Estado</th></tr>` + DANZAS.map((d) => {
-    const b = motor.balance(d.id), dif = d.pareja ? b.h - b.m : 0;
-    return `<tr><td><b>${esc(d.label)}</b>${defTag(d.id)}</td><td>${d.s}</td><td>${b.h}</td><td>${b.m}</td><td>${d.pareja ? b.par : d.soloMujeres ? "solo mujeres" : "–"}</td><td>${dif ? `<span class="tag warn">faltan ${Math.abs(dif)} ${dif > 0 ? "mujer(es)" : "hombre(s)"}</span>` : ""}</td></tr>`;
+  $("#l-bal").innerHTML = `<tr><th>Danza</th><th>Hora</th><th>Hombres / cupo</th><th>Mujeres / cupo</th><th>Parejas</th><th>Estado</th></tr>` + DANZAS.map((d) => {
+    const b = motor.balance(d.id), dif = d.pareja ? b.h - b.m : 0, cu = CUPOS[d.id] || {};
+    return `<tr><td><b>${esc(d.label)}</b>${defTag(d.id)}</td><td>${d.s}</td><td>${b.h} / ${cu.Hombre ?? "–"}</td><td>${b.m} / ${cu.Mujer ?? "–"}</td><td>${d.pareja ? b.par : d.soloMujeres ? "solo mujeres" : "–"}</td><td>${dif ? `<span class="tag warn">faltan ${Math.abs(dif)} ${dif > 0 ? "mujer(es)" : "hombre(s)"}</span>` : ""}</td></tr>`;
   }).join("");
   const rows = ps.map((p) => { const cs = cambios(motor.asig(p.id)); return { p, n: motor.asig(p.id).length, cs: cs.length, mn: cs.length ? Math.min(...cs.map((c) => c.min)) : null }; }).sort((a, b) => (a.mn ?? 99) - (b.mn ?? 99) || b.n - a.n);
   $("#l-per").innerHTML = `<tr><th>Persona</th><th>Danzas</th><th>Cambios</th><th>Cambio más corto</th></tr>` + (rows.length ? rows.map((r) => `<tr><td>${esc(r.p.nombre)} ${rolTag(r.p)}</td><td>${r.n}${maxDe(r.p) ? ` / ${maxDe(r.p)}` : ""}</td><td>${r.cs}</td><td>${r.mn === null ? "–" : tag(r.mn)}</td></tr>`).join("") : `<tr><td colspan="4" class="hint">Aún no hay asignaciones.</td></tr>`);
@@ -203,17 +208,88 @@ $("#imp").addEventListener("change", async (e) => {
   } catch (err) { msg("No se pudo importar: " + (err.message || "archivo no válido"), "bad"); }
 });
 
+/* ---------- vestuario (maestro) ---------- */
+const ROLES = ["Mujer", "Hombre"];
+const nombreRol = { Mujer: "Mujeres", Hombre: "Hombres" };
+function piezasAnalisis() {
+  return PIEZAS_COMPARTIDAS.map((x) => {
+    const usa = (ds) => new Set(D().personas.filter((p) => p.rol === x.rol && motor.asig(p.id).some((d) => ds.includes(d))).map((p) => p.id));
+    const A = usa(x.de), B = usa(x.a);
+    const entregan = [...A].filter((id) => !B.has(id)).length, reciben = [...B].filter((id) => !A.has(id)).length;
+    const min = Math.min(...x.a.map((d) => DZ[d].ini)) - Math.max(...x.de.map((d) => DZ[d].fin));
+    return { ...x, A, B, entregan, reciben, min };
+  });
+}
+function renderVestuario() {
+  $("#v-tabla").innerHTML = DANZAS.map((d) => {
+    const v = VESTUARIO[d.id] || {}, b = motor.balance(d.id);
+    const filas = ROLES.filter((r) => v[r] && (CUPOS[d.id]?.[r] ?? 0) > 0).map((r) => {
+      const cupo = CUPOS[d.id][r], asig = r === "Hombre" ? b.h : b.m;
+      const prendas = v[r].prendas.map(([n, hay, nec]) => { const need = nec ?? cupo, falta = Math.max(0, need - hay); return `<li>${esc(n)} <span class="hint">${hay}/${need}</span>${falta ? ` <span class="tag warn">faltan ${falta}</span>` : ""}</li>`; }).join("") || `<li class="hint">Sin prendas registradas</li>`;
+      const pend = v[r].pend.length ? `<div class="hint" style="margin-top:6px">${v[r].pend.map(esc).join(" · ")}</div>` : "";
+      return `<div><h4 class="vh"><span class="dot ${r === "Hombre" ? "H" : "M"}"></span>${nombreRol[r]} · ${asig} de ${cupo} asignados</h4><ul class="plist">${prendas}</ul>${pend}</div>`;
+    }).join("");
+    return `<div class="card vcard"><h3>${esc(d.label)} <span class="hint">· ${d.s} · ${esc(BQ[d.b].nombre)}</span></h3><div class="vgrid">${filas}</div></div>`;
+  }).join("");
+  $("#v-piezas").innerHTML = `<tr><th>Pieza</th><th>Pasa de</th><th>A</th><th>Margen</th><th>Entregan / reciben</th></tr>` + piezasAnalisis().map((x) => {
+    const n = nivel(x.min), riesgo = x.entregan && x.reciben && n !== "ok";
+    return `<tr><td><b>${esc(x.pieza)}</b> <span class="hint">(${nombreRol[x.rol].toLowerCase()})</span></td><td>${x.de.map((d) => esc(DZ[d].label)).join(", ")}</td><td>${x.a.map((d) => esc(DZ[d].label)).join(", ")}</td><td><span class="tag ${n === "ok" ? "ok" : n === "warn" ? "warn" : "bad"}">${x.min} min</span></td><td>${x.entregan} entregan · ${x.reciben} reciben${riesgo ? ' <span class="tag bad">riesgo</span>' : ""}</td></tr>`;
+  }).join("") + `<tr><td colspan="5" class="hint">Quien baila en ambos lados conserva la pieza. "Entregan" son quienes salen y no siguen; "reciben" son quienes entran sin haberla usado antes.</td></tr>`;
+}
+
+/* ---------- ficha del bailarín (la usan el bailarín y el maestro) ---------- */
+const NOTAS_ESCENA = Object.fromEntries(PROGRAMA.filter((x) => x.d && x.n).map((x) => [x.d, x.n]));
+function vecinos(d) {
+  const i = PROGRAMA.findIndex((x) => x.d === d);
+  const nom = (x) => (x ? (x.d ? DZ[x.d].label : x.a) + ` (${x.i})` : null);
+  return { antes: nom(PROGRAMA[i - 1]), despues: nom(PROGRAMA[i + 1]) };
+}
+function recomendaciones(p) {
+  const S = motor.asig(p.id), cs = cambios(S), out = [];
+  cs.forEach((c) => {
+    if (c.min < REGLAS.margenRapido) out.push(`Cambio rápido de ${c.min} min entre ${DZ[c.de].label} y ${DZ[c.a].label}: deja el vestuario de ${DZ[c.a].label} listo en el camerino, en el orden en que te lo pones, antes de que empiece la función.`);
+    else out.push(`Tienes ${c.min} min para cambiarte entre ${DZ[c.de].label} y ${DZ[c.a].label}.`);
+  });
+  BLOQUES.forEach((b) => { const en = S.filter((d) => DZ[d].b === b.id); if (en.length > 1) out.push(`${en.map((d) => DZ[d].label).join(" y ")} usan el mismo vestuario: no te cambias entre ellas.`); });
+  piezasAnalisis().forEach((x) => {
+    if (x.A.has(p.id) && !x.B.has(p.id) && x.B.size) out.push(`Al terminar ${x.de.map((d) => DZ[d].label).join(" / ")}, entrega ${x.pieza.toLowerCase()} a quienes entran en ${x.a.map((d) => DZ[d].label).join(" / ")} (${x.min} min después).`);
+    if (x.B.has(p.id) && !x.A.has(p.id) && x.A.size) out.push(`Recibes ${x.pieza.toLowerCase()} de quienes salen de ${x.de.map((d) => DZ[d].label).join(" / ")}: acuerda con ellos dónde te los dejan.`);
+  });
+  S.forEach((d) => { if (NOTAS_ESCENA[d] && /objeto/i.test(NOTAS_ESCENA[d])) out.push(`${DZ[d].label}: ${NOTAS_ESCENA[d].replace(/^Objeto articulador:/i, "objeto en escena:")}. Confirma con producción dónde lo recoges.`); });
+  out.push("Marca cada prenda con tu nombre y revisa que esté completa antes del ensayo general de las 5:00 p. m.");
+  out.push("Lleva ropa base cómoda para los cambios, agua y lo necesario para maquillaje y peinado.");
+  return out;
+}
+function fichaHTML(p, propio) {
+  const S = motor.asig(p.id), cs = cambios(S);
+  let h = `<div class="card" style="display:grid;gap:8px"><h2>${propio ? `Hola, ${esc(p.nombre.split(" ")[0])}` : esc(p.nombre)}</h2><p class="hint" style="margin:0">${S.length ? `${pl(S.length, "danza", "danzas")} · ${pl(cs.length, "cambio de vestuario", "cambios de vestuario")}.${propio ? " Se actualiza en vivo cuando el maestro hace cambios." : ""}` : "Aún no tiene danzas asignadas."}</p></div>`;
+  if (!S.length) return h;
+  h += `<div class="card" style="display:grid;gap:8px"><h3>Llamados del día · miércoles 18 de noviembre</h3><ul class="llamados">${LLAMADOS.map(([t, a]) => `<li><time>${t}</time> ${esc(a)}</li>`).join("")}</ul></div>`;
+  S.forEach((d, i) => {
+    const X = DZ[d], v = vecinos(d), b = motor.balance(d), vest = VESTUARIO[d]?.[p.rol];
+    const llega = i ? cs.find((c) => c.a === d) : null, mismo = i && !llega;
+    const lista = (r) => b.l.filter((x) => x.rol === r).map((x) => x.id === p.id ? `<b>${esc(x.nombre)}</b>` : esc(x.nombre)).join(" · ") || "Aún sin asignar";
+    h += `<article class="card ficha"><div class="ficha-h"><time>${X.s} – ${X.e}</time><h3>${esc(X.label)}</h3><span class="hint">${esc(BQ[X.b].nombre)}${NOTAS_ESCENA[d] ? " · " + esc(NOTAS_ESCENA[d]) : ""}</span></div>
+      <div class="ficha-g">
+        <div><span class="k">En escena antes</span>${esc(v.antes || "Inicio de la función")}</div>
+        <div><span class="k">En escena después</span>${esc(v.despues || "Cierre")}</div>
+        <div><span class="k">Tu cambio</span>${i === 0 ? "Primera danza: llega vestido desde el calentamiento" : mismo ? "Mismo vestuario que tu danza anterior" : `${llega.min} min desde ${esc(DZ[llega.de].label)}`}</div>
+      </div>
+      <div><span class="k">Vestuario a alistar</span>${vest && vest.prendas.length ? `<ul class="plist">${vest.prendas.map(([n]) => `<li>${esc(n.replace(/ \(solista\)$/, ""))}${/solista/.test(n) ? ' <span class="hint">(solo solista)</span>' : ""}</li>`).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">Pendiente de definir con el maestro.</p>`}${vest && vest.pend.length ? `<p class="hint" style="margin:6px 0 0">Pendiente del grupo: ${vest.pend.map(esc).join(" · ")}</p>` : ""}</div>
+      <div><span class="k">Elenco</span><div class="hint"><span class="dot H"></span>${lista("Hombre")}</div><div class="hint"><span class="dot M"></span>${lista("Mujer")}</div></div>
+    </article>`;
+  });
+  h += `<div class="card" style="display:grid;gap:8px"><h3>Recomendaciones</h3><ul class="recs">${recomendaciones(p).map((r) => `<li>${esc(r)}</li>`).join("")}</ul></div>`;
+  return h;
+}
+
 /* ---------- bailarín ---------- */
 function renderBailarin() {
   const s = store.sesion, p = D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo);
   let h = "";
   if (!D().personas.length) h += `<div class="card"><p class="hint" style="margin:0">Cargando el elenco…</p></div>`;
   else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero no aparece en el elenco. Pídele al maestro que lo agregue a tu nombre.</p></div>`;
-  else {
-    const S = motor.asig(p.id), cs = cambios(S);
-    h += `<div class="card" style="display:grid;gap:10px"><h2>Hola, ${esc(p.nombre.split(" ")[0])}</h2><p class="hint" style="margin:0">${S.length ? `Bailas ${S.length} danza${S.length === 1 ? "" : "s"} y tienes ${cs.length} cambio${cs.length === 1 ? "" : "s"} de vestuario. Se actualiza en vivo cuando el maestro hace cambios.` : "El maestro aún no te ha asignado danzas. Esta página se actualiza sola."}</p></div>`;
-    h += `<div style="display:grid;gap:8px"><h3>Tu programa</h3><div class="tl">${timelineHTML(p)}</div></div>`;
-  }
+  else h += fichaHTML(p, true);
   h += `<div style="display:grid;gap:8px"><h3>Programa de la función</h3><div class="tl">${programaHTML(true)}</div></div>`;
   $("#v-bailarin").innerHTML = h;
 }
@@ -248,7 +324,7 @@ function render() {
   if (!listo) return;
   if (s.error) msg(s.error, "bad");
   motor = crearMotor(D());
-  if (s.maestro) { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); $("#prog").innerHTML = programaHTML(false); }
+  if (s.maestro) { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); renderVestuario(); $("#prog").innerHTML = programaHTML(false); }
   else renderBailarin();
 }
 document.addEventListener("click", (e) => { if (e.target.id === "salir") { verInicio = true; store.salir(); } });

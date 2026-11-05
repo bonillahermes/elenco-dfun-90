@@ -86,6 +86,7 @@
       <button class="tab" role="tab" data-view="danza" aria-selected="false">Por danza</button>
       <button class="tab" role="tab" data-view="persona" aria-selected="false">Por persona</button>
       <button class="tab" role="tab" data-view="logistica" aria-selected="false">Logística</button>
+      <button class="tab" role="tab" data-view="vestuario" aria-selected="false">Vestuario</button>
       <button class="tab" role="tab" data-view="programa" aria-selected="false">Programa</button>
       <button class="tab" role="tab" data-view="datos" aria-selected="false">Datos</button>
     </nav>
@@ -139,6 +140,7 @@
         <div style="display:grid;gap:8px"><h3>Su programa</h3><div class="tl" id="p-tl"></div></div>
         <div style="display:grid;gap:8px"><h3>Qué más puede bailar</h3><ul class="list" id="p-opts"></ul></div>
       </div>
+      <details id="p-ficha" class="card"><summary>Ver lo que ve esta persona al ingresar</summary><div id="p-ficha-c" class="mine" style="margin-top:12px"></div></details>
     </section>
 
     <section id="v-logistica" class="view" hidden style="display:grid;gap:14px">
@@ -150,6 +152,16 @@
       </div>
       <div class="card" style="display:grid;gap:10px"><h2>Balance por danza</h2><div style="overflow-x:auto"><table class="ttable" id="l-bal"></table></div></div>
       <div class="card" style="display:grid;gap:10px"><h2>Carga por persona</h2><div style="overflow-x:auto"><table class="ttable" id="l-per"></table></div></div>
+    </section>
+
+    <section id="v-vestuario" class="view" hidden style="display:grid;gap:14px">
+      <div class="card" style="display:grid;gap:10px">
+        <h2>Piezas que pasan de mano</h2>
+        <p class="hint" style="margin:0">Prendas que se usan en danzas de bloques distintos. Con poco margen, quien sale debe dejarlas listas para quien entra.</p>
+        <div style="overflow-x:auto"><table class="ttable" id="v-piezas"></table></div>
+      </div>
+      <p class="hint" style="margin:0">Disponible frente a cupo. Los faltantes se compran el fin de semana.</p>
+      <div class="vlist" id="v-tabla"></div>
     </section>
 
     <section id="v-programa" class="view" hidden style="display:grid;gap:12px">

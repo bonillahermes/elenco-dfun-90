@@ -70,3 +70,85 @@ BLOQUES.forEach((b) => {
 });
 export const DZ = Object.fromEntries(DANZAS.map((d) => [d.id, d]));
 export const BQ = Object.fromEntries(BLOQUES.map((b) => [b.id, b]));
+
+// Cupos fijos por danza (fuente: matriz de vestuario de la gala).
+export const CUPOS = {
+  "Guabina": { Hombre: 8, Mujer: 8 },
+  "Guaneña y Bambuco sureño": { Hombre: 9, Mujer: 9 },
+  "Fandanguillo": { Hombre: 16, Mujer: 16 },
+  "Cortadeña": { Hombre: 8, Mujer: 8 },
+  "Rajaleña": { Hombre: 12, Mujer: 12 },
+  "Arcos": { Hombre: 12, Mujer: 12 },
+  "Chicha": { Hombre: 12, Mujer: 12 },
+  "Palo negro": { Hombre: 3, Mujer: 3 },
+  "Cumbia": { Hombre: 8, Mujer: 8 },
+  "Bullerengue": { Hombre: 0, Mujer: 8 },
+  "Pilanderas": { Hombre: 8, Mujer: 8 },
+};
+
+// Vestuario por danza y rol (fuente: matriz de vestuario). Cada prenda: [nombre, disponible hoy, necesarias].
+// Si falta "necesarias", se usa el cupo del rol. En Guaneña, el solista tiene vestuario propio.
+// "pend" = pendientes anotados. Se compran faltantes el fin de semana.
+export const VESTUARIO = {
+  "Guabina": {
+    Mujer: { prendas: [["Mantilla", 7], ["Sombrero", 7], ["Blusa", 6], ["Falda", 9]], pend: ["Falta 1 sombrero", "Faltan 2 blusas"] },
+    Hombre: { prendas: [["Pantalón gris", 10], ["Pañoleta roja", 15], ["Sombrero negro", 9], ["Camisa blanca", 5], ["Ruana", 0]], pend: ["Falta traer 8 ruanas"] },
+  },
+  "Guaneña y Bambuco sureño": {
+    Mujer: { prendas: [["Falda", 8, 8], ["Blusa blanca", 6, 8], ["Chal negro", 8, 8], ["Chal vinotinto (solista)", 1, 1], ["Vestuario Guaneña completo (solista)", 1, 1]], pend: ["El inventario dice que hay 8 blusas de Nariño", "Coordinar accesorios: aretes y collares"] },
+    Hombre: { prendas: [["Pantalón café", 8, 8], ["Camisa", 4, 8], ["Pañoleta", 8, 8], ["Fajón", 8, 8], ["Pantalón beige (solista)", 1, 1], ["Camisa dorada con negro (solista)", 1, 1]], pend: ["El inventario dice que hay 8 camisas de Nariño", "Falta el pantalón del solista de Guaneña"] },
+  },
+  "Fandanguillo": {
+    Mujer: { prendas: [["Falda Antioquia vinotinto", 8], ["Blusa Antioquia vinotinto", 8]], pend: [] },
+    Hombre: { prendas: [["Poncho", 21], ["Carriel", 6], ["Pantalón (4 verdes y 5 cafés)", 9], ["Cincho", 9], ["Forro de machete", 19], ["Machete", 12]], pend: ["Cada cuadrante usa camisas distintas", "2 carrieles dañados"] },
+  },
+  "Cortadeña": {
+    Mujer: { prendas: [["Falda Antioquia vinotinto", 8], ["Blusa Antioquia vinotinto", 8]], pend: ["Revisar delantales"] },
+    Hombre: { prendas: [["Poncho", 21], ["Carriel", 6], ["Pantalón (4 verdes y 5 cafés)", 9], ["Cincho", 9], ["Forro de machete", 19], ["Machete", 12]], pend: [] },
+  },
+  "Rajaleña": {
+    Mujer: { prendas: [["Blusa (azul bebé, rosado, azul oscuro)", 3]], pend: ["Faltan blusas: 2 rojas, 1 naranja, 1 verde, 1 amarilla, 1 azul oscuro", "No figuran faldas"] },
+    Hombre: { prendas: [["Camisa", 12], ["Pantalón blanco", 10], ["Pañoleta", 12], ["Cincho", 9], ["Forro de machete", 19], ["Machete", 12], ["Poncho", 21], ["Sombrero", 8]], pend: [] },
+  },
+  "Arcos": {
+    Mujer: { prendas: [["Falda", 9], ["Blusa", 6]], pend: ["El inventario dice que hay 10 blusas de Cundinamarca"] },
+    Hombre: { prendas: [], pend: ["Vestuario de hombres sin definir en la matriz"] },
+  },
+  "Chicha": {
+    Mujer: { prendas: [["Falda", 9], ["Blusa", 6]], pend: ["El inventario dice que hay 10 blusas de Cundinamarca"] },
+    Hombre: { prendas: [["Perrero", 9]], pend: ["Resto del vestuario de hombres sin definir en la matriz"] },
+  },
+  "Palo negro": {
+    Mujer: { prendas: [["Blusa de Bullerengue", 3], ["Falda", 3]], pend: ["Pendiente hacer tocados"] },
+    Hombre: { prendas: [], pend: ["Vestuario de hombres sin definir en la matriz"] },
+  },
+  "Cumbia": {
+    Mujer: { prendas: [["Falda", 8], ["Blusa", 8]], pend: [] },
+    Hombre: { prendas: [["Camisa", 9], ["Pañoleta roja", 15], ["Mochila", 16], ["Fajón", 7], ["Pantalón blanco", 10]], pend: [] },
+  },
+  "Bullerengue": {
+    Mujer: { prendas: [["Falda", 8]], pend: ["Blusas y tocados los hace Clau"] },
+  },
+  "Pilanderas": {
+    Mujer: { prendas: [["Falda fandango", 8], ["Blusa fandango", 7]], pend: ["Falta 1 blusa rosada fandango"] },
+    Hombre: { prendas: [["Camisa", 9], ["Pantalón blanco", 10], ["Mochila", 16]], pend: [] },
+  },
+};
+
+// Piezas físicas que se usan en danzas de bloques distintos y deben pasar de mano.
+export const PIEZAS_COMPARTIDAS = [
+  { pieza: "Ponchos, machetes, forros y cinchos", rol: "Hombre", de: ["Fandanguillo", "Cortadeña"], a: ["Rajaleña"] },
+  { pieza: "Pantalones blancos", rol: "Hombre", de: ["Rajaleña"], a: ["Cumbia", "Pilanderas"] },
+  { pieza: "Pañoletas rojas", rol: "Hombre", de: ["Guabina"], a: ["Cumbia"] },
+  { pieza: "Blusas de Bullerengue", rol: "Mujer", de: ["Palo negro"], a: ["Bullerengue"] },
+];
+
+// Llamados generales del día (minuto a minuto de producción).
+export const LLAMADOS = [
+  ["2:00 p. m.", "Llegada y reunión general de producción"],
+  ["2:30 p. m.", "Reconocimiento del escenario y marcación"],
+  ["5:00 p. m.", "Ensayo general"],
+  ["6:00 p. m.", "Revisión final de vestuario, maquillaje y utilería"],
+  ["6:30 p. m.", "Calentamiento corporal y vocal"],
+  ["7:10 p. m.", "Inicio de la función"],
+];

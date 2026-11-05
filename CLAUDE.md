@@ -29,7 +29,13 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 - Entre danzas de bloques distintos: 0 min = imposible, 1 a 4 min = cambio rápido (advertencia), 5 o más = normal. Se evalúa por pares consecutivos de las danzas de cada persona.
 - Guaneña y Danza de Nariño son una sola columna. Cortadeña exige Fandanguillo. Bullerengue es solo de mujeres y no comparte gente con Cumbia. Cumbia sugiere Pilanderas (no obliga).
 - Mujeres: máximo 4 danzas. Hombres: sin límite.
+- Cupos fijos por danza y rol (`CUPOS` en montaje.js, de la matriz de vestuario): no se puede asignar por encima del cupo.
 - "Definida" marca un elenco ya acordado (Palo negro): se puede cambiar, con confirmación.
+
+## Vestuario
+- `VESTUARIO` en montaje.js: prendas por danza y rol como [nombre, disponible, necesarias?]; sin "necesarias" se usa el cupo. Faltantes se compran; la pestaña Vestuario los muestra.
+- `PIEZAS_COMPARTIDAS`: prendas físicas que pasan de una danza a otra de distinto bloque; se calcula quién entrega y quién recibe.
+- El bailarín ve una ficha por danza: hora, danza anterior y siguiente en escena, su cambio, vestuario a alistar, elenco y recomendaciones.
 
 ## Maestros
 - bsilvab@unal.edu.co (maestro del grupo) y hyate@unal.edu.co (Hermes, administrador).

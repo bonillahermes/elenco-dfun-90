@@ -56,3 +56,18 @@ test("elenco definido se puede cambiar pero queda marcado", () => {
 test("Cumbia sugiere Pilanderas", () => {
   assert.equal(motor().alternar(M("m"), "Cumbia").sugerencia, "Pilanderas");
 });
+
+test("cupo fijo: no se puede pasar del cupo por rol", () => {
+  const hs = Array.from({ length: 3 }, (_, i) => H("h" + i));
+  const m = crearMotor({ personas: [...hs, H("x")], elenco: { h0: ["Palo negro"], h1: ["Palo negro"], h2: ["Palo negro"] }, definidas: {} });
+  const r = m.evaluar(H("x"), "Palo negro");
+  assert.equal(r.st, "block");
+  assert.match(r.why, /Cupo lleno/);
+});
+
+test("Bullerengue tiene cupo de 8 mujeres", () => {
+  const ms = Array.from({ length: 8 }, (_, i) => M("m" + i));
+  const elenco = Object.fromEntries(ms.map((m) => [m.id, ["Bullerengue"]]));
+  const m = crearMotor({ personas: [...ms, M("y")], elenco, definidas: {} });
+  assert.equal(m.evaluar(M("y"), "Bullerengue").st, "block");
+});

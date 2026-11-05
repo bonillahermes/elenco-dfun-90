@@ -167,3 +167,20 @@ tr.sel td{background:var(--accent-soft)}
 .pie{text-align:center;font-size:13px;color:var(--muted);padding:24px 16px 40px}
 .local-fixed{position:fixed;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:25;max-width:min(70vw,300px);font-size:11px;padding:5px 9px;opacity:.92}
 @media (max-width:760px){.hero-in{grid-template-columns:1fr}.falda{width:min(170px,44vw);order:-1;justify-self:start}.acceso-in{grid-template-columns:1fr}}
+
+/* Vestuario y ficha */
+.vlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.vcard{display:grid;gap:10px;align-content:start}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.vh{margin:0 0 6px;font-size:13px;font-weight:700}
+.plist{margin:4px 0 0;padding-left:18px;display:grid;gap:3px;font-size:14px}
+.ficha{display:grid;gap:12px}
+.ficha-h{display:grid;gap:2px}
+.ficha-h time{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.ficha-h h3{font-size:22px}
+.ficha-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;font-size:14px}
+.k{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:2px}
+.llamados,.recs{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px}
+.llamados{list-style:none;padding:0}
+.llamados time{display:inline-block;min-width:84px;font-weight:700;font-variant-numeric:tabular-nums}
+details summary{cursor:pointer;font-weight:600}

@@ -2,7 +2,7 @@
 // personas: [{ id, nombre, rol: "Hombre" | "Mujer", ... }]
 // elenco:   { [personaId]: ["Guabina", ...] }
 // definidas:{ [danzaId]: true }
-import { DANZAS, DZ, BLOQUES, REGLAS } from "./montaje.js";
+import { DANZAS, DZ, BLOQUES, REGLAS, CUPOS } from "./montaje.js";
 
 export const ordenar = (ds) => ds.filter((d) => DZ[d]).sort((a, b) => DZ[a].ini - DZ[b].ini);
 export const nivel = (min) => (min <= 0 ? "block" : min < REGLAS.margenRapido ? "warn" : "ok");
@@ -21,6 +21,8 @@ const peorDe = (cs) => cs.reduce((m, c) => (!m || c.min < m.min ? c : m), null);
 
 export function crearMotor(estado) {
   const asig = (id) => ordenar(estado.elenco[id] || []);
+  const cupo = (d, rol) => CUPOS[d]?.[rol] ?? null;
+  const ocupados = (d, rol) => estado.personas.filter((p) => p.rol === rol && (estado.elenco[p.id] || []).includes(d)).length;
   const definida = (d) => !!estado.definidas[d];
 
   // Qué pasaría si se asigna la danza d a la persona p.
@@ -32,6 +34,7 @@ export function crearMotor(estado) {
     const add = [d];
     if (D.requiere && !S.includes(D.requiere)) add.push(D.requiere);
     for (const x of add) { const ex = DZ[x].excluye; if (ex && S.includes(ex)) return { st: "block", why: `No se combina con ${DZ[ex].label}` }; }
+    for (const x of add) { const c = cupo(x, p.rol); if (c !== null && ocupados(x, p.rol) >= c) return { st: "block", why: `Cupo lleno en ${DZ[x].label} (${c} ${p.rol === "Mujer" ? "mujeres" : "hombres"})` }; }
     const N = S.concat(add), mx = maxDe(p);
     if (mx && N.length > mx) return { st: "block", why: `Llegaría a ${N.length} danzas (máximo ${mx})` };
     const peor = peorDe(cambios(N).filter((c) => add.includes(c.de) || add.includes(c.a)));
@@ -49,6 +52,7 @@ export function crearMotor(estado) {
     if (D.requiere && !S.includes(D.requiere)) return { bad: true, why: `Falta ${DZ[D.requiere].label}` };
     if (D.excluye && S.includes(D.excluye)) return { bad: true, why: `No se combina con ${DZ[D.excluye].label}` };
     const mx = maxDe(p); if (mx && S.length > mx) return { bad: true, why: `${S.length} danzas (máximo ${mx})` };
+    const c = cupo(d, p.rol); if (c !== null && ocupados(d, p.rol) > c) return { bad: true, why: `Cupo excedido (${ocupados(d, p.rol)} de ${c})` };
     const peor = peorDe(cambios(S).filter((c) => c.de === d || c.a === d));
     if (peor && peor.min <= 0) return { bad: true, why: `Sin tiempo: ${DZ[peor.de].label} → ${DZ[peor.a].label}` };
     if (peor && peor.min < REGLAS.margenRapido) return { warn: true, why: `Cambio rápido de ${peor.min} min` };
@@ -85,5 +89,5 @@ export function crearMotor(estado) {
   }
   const conProblemas = () => estado.personas.filter((p) => asig(p.id).some((d) => revisar(p, asig(p.id), d).bad));
 
-  return { asig, definida, evaluar, revisar, alternar, elencoDe, balance, transiciones, conProblemas };
+  return { asig, cupo, ocupados, definida, evaluar, revisar, alternar, elencoDe, balance, transiciones, conProblemas };
 }
