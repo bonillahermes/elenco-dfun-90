@@ -9,57 +9,107 @@
 <meta name="theme-color" content="#A3174F">
 <title>Elenco DFUN 90 años</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/portada.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 </head>
 <body>
-<!-- Página de inicio -->
-<main id="v-inicio" class="inicio" hidden>
-  <section class="hero">
-    <div class="hero-in">
-      <div class="hero-txt">
-        <div class="hero-eyebrow">Universidad Nacional de Colombia · 1936 – 2026</div>
-        <h1 class="hero-t">Grupo de Danzas Folclóricas</h1>
-        <p class="hero-90"><span>90</span> años bailando Colombia</p>
-        <div class="row hero-cta">
-          <button class="btn btn-lg" type="button" data-entrar>Ingresar</button>
-          <a class="btn btn-lg btn-line" href="#programa">Ver el programa</a>
-        </div>
-        <div class="msg bad" id="login-msg"></div>
-      </div>
-      <div class="falda" aria-hidden="true"><i></i><i></i><i></i></div>
+<!-- Portada pública. Estilos en css/portada.css y lógica en js/portada.js. -->
+<main id="v-inicio" class="inicio">
+  <header class="po-barra po-g">
+    <div class="po-in"><span class="po-marca">DFUN</span><button class="po-enlace" type="button" data-entrar>Ingresar</button></div>
+  </header>
+
+  <section class="po-hero po-g" aria-labelledby="po-titulo">
+    <picture class="po-foto">
+      <source type="image/webp" srcset="img/portada/apertura.webp">
+      <img src="img/portada/apertura.jpg" width="1920" height="1280" fetchpriority="high" alt="Una treintena de bailarines del grupo posan frente a un muro de ladrillo de la Ciudad Universitaria; adelante, las mujeres abren polleras de colores morado, rosado, verde y naranja.">
+    </picture>
+    <div class="po-telon" aria-hidden="true"><i></i><i></i></div>
+    <div class="po-in">
+      <h1 id="po-titulo">90 años bailando Colombia</h1>
+      <p class="po-sub">Grupo de Danzas Folclóricas de la Universidad Nacional de Colombia, sede Bogotá.</p>
+      <div><button class="po-btn" type="button" data-entrar>Ingresar</button></div>
+      <p class="msg po-msg" id="login-msg" aria-live="polite"></p>
     </div>
   </section>
 
-  <section class="gala">
-    <div class="gala-in">
-      <div><span class="k">Gala 90 años</span><b>Miércoles 18 de noviembre</b></div>
-      <div><span class="k">Función</span><b>7:10 p. m.</b></div>
-      <div><span class="k">Lugar</span><b>Auditorio León de Greiff</b></div>
-      <div><span class="k">En escena</span><b>12 danzas · 7 momentos</b></div>
-    </div>
-  </section>
-
-  <section class="recorrido" id="programa">
-    <div class="rec-in">
-      <h2 class="sec-t">El recorrido de la noche</h2>
-      <p class="sec-sub">Siete momentos, cada uno con su vestuario y sus objetos en escena.</p>
-      <ol class="momentos" id="momentos"></ol>
-    </div>
-  </section>
-
-  <section class="acceso">
-    <div class="acceso-in">
+  <section class="po-linaje po-g" aria-labelledby="po-linaje-t">
+    <div class="po-in">
       <div>
-        <h2 class="sec-t">Para el elenco</h2>
-        <p class="sec-sub">Ingresa con tu correo @unal.edu.co. Si eres bailarín, verás en vivo qué danzas te asignaron, a qué hora entras y cuánto tiempo tienes para cada cambio de vestuario. El maestro arma el elenco desde aquí mismo.</p>
+        <h2 id="po-linaje-t">Desde 1936<!-- POR CONFIRMAR: año de fundación -->, de Jacinto Jaramillo a hoy.</h2>
+        <p class="po-lead">Las danzas de las cuatro regiones del país, enseñadas de maestro a maestro. La gala honra a quienes han dirigido el grupo: varias de sus voces sonarán esa noche entre una danza y otra.</p>
       </div>
-      <button class="btn btn-lg" type="button" data-entrar>Ingresar con correo UNAL</button>
+      <ol class="po-maestros">
+        <!-- POR CONFIRMAR: Jacinto Jaramillo -->
+        <li><span class="po-n">1</span><div><b>Jacinto Jaramillo</b><span>Fundador. Formado en Nueva York en la escuela de Isadora Duncan.</span></div></li>
+        <!-- POR CONFIRMAR: Delia Zapata -->
+        <li><span class="po-n">2</span><div><b>Delia Zapata</b><span>Las danzas del Caribe y el Pacífico.</span></div></li>
+        <!-- POR CONFIRMAR: Edgar Sandino -->
+        <li><span class="po-n">3</span><div><b>Edgar Sandino</b><span>Maestro del grupo.</span></div></li>
+        <!-- POR CONFIRMAR: Felipe Lozano -->
+        <li><span class="po-n">4</span><div><b>Felipe Lozano</b><span>Director entre 2005 y 2009, alumno de Jaramillo.</span></div></li>
+        <!-- POR CONFIRMAR: Rafael Barrera -->
+        <li><span class="po-n">5</span><div><b>Rafael Barrera</b><span>Director en el aniversario 75.</span></div></li>
+        <!-- POR CONFIRMAR: Nicolás Silva -->
+        <li class="po-hoy"><span class="po-n">6</span><div><b>Nicolás Silva</b><span>Maestro del elenco de la gala 90 años.</span></div></li>
+      </ol>
     </div>
   </section>
 
-  <footer class="pie">Grupo de Danzas Folclóricas · Universidad Nacional de Colombia, sede Bogotá</footer>
+  <!-- Recorrido fijo. js/portada.js lo arma desde montaje.js (horas, bloques y danzas).
+       Lo que hay aquí es solo el primer bloque, para que se vea si el JavaScript no carga. -->
+  <section class="po-rec" id="recorrido" aria-labelledby="po-rec-t">
+    <h2 class="po-sr" id="po-rec-t">El recorrido de la noche</h2>
+    <ol class="po-sr" id="po-rec-lista"></ol>
+    <div class="po-escena po-g" id="po-escena">
+      <div class="po-in">
+        <div class="po-mom" id="po-mom">
+          <p class="po-reloj"><span id="po-reloj">7:23</span><small>p. m.</small></p>
+          <h3 id="po-mnom">Guabina</h3>
+          <ul id="po-mdz"><li>Guabina, con mantilla</li></ul>
+          <p class="po-que" id="po-mque">Pañoletas rojas y sombreros negros abren la noche.</p>
+        </div>
+        <div class="po-ph">
+          <picture class="po-on" data-foto="ruanas">
+            <source type="image/webp" srcset="img/portada/ruanas.webp">
+            <img src="img/portada/ruanas.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Bailarines frente a un muro de ladrillo: los hombres con sombrero negro, pañoleta roja y ruana gris; las mujeres con chal negro, blusa rosada y una vasija pequeña sobre la cabeza.">
+          </picture>
+          <picture data-foto="escenario">
+            <source type="image/webp" srcset="img/portada/escenario.webp">
+            <img src="img/portada/escenario.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="El grupo en un escenario con telón rojo: hombres de blanco con sombrero de paja y pañoleta, y mujeres sentadas adelante con polleras de colores.">
+          </picture>
+        </div>
+      </div>
+      <div class="po-pasos" id="po-pasos" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <section class="po-gala po-g" aria-labelledby="po-gala-t">
+    <div class="po-in">
+      <h2 id="po-gala-t">Miércoles 18 de noviembre, 7:10 p. m.</h2>
+      <p>Auditorio León de Greiff, Ciudad Universitaria. Doce danzas en setenta minutos, con músicos en vivo.</p>
+    </div>
+  </section>
+
+  <section class="po-elenco" id="elenco" aria-labelledby="po-elenco-t">
+    <div class="po-in">
+      <picture class="po-ph">
+        <source type="image/webp" srcset="img/portada/frac.webp">
+        <img src="img/portada/frac.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Siete bailarines de frac negro y corbatín de cinta, en fila a lo largo de un corredor de ladrillo.">
+      </picture>
+      <div class="po-txt">
+        <h2 id="po-elenco-t">Para el elenco</h2>
+        <p>Entra con tu correo de la universidad y mira qué bailas, a qué hora sales a escena, qué vestuario alistas y con quién bailas cada danza.</p>
+        <div><button class="po-btn" type="button" data-entrar>Ingresar con correo UNAL</button></div>
+        <p class="msg po-msg" data-eco-login aria-hidden="true"></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="po-pie po-g"><div class="po-in"><span>Grupo de Danzas Folclóricas, Universidad Nacional de Colombia, sede Bogotá</span><span>dfun.app</span></div></footer>
 </main>
 
 <div class="wrap" id="app" hidden>

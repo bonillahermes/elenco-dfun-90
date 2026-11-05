@@ -2,6 +2,7 @@ import { BLOQUES, DANZAS, DZ, BQ, PROGRAMA, REGLAS, CUPOS, VESTUARIO, PIEZAS_COM
 import { crearMotor, cambios, nivel, maxDe } from "./reglas.js";
 import { crearStore } from "./datos.js";
 import { leerExcel, exportarExcel } from "./excel.js";
+import { iniciarPortada } from "./portada.js";
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -303,10 +304,8 @@ function renderBailarin() {
 }
 
 /* ---------- página de inicio ---------- */
-const notas = { "Guabina": "mantilla", "Guaneña y Bambuco sureño": "bebé", "Fandanguillo": "coplas para Marla Patricia", "Arcos": "arcos", "Chicha": "brindis con chicha", "Cumbia": "velas", "Bullerengue": "Delia", "Pilanderas": "balay y pilón" };
-const nombreInicio = { "Guaneña y Bambuco sureño": "Guaneña y Danza de Nariño" };
-$("#momentos").innerHTML = BLOQUES.map((b) => `<li class="momento"><time>${fmt(b.ini)} p. m.</time><h3>${esc(b.nombre)}</h3><ul>${b.danzas.map((d) =>
-  `<li>${esc(nombreInicio[d] || DZ[d].label)}${notas[d] ? ` <small>· ${esc(notas[d])}</small>` : ""}</li>`).join("")}</ul></li>`).join("");
+// La portada pública (telón y recorrido fijo) vive en portada.js. Un fallo ahí no debe frenar la aplicación.
+try { iniciarPortada(); } catch (e) { console.error(e); }
 let verPortada = true, vista = "panel", rolActivo = null;
 try { rolActivo = localStorage.getItem("dfun-v2-rol"); } catch (e) {}
 // Roles que puede usar la sesión y el rol con el que está viendo la página.
