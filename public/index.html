@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Elenco DFUN">
+<meta name="theme-color" content="#A3174F">
+<title>Elenco DFUN 90 años</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+</head>
+<body>
+<!-- Página de inicio -->
+<main id="v-inicio" class="inicio" hidden>
+  <section class="hero">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <div class="hero-eyebrow">Universidad Nacional de Colombia · 1936 – 2026</div>
+        <h1 class="hero-t">Grupo de Danzas Folclóricas</h1>
+        <p class="hero-90"><span>90</span> años bailando Colombia</p>
+        <div class="row hero-cta">
+          <button class="btn btn-lg" type="button" data-entrar>Ingresar</button>
+          <a class="btn btn-lg btn-line" href="#programa">Ver el programa</a>
+        </div>
+        <div class="msg bad" id="login-msg"></div>
+      </div>
+      <div class="falda" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <section class="gala">
+    <div class="gala-in">
+      <div><span class="k">Gala 90 años</span><b>Miércoles 18 de noviembre</b></div>
+      <div><span class="k">Función</span><b>7:10 p. m.</b></div>
+      <div><span class="k">Lugar</span><b>Auditorio León de Greiff</b></div>
+      <div><span class="k">En escena</span><b>12 danzas · 7 momentos</b></div>
+    </div>
+  </section>
+
+  <section class="recorrido" id="programa">
+    <div class="rec-in">
+      <h2 class="sec-t">El recorrido de la noche</h2>
+      <p class="sec-sub">Siete momentos, cada uno con su vestuario y sus objetos en escena.</p>
+      <ol class="momentos" id="momentos"></ol>
+    </div>
+  </section>
+
+  <section class="acceso">
+    <div class="acceso-in">
+      <div>
+        <h2 class="sec-t">Para el elenco</h2>
+        <p class="sec-sub">Ingresa con tu correo @unal.edu.co. Si eres bailarín, verás en vivo qué danzas te asignaron, a qué hora entras y cuánto tiempo tienes para cada cambio de vestuario. El maestro arma el elenco desde aquí mismo.</p>
+      </div>
+      <button class="btn btn-lg" type="button" data-entrar>Ingresar con correo UNAL</button>
+    </div>
+  </section>
+
+  <footer class="pie">Grupo de Danzas Folclóricas · Universidad Nacional de Colombia, sede Bogotá</footer>
+</main>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div class="topbar">
+      <div class="eyebrow">Danzas Folclóricas UN · Gala 90 años · Miércoles 18 de noviembre</div>
+      <div class="user" id="user" hidden></div>
+    </div>
+    <h1>Elenco DFUN 90 años</h1>
+
+    <div class="msg" id="status" role="status"></div>
+  </header>
+
+  <section id="v-cargando" class="hint">Cargando…</section>
+
+  <!-- Vista del bailarín -->
+  <section id="v-bailarin" class="mine" hidden></section>
+
+  <!-- Vista del maestro -->
+  <div id="v-maestro" hidden style="display:grid;gap:16px">
+    <div class="summary" id="summary"></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-view="matriz" aria-selected="true">Matriz</button>
+      <button class="tab" role="tab" data-view="danza" aria-selected="false">Por danza</button>
+      <button class="tab" role="tab" data-view="persona" aria-selected="false">Por persona</button>
+      <button class="tab" role="tab" data-view="logistica" aria-selected="false">Logística</button>
+      <button class="tab" role="tab" data-view="programa" aria-selected="false">Programa</button>
+      <button class="tab" role="tab" data-view="datos" aria-selected="false">Datos</button>
+    </nav>
+
+    <section id="v-matriz" class="view" style="display:grid;gap:12px">
+      <div class="row between">
+        <input type="text" id="q" placeholder="Buscar por nombre" aria-label="Buscar por nombre" style="max-width:300px">
+        <div class="chips" role="radiogroup" aria-label="Filtrar por rol">
+          <label class="chip"><input type="radio" name="frol" value="" checked><span>Todos</span></label>
+          <label class="chip"><input type="radio" name="frol" value="Hombre"><span>Hombres</span></label>
+          <label class="chip"><input type="radio" name="frol" value="Mujer"><span>Mujeres</span></label>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--ink);color:var(--bg)">✓</i>Asignado</span>
+        <span><i class="sw" style="color:var(--ok)">●</i>Disponible</span>
+        <span><i class="sw" style="color:var(--warn)">◆</i>Cambio rápido (1 a 4 min)</span>
+        <span><i class="sw" style="color:var(--bad);background:var(--bad-soft)">×</i>No puede</span>
+        <span><i class="sw">–</i>No aplica</span>
+        <span><span class="badge">Definida</span> Pareja o elenco definido</span>
+        <span><i class="sw" style="position:relative"><i style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--accent)"></i></i>Se postuló</span>
+      </div>
+      <p class="hint" style="margin:0">Toque una casilla para asignar o quitar. Toque el nombre para ver el detalle de la persona.</p>
+      <div class="tablebox"><table id="mx"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+    </section>
+
+    <section id="v-danza" class="view" hidden style="display:grid;gap:14px">
+      <div class="card" style="display:grid;gap:12px">
+        <div class="grid2">
+          <div class="field"><label for="d-sel">Danza</label><select id="d-sel"></select></div>
+          <div id="d-head" class="hint" style="align-self:end"></div>
+        </div>
+        <div class="kpis" id="d-kpis"></div>
+        <div class="row" id="d-actions"></div>
+      </div>
+      <div class="cols" id="d-cols"></div>
+    </section>
+
+    <section id="v-persona" class="view" hidden style="display:grid;gap:14px">
+      <div class="card" style="display:grid;gap:12px">
+        <div class="field"><label for="p-sel">Persona</label><select id="p-sel"></select></div>
+        <div id="p-head" class="hint"></div>
+        <form id="p-form" class="grid2" autocomplete="off">
+          <div class="field"><label for="p-correo">Correo UNAL</label><input type="text" id="p-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
+          <div class="field"><label for="p-rol">Rol</label><select id="p-rol"><option value="">Sin definir</option><option>Hombre</option><option>Mujer</option></select></div>
+          <div class="field"><label for="p-vin">Vínculo</label><select id="p-vin"><option value="">Sin definir</option><option>Estudiante</option><option>Egresado</option></select></div>
+          <div class="field" style="align-self:end"><button class="btn small" type="submit">Guardar datos</button></div>
+        </form>
+      </div>
+      <div class="cols">
+        <div style="display:grid;gap:8px"><h3>Su programa</h3><div class="tl" id="p-tl"></div></div>
+        <div style="display:grid;gap:8px"><h3>Qué más puede bailar</h3><ul class="list" id="p-opts"></ul></div>
+      </div>
+    </section>
+
+    <section id="v-logistica" class="view" hidden style="display:grid;gap:14px">
+      <div class="kpis" id="l-kpis"></div>
+      <div class="card" style="display:grid;gap:10px">
+        <h2>Cambios de vestuario entre bloques</h2>
+        <p class="hint" style="margin:0">Dentro de un bloque se usa el mismo vestuario. La presión suma cuántas personas se cambian y qué tan poco tiempo tiene cada una.</p>
+        <div style="overflow-x:auto"><table class="ttable" id="l-trans"></table></div>
+      </div>
+      <div class="card" style="display:grid;gap:10px"><h2>Balance por danza</h2><div style="overflow-x:auto"><table class="ttable" id="l-bal"></table></div></div>
+      <div class="card" style="display:grid;gap:10px"><h2>Carga por persona</h2><div style="overflow-x:auto"><table class="ttable" id="l-per"></table></div></div>
+    </section>
+
+    <section id="v-programa" class="view" hidden style="display:grid;gap:12px">
+      <div class="row between"><h2>Minuto a minuto de la función</h2><span class="hint">Llegada 2:00 p. m. · Función 7:10 a 8:28 p. m.</span></div>
+      <div class="tl" id="prog"></div>
+    </section>
+
+    <section id="v-datos" class="view" hidden style="display:grid;gap:14px">
+      <form class="card" id="f-new" style="display:grid;gap:12px" autocomplete="off">
+        <h2>Inscribir bailarín(a)</h2>
+        <div class="grid2">
+          <div class="field"><label for="f-nombre">Nombre completo</label><input type="text" id="f-nombre" maxlength="120"></div>
+          <div class="field"><label for="f-correo">Correo UNAL</label><input type="text" id="f-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><span class="lbl">Rol</span><div class="chips"><label class="chip"><input type="radio" name="rol" value="Hombre"><span>Hombre</span></label><label class="chip"><input type="radio" name="rol" value="Mujer"><span>Mujer</span></label></div></div>
+          <div class="field"><span class="lbl">Vínculo</span><div class="chips"><label class="chip"><input type="radio" name="vin" value="Estudiante"><span>Estudiante</span></label><label class="chip"><input type="radio" name="vin" value="Egresado"><span>Egresado(a)</span></label></div></div>
+        </div>
+        <div class="row"><button class="btn" type="submit">Inscribir</button><span class="msg" id="f-msg"></span></div>
+      </form>
+      <div class="card" style="display:grid;gap:10px">
+        <h2>Respaldo en Excel</h2>
+        <p class="hint" style="margin:0">Los cambios se guardan solos en la base de datos. Exportar descarga una copia del elenco. Restaurar reemplaza todas las personas y asignaciones con las del archivo; úselo solo en caso de emergencia.</p>
+        <div class="row">
+          <button class="btn ghost small" type="button" id="xls">Exportar a Excel</button>
+          <label class="btn ghost small" for="imp" style="cursor:pointer">Restaurar desde Excel</label>
+          <input type="file" id="imp" accept=".xlsx" hidden>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="local local-fixed" id="local" hidden>Modo de prueba local (sin Firebase)</div>
+<div class="toast" id="toast" hidden></div>
+<div class="modal-bg" id="modal" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <h3 id="modal-t"></h3><p class="hint" id="modal-b" style="margin:0"></p>
+  <div class="row"><button class="btn ghost" type="button" id="modal-no">Cancelar</button><button class="btn" type="button" id="modal-si">Confirmar</button></div>
+</div></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
