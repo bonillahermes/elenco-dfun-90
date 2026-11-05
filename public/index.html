@@ -149,7 +149,7 @@
       <div class="user" id="user" hidden></div>
     </div>
     <h1>Elenco DFUN 90 años</h1>
-    <p class="modo-admin" id="modo-admin" hidden>Modo administrador: puedes vincular correos, borrar personas y restaurar datos. Esos cambios afectan a todos.</p>
+    <p class="modo-admin" id="modo-admin" hidden>Modo administrador<span class="ma-det">: puedes vincular correos, borrar personas y restaurar datos. Esos cambios afectan a todos.</span></p>
 
     <div class="msg" id="status" role="status"></div>
   </header>
@@ -192,16 +192,21 @@
         <label class="chip" id="f-sincorreo" hidden><input type="radio" name="fest" value="sincorreo"><span>Sin correo <b data-cuenta="sincorreo"></b></span></label>
       </div>
       <div id="mx-panel"></div>
-      <div class="legend">
-        <span><i class="sw" style="background:var(--ink);color:var(--bg)">✓</i>Asignado</span>
-        <span><i class="sw" style="color:var(--ok)">●</i>Disponible</span>
-        <span><i class="sw" style="color:var(--warn)">◆</i>Cambio rápido (1 a 4 min)</span>
-        <span><i class="sw" style="color:var(--bad);background:var(--bad-soft)">×</i>No puede</span>
-        <span><i class="sw">–</i>No aplica</span>
-        <span><span class="badge">Definida</span> Pareja o elenco definido</span>
-        <span><i class="sw sw-post"></i>Se postuló</span>
-      </div>
-      <p class="hint" style="margin:0">Toque una casilla para asignar o quitar. Toque el nombre para ver el detalle de la persona.</p>
+      <details class="leyenda" id="leyenda">
+        <summary>Qué significa cada casilla</summary>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--ink);color:var(--bg)">✓</i>Asignado</span>
+          <span><i class="sw" style="background:var(--warn);color:#fff">✓</i>Asignado, con cambio rápido</span>
+          <span><i class="sw" style="background:var(--bad);color:#fff">✓</i>Asignado, pero rompe una regla</span>
+          <span><i class="sw" style="color:var(--ok)">●</i>Disponible</span>
+          <span><i class="sw" style="color:var(--warn)">◆</i>Disponible con cambio rápido (1 a 4 min)</span>
+          <span><i class="sw" style="color:var(--bad);background:var(--bad-soft)">×</i>No puede</span>
+          <span><i class="sw">–</i>No aplica</span>
+          <span><i class="sw sw-post"></i>Se postuló</span>
+          <span><b>★</b> Danza con elenco definido: cambiarla pide confirmación</span>
+        </div>
+      </details>
+      <p class="hint" style="margin:0">Toca una casilla para asignar o quitar; si no se puede, el motivo aparece abajo. Toca el nombre para ver el detalle de la persona. Bajo cada danza va su cupo: H para hombres y M para mujeres.</p>
       <div class="tablebox"><table id="mx"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
     </section>
 
@@ -250,7 +255,7 @@
       <div class="kpis" id="l-kpis"></div>
       <div class="card" style="display:grid;gap:10px">
         <h2>Cambios de vestuario entre bloques</h2>
-        <p class="hint" style="margin:0">Dentro de un bloque se usa el mismo vestuario. La presión suma cuántas personas se cambian y qué tan poco tiempo tiene cada una.</p>
+        <p class="hint" style="margin:0">Dentro de un bloque se usa el mismo vestuario: solo hay cambio al pasar de un bloque a otro.</p>
         <div style="overflow-x:auto"><table class="ttable" id="l-trans"></table></div>
       </div>
       <div class="card" style="display:grid;gap:10px"><h2>Balance por danza</h2><div style="overflow-x:auto"><table class="ttable" id="l-bal"></table></div></div>
@@ -263,7 +268,7 @@
         <p class="hint" style="margin:0">Prendas que se usan en danzas de bloques distintos. Con poco margen, quien sale debe dejarlas listas para quien entra.</p>
         <div style="overflow-x:auto"><table class="ttable" id="v-piezas"></table></div>
       </div>
-      <p class="hint" style="margin:0">Disponible frente a cupo. Los faltantes se compran el fin de semana.</p>
+      <p class="hint" style="margin:0">Cada prenda muestra cuántas hay frente a las necesarias. En rojo, lo que falta para quienes ya están asignados; en amarillo, lo que falta para completar el cupo. Los faltantes se compran el fin de semana.</p>
       <div class="vlist" id="v-tabla"></div>
     </section>
 

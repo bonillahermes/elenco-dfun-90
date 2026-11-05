@@ -75,3 +75,34 @@
 .zona-cuidado p{margin:0}
 .btn.peligro{background:transparent;color:var(--bad);border-color:var(--bad)}
 .btn.peligro:hover{background:var(--bad);color:#fff}
+
+/* Matriz: cupo bajo cada danza y leyenda plegable. */
+thead tr.d th small.cupo{font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px;color:var(--muted);white-space:nowrap}
+thead tr.d th small.cupo.ok{color:var(--ok)}
+thead tr.d th small.cupo.bad{color:var(--bad)}
+.leyenda summary{font-size:14px;color:var(--muted)}
+.leyenda[open] summary{margin-bottom:8px}
+
+/* Logística y vestuario */
+.quienes{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:4px;font-size:14px}
+.ttable details summary{font-weight:600;font-size:14px;color:var(--ink)}
+.vpend{margin:6px 0 0;padding-left:16px;display:grid;gap:2px}
+
+/* Teléfono: encabezado compacto, pestañas en una sola fila deslizable y matriz más alta. */
+@media (max-width:760px){
+  body:has(#v-maestro:not([hidden])) #app > header .eyebrow{display:none}
+  body:has(#v-maestro:not([hidden])) #app > header h1{font-size:26px}
+  body:has(#v-maestro:not([hidden])) .modo-admin{font-size:13px}
+  .summary{font-size:13px;gap:4px 12px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding-inline:4px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{white-space:nowrap;flex:0 0 auto}
+  .tablebox{max-height:calc(100vh - 64px);max-height:calc(100svh - 64px)}
+  thead tr.d th{height:132px}
+  .ttable{font-size:13px}
+  .ma-det{display:none}
+  #v-matriz .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  #v-matriz .chips::-webkit-scrollbar{display:none}
+  #v-matriz .chip{flex:0 0 auto}
+  #v-matriz .chip span{white-space:nowrap}
+}
