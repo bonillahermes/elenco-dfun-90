@@ -202,3 +202,4 @@ details summary{cursor:pointer;font-weight:600}
 
 .rolsel{display:inline-flex;gap:6px;align-items:center}
 .rolsel select{width:auto;padding:5px 8px;font-size:13px;font-weight:600}
+.aviso{border-left:4px solid var(--warn)}

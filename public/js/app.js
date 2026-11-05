@@ -66,13 +66,16 @@ function renderSummary() {
 const bstart = (i) => (i === 0 || DANZAS[i - 1].b !== DANZAS[i].b ? "bstart" : "");
 function renderMatriz() {
   const t = $("#mx"), q = norm($("#q").value), fr = document.querySelector('input[name="frol"]:checked').value;
-  const ps = D().personas.filter((p) => (!q || norm(p.nombre).includes(q)) && (!fr || p.rol === fr));
+  const esAdmin = rolActivo === "admin" && store.sesion?.admin;
+  $("#f-sincorreo").hidden = !esAdmin;
+  if (!esAdmin && fr === "sincorreo") { document.querySelector('input[name="frol"][value=""]').checked = true; return renderMatriz(); }
+  const ps = D().personas.filter((p) => (!q || norm(p.nombre).includes(q)) && (fr === "sincorreo" ? esAdmin && !p.correo : !fr || p.rol === fr));
   t.tHead.innerHTML = `<tr class="b"><th class="name"></th>${BLOQUES.map((b) => `<th colspan="${b.danzas.length}" class="bstart" title="${esc(b.nombre)}">${esc(b.corto || b.nombre)}</th>`).join("")}</tr>
   <tr class="d"><th class="name">Nombre</th>${DANZAS.map((d, i) => `<th class="${bstart(i)}"><span>${esc(d.label)}${motor.definida(d.id) ? " ★" : ""}</span><small>${d.s}</small></th>`).join("")}</tr>`;
   if (!ps.length) { t.tBodies[0].innerHTML = `<tr><td class="name" colspan="${DANZAS.length + 1}" style="padding:16px">${D().personas.length ? "Nadie coincide con la búsqueda." : "Aún no hay personas. Cárguelas desde la pestaña Datos."}</td></tr>`; t.tFoot.innerHTML = ""; return; }
   t.tBodies[0].innerHTML = ps.map((p) => {
     const post = new Set(p.postulaciones || []);
-    return `<tr data-id="${esc(p.id)}"><td class="name"><button class="cell" data-act="persona" style="width:auto;height:auto;text-align:left;font-weight:600;font-size:14px;padding:2px 0">${esc(p.nombre)}</button> ${rolTag(p)}${cntTag(p)}</td>${DANZAS.map((d, i) => {
+    return `<tr data-id="${esc(p.id)}"><td class="name"><button class="cell" data-act="persona" style="width:auto;height:auto;text-align:left;font-weight:600;font-size:14px;padding:2px 0">${esc(p.nombre)}</button> ${rolTag(p)}${cntTag(p)}${esAdmin && !p.correo ? ' <span class="tag warn" title="Sin correo vinculado: no puede ver su programa">sin correo</span>' : ""}</td>${DANZAS.map((d, i) => {
       const ev = motor.evaluar(p, d.id); let cls = "cell", tip = ev.why || "";
       if (ev.st === "on") cls += " on" + (ev.bad ? " bad" : ev.warn ? " warn" : ""); else cls += " s-" + ev.st;
       if (post.has(d.id)) { cls += " post"; tip += " · Se postuló"; }
@@ -118,7 +121,8 @@ $("#v-danza").addEventListener("click", async (e) => {
 /* Por persona */
 function renderPersonaSel() {
   const cur = $("#p-sel").value;
-  $("#p-sel").innerHTML = D().personas.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}${p.rol ? ` (${isH(p) ? "H" : "M"})` : ""}</option>`).join("");
+  const esAdmin = rolActivo === "admin" && store.sesion?.admin;
+  $("#p-sel").innerHTML = D().personas.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}${p.rol ? ` (${isH(p) ? "H" : "M"})` : ""}${esAdmin && !p.correo ? " · sin correo" : ""}</option>`).join("");
   if (cur && persona(cur)) $("#p-sel").value = cur;
 }
 function timelineHTML(p) {
@@ -204,8 +208,11 @@ $("#imp").addEventListener("change", async (e) => {
   if (!store.sesion?.admin || rolActivo !== "admin") return msg("Solo el administrador puede restaurar datos.", "bad");
   try {
     const { personas, elenco } = await leerExcel(f);
+    // Conserva los correos ya vinculados cuando el archivo no los trae.
+    let conservados = 0;
+    personas.forEach((p) => { if (!p.correo) { const old = D().personas.find((x) => x.correo && norm(x.nombre) === norm(p.nombre)); if (old) { p.correo = old.correo; conservados++; } } });
     if (D().personas.length && !(await confirmar("Reemplazar todos los datos", `Se cargarán ${personas.length} personas y se borrarán las ${D().personas.length} actuales con sus asignaciones. Esto afecta a todos los usuarios.`))) return;
-    msg("Importando…"); await store.importar(personas, elenco); msg(`Se importaron ${personas.length} personas.`, "ok");
+    msg("Importando…"); await store.importar(personas, elenco); msg(`Se importaron ${personas.length} personas${conservados ? ` y se ${conservados === 1 ? "conservó" : "conservaron"} ${pl(conservados, "correo vinculado", "correos vinculados")}` : ""}.`, "ok");
   } catch (err) { msg("No se pudo importar: " + (err.message || "archivo no válido"), "bad"); }
 });
 
@@ -289,8 +296,7 @@ function renderBailarin() {
   const s = store.sesion, p = D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo);
   let h = "";
   if (!D().personas.length) h += `<div class="card"><p class="hint" style="margin:0">Cargando el elenco…</p></div>`;
-  else if (!p && store.sesion.admin) h += vincularHTML() || `<div class="card"><p class="hint" style="margin:0">Todos los nombres ya tienen correo vinculado.</p></div>`;
-  else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero no aparece en el elenco. Pídele al administrador que lo vincule a tu nombre.</p></div>`;
+  else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero aún no está unido a tu nombre del elenco, así que no podemos mostrarte tus danzas. ${s.admin ? "Cámbiate a <b>Administrador</b> y vincúlalo desde Inicio." : "Pídele al administrador que lo vincule a tu nombre."}</p></div>`;
   else h += fichaHTML(p, true);
   h += `<div style="display:grid;gap:8px"><h3>Programa de la función</h3><div class="tl">${programaHTML(true)}</div></div>`;
   $("#v-bailarin").innerHTML = h;
@@ -318,11 +324,12 @@ document.addEventListener("click", async (e) => {
   if (e.target.closest("[data-inicio]")) return ir("panel");
   if (e.target.closest("[data-portada]")) { verPortada = true; render(); window.scrollTo(0, 0); return; }
   const v = e.target.closest("[data-vista]"); if (v) return ir(v.dataset.vista);
+  if (e.target.closest("[data-ir-sincorreo]")) { const r = document.querySelector('input[name="frol"][value="sincorreo"]'); if (r) r.checked = true; show("matriz"); return ir("maestro"); }
   if (e.target.id === "salir") { verPortada = true; vista = "panel"; store.salir(); return; }
   if (e.target.closest("[data-rol]")) { rolActivo = e.target.closest("[data-rol]").dataset.rol; try { localStorage.setItem("dfun-v2-rol", rolActivo); } catch (err) {} return ir(rolActivo === "bailarin" ? "bailarin" : "panel"); }
-  if (e.target.id === "vincular") {
-    if (!store.sesion?.admin) return msg("Solo el administrador puede vincular correos.", "bad");
-    const id = $("#vincular-sel").value, p = persona(id); if (!p) return;
+  if (e.target.id === "vincular" || e.target.closest("[data-vincular-id]")) {
+    if (!store.sesion?.admin || rolActivo !== "admin") return msg("Solo el administrador puede vincular correos.", "bad");
+    const id = e.target.closest("[data-vincular-id]")?.dataset.vincularId || $("#vincular-sel").value, p = persona(id); if (!p) return;
     if (p.correo && p.correo !== store.sesion.correo) return msg(`${p.nombre} ya está vinculado a otro correo.`, "bad");
     const previo = yoDe(store.sesion);
     try { if (previo && previo.id !== id) await store.actualizarPersona(previo.id, { correo: "" }); await store.actualizarPersona(id, { correo: store.sesion.correo }); msg(`Tu correo quedó vinculado a ${p.nombre}.`, "ok"); }
@@ -331,11 +338,21 @@ document.addEventListener("click", async (e) => {
 });
 
 /* ---------- panel de inicio (después de ingresar) ---------- */
-function vincularHTML() {
+// Sugiere la persona del elenco cuyo nombre más se parece al nombre de la cuenta de Google.
+function sugerido(s) {
+  const t = new Set(norm(s.nombre || "").split(" ").filter((x) => x.length > 2));
+  if (t.size < 2) return null;
+  let mejor = null, max = 0;
+  D().personas.filter((p) => !p.correo).forEach((p) => { const n = norm(p.nombre).split(" ").filter((x) => t.has(x)).length; if (n > max) { max = n; mejor = p; } });
+  return max >= 2 ? mejor : null;
+}
+function vincularHTML(s) {
   const ps = D().personas.filter((p) => !p.correo);
   if (!ps.length) return "";
-  return `<div class="card" style="display:grid;gap:10px"><h3>Vincula tu nombre</h3><p class="hint" style="margin:0">Elige tu nombre del elenco para ver tu propio programa como bailarín.</p>
-    <div class="row"><select id="vincular-sel" style="max-width:360px">${ps.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}</option>`).join("")}</select><button class="btn small" id="vincular" type="button">Vincular</button></div></div>`;
+  const sug = sugerido(s);
+  return `<div class="card" style="display:grid;gap:10px"><h3>Vincula tu nombre</h3>
+    ${sug ? `<p style="margin:0">¿Eres <b>${esc(sug.nombre)}</b>?</p><div class="row"><button class="btn small" type="button" data-vincular-id="${esc(sug.id)}">Sí, vincular mi correo</button></div><p class="hint" style="margin:0">Si no eres tú, elige tu nombre en la lista:</p>` : `<p class="hint" style="margin:0">Elige tu nombre del elenco para ver tu propio programa como bailarín.</p>`}
+    <div class="row"><select id="vincular-sel" style="max-width:360px">${ps.map((p) => `<option value="${esc(p.id)}" ${sug && sug.id === p.id ? "selected" : ""}>${esc(p.nombre)}</option>`).join("")}</select><button class="btn small ${sug ? "ghost" : ""}" id="vincular" type="button">Vincular</button></div></div>`;
 }
 function renderPanel() {
   const s = store.sesion, yo = yoDe(s), ps = D().personas, P = permisos(s);
@@ -359,7 +376,7 @@ function renderPanel() {
   }
   if (yo || P.rol === "bailarin") {
     tarjetas.push(`<article class="card rolcard"><span class="badge">Bailarín</span><h2>Mi programa</h2>
-      <p class="hint">${yo ? (S.length ? `Bailas ${pl(S.length, "danza", "danzas")}: ${S.map((d) => DZ[d].label).join(", ")}. Primera salida a escena: ${DZ[S[0]].s} p. m.` : "Aún no tienes danzas asignadas.") : `Tu correo ${esc(s.correo)} aún no está vinculado a un nombre del elenco.${s.admin ? " Vincúlalo aquí abajo." : " Pídeselo al administrador."}`}</p>
+      <p class="hint">${yo ? (S.length ? `Bailas ${pl(S.length, "danza", "danzas")}: ${S.map((d) => DZ[d].label).join(", ")}. Primera salida a escena: ${DZ[S[0]].s} p. m.` : "Aún no tienes danzas asignadas.") : `Tu correo ${esc(s.correo)} aún no está vinculado a un nombre del elenco.${P.admin ? " Vincúlalo aquí abajo." : s.admin ? " Cámbiate a Administrador para vincularlo." : " Pídeselo al administrador."}`}</p>
       <ul class="encontraras">
         <li><b>Llamados del día</b>: llegada, ensayo general, calentamiento y función.</li>
         <li><b>Una ficha por danza</b>: hora, qué va antes y después en escena y cuánto tiempo tienes para cambiarte.</li>
@@ -369,10 +386,12 @@ function renderPanel() {
       </ul>
       ${yo ? `<button class="btn" type="button" data-vista="bailarin">Ver mi programa</button>` : ""}</article>`);
   }
-  const vincular = s.admin && !yo ? vincularHTML() : "";
+  const vincular = P.admin && !yo ? vincularHTML(s) : "";
+  const sinCorreo = ps.filter((p) => !p.correo);
+  const aviso = P.admin && ps.length && sinCorreo.length ? `<div class="card aviso" style="display:grid;gap:8px"><h3>${sinCorreo.length} de ${ps.length} personas sin correo vinculado</h3><p class="hint" style="margin:0">No podrán ver su programa al ingresar. ${sinCorreo.filter((p) => motor.asig(p.id).length).length} de ellas ya tienen danzas asignadas. Vincúlalas en <b>Elenco → Por persona</b> o con el filtro "Sin correo" de la matriz.</p><div class="row"><button class="btn small" type="button" data-ir-sincorreo>Ver quiénes faltan</button></div></div>` : "";
   const cambioRol = P.roles.length > 1 ? `<div class="card" style="display:grid;gap:10px"><h3>Cambiar de rol</h3><p class="hint" style="margin:0">Estás viendo la página como <b>${NOMBRE_ROL[P.rol]}</b>. Cambia para ver exactamente lo que ve cada rol.</p><div class="row">${P.roles.map((r) => `<button class="btn small ${r === P.rol ? "" : "ghost"}" type="button" data-rol="${r}">${NOMBRE_ROL[r]}</button>`).join("")}</div></div>` : "";
   $("#v-panel").innerHTML = `<div class="panel-h"><h2 class="sec-t">Hola, ${esc(nombre)}</h2><p class="sec-sub">Gala 90 años · miércoles 18 de noviembre · función a las 7:10 p. m.</p></div>
-    <div class="rolgrid">${tarjetas.join("")}</div>${vincular}${cambioRol}
+    ${aviso}<div class="rolgrid">${tarjetas.join("")}</div>${vincular}${cambioRol}
     <p class="hint"><button class="linkbtn" type="button" data-portada>Ver la portada del grupo</button></p>`;
 }
 

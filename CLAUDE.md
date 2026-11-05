@@ -40,7 +40,8 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 ## Roles
 - Administrador: hyate@unal.edu.co (Hermes). Todo lo del maestro, más restaurar datos desde Excel, borrar personas y vincular correos a nombres (la UI y las reglas lo restringen al admin).
 - Maestro: bsilvab@unal.edu.co (Bryan Nicolás Silva Bermúdez) y el administrador. Arma el elenco. Lista en `MAESTROS` (config.js) y en `maestro()` de firestore.rules.
-- Bailarín: cualquier cuenta UNAL cuyo correo esté vinculado a una persona; ve su propio programa.
+- Bailarín: cualquier cuenta UNAL cuyo correo esté vinculado a una persona; ve su propio programa. Sin vínculo no hay ficha: vincular es la unión entre la cuenta y el nombre del elenco.
+- Vincular: solo con el rol Administrador activo. El panel sugiere la persona cuyo nombre coincide con el nombre de la cuenta de Google, avisa cuántos faltan y la matriz tiene el filtro "Sin correo". Restaurar desde Excel conserva los correos ya vinculados (por nombre) cuando el archivo no los trae.
 - Un mismo usuario puede tener varios roles. El selector "Ver como" (encabezado y panel de Inicio) cambia el rol activo: Administrador, Maestro o Bailarín. Es solo de interfaz; los permisos reales los dan las reglas de Firestore. Se recuerda en localStorage (`dfun-v2-rol`).
 
 ## Principio de uso
