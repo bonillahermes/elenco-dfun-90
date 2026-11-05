@@ -39,7 +39,7 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 
 ## Roles
 - Administrador: hyate@unal.edu.co (Hermes). Todo lo del maestro, más restaurar datos desde Excel y borrar personas.
-- Maestro: arma el elenco. Lista en `MAESTROS` (config.js) y en `maestro()` de firestore.rules.
+- Maestro: bsilvab@unal.edu.co (Bryan Nicolás Silva Bermúdez) y el administrador. Arma el elenco. Lista en `MAESTROS` (config.js) y en `maestro()` de firestore.rules.
 - Bailarín: cualquier cuenta UNAL cuyo correo esté vinculado a una persona; ve su propio programa.
 - Un mismo usuario puede tener varios roles: si es maestro y bailarín, el encabezado ofrece "Elenco | Mi programa".
 
