@@ -35,7 +35,7 @@ problemas.forEach((x) => console.log(`  ! ${x}`));
 if (!aplicar) { console.log("Simulación: no se escribió nada. Agregue --aplicar para guardar."); process.exit(0); }
 for (let i = 0; i < cambios.length; i += 400) {
   const b = db.batch();
-  cambios.slice(i, i + 400).forEach((x) => b.update(x.ref, { correo: x.correo }));
+  cambios.slice(i, i + 400).forEach((x) => b.update(x.p.ref, { correo: x.correo }));
   await b.commit();
 }
 const conCorreo = new Set(personas.filter((p) => p.correo).map((p) => p.id));
