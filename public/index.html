@@ -191,19 +191,19 @@
         <span><i class="sw" style="color:var(--bad);background:var(--bad-soft)">×</i>No puede</span>
         <span><i class="sw">–</i>No aplica</span>
         <span><span class="badge">Definida</span> Pareja o elenco definido</span>
-        <span><i class="sw" style="position:relative"><i style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--accent)"></i></i>Se postuló</span>
+        <span><i class="sw sw-post"></i>Se postuló</span>
       </div>
       <p class="hint" style="margin:0">Toque una casilla para asignar o quitar. Toque el nombre para ver el detalle de la persona.</p>
       <div class="tablebox"><table id="mx"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
     </section>
 
     <section id="v-danza" class="view" hidden style="display:grid;gap:14px">
+      <div class="dchips" id="d-chips" role="group" aria-label="Elige la danza"></div>
+      <select id="d-sel" hidden aria-hidden="true" tabindex="-1"></select>
       <div class="card" style="display:grid;gap:12px">
-        <div class="grid2">
-          <div class="field"><label for="d-sel">Danza</label><select id="d-sel"></select></div>
-          <div id="d-head" class="hint" style="align-self:end"></div>
-        </div>
+        <div id="d-head" class="d-head"></div>
         <div class="kpis" id="d-kpis"></div>
+        <p class="d-estado" id="d-estado"></p>
         <div class="row" id="d-actions"></div>
       </div>
       <div class="cols" id="d-cols"></div>

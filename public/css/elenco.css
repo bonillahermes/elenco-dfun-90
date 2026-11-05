@@ -2,11 +2,11 @@
    Usa los tokens de app.css (modo claro y oscuro) y la tipografía de inicio.css. */
 
 /* Aviso fijo abajo: resultado de cada acción, con Deshacer cuando aplica. */
-.aviso-accion{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:28;width:min(560px,calc(100vw - 24px));display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px 12px 16px;border-radius:12px;background:var(--ink);color:var(--bg);box-shadow:0 10px 30px rgba(0,0,0,.25);border-left:5px solid var(--ink);font-family:var(--in-body);font-size:15px;line-height:1.35}
+.aviso-accion{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:28;width:min(560px,calc(100vw - 24px));display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px 12px 16px;border-radius:12px;background:var(--ink);color:var(--bg);--franja:transparent;box-shadow:inset 5px 0 0 var(--franja),0 10px 30px rgba(0,0,0,.25);font-family:var(--in-body);font-size:15px;line-height:1.35}
 .aviso-accion p{margin:0;min-width:0}
-.aviso-accion.ok{border-left-color:var(--ok)}
-.aviso-accion.warn{border-left-color:var(--warn)}
-.aviso-accion.bad{border-left-color:var(--bad)}
+.aviso-accion.ok{--franja:var(--ok)}
+.aviso-accion.warn{--franja:var(--warn)}
+.aviso-accion.bad{--franja:var(--bad)}
 .aviso-botones{display:flex;gap:6px;flex-shrink:0}
 .aviso-btn{appearance:none;border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;font:600 14px/1 var(--in-body);padding:9px 14px;border-radius:999px;cursor:pointer;touch-action:manipulation}
 .aviso-btn:hover{border-color:currentColor}
@@ -17,3 +17,29 @@
   .aviso-accion{flex-direction:column;align-items:stretch;gap:8px}
   .aviso-botones{justify-content:flex-end}
 }
+
+/* Postulaciones: anillo en la casilla de la matriz y etiqueta en las listas. */
+.cell.post:not(.on){box-shadow:inset 0 0 0 2px var(--accent)}
+.cell.post::after{content:"";position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.sw-post{box-shadow:inset 0 0 0 2px var(--accent);position:relative}
+.sw-post::after{content:"";position:absolute;top:-3px;right:-3px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.tag.post{border-color:var(--accent);color:var(--accent);font-size:11px;padding:1px 7px;margin-left:4px}
+
+/* Por danza: fila de danzas con su estado frente al cupo. */
+.dchips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.dchip{flex:0 0 auto;appearance:none;display:grid;gap:2px;justify-items:start;text-align:left;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;touch-action:manipulation}
+.dchip b{font-size:14px;white-space:nowrap}
+.dchip small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dchip.ok{border-color:var(--ok)} .dchip.ok small{color:var(--ok)}
+.dchip.bad{border-color:var(--bad)} .dchip.bad small{color:var(--bad)}
+.dchip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.dchip[aria-pressed="true"] small{color:inherit;opacity:.85}
+.d-head{display:grid;gap:4px}
+.d-head h2{font-family:var(--in-display);font-weight:400;font-size:clamp(28px,3vw,38px);line-height:1.05}
+.d-head p{margin:0}
+.kpi b.exceso{color:var(--bad)} .kpi b.lleno{color:var(--ok)}
+.d-estado{margin:0;font-weight:600;font-size:15px}
+.d-estado.ok{color:var(--ok)} .d-estado.bad{color:var(--bad)} .d-estado.falta{color:var(--ink)}
+.no-pueden summary{font-family:var(--display);font-size:16px}
+.no-pueden[open]{display:grid;gap:8px}
+.no-pueden p{margin:6px 0 0}

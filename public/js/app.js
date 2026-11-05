@@ -116,23 +116,52 @@ $("#q").addEventListener("input", renderMatriz);
 document.querySelectorAll('input[name="frol"]').forEach((i) => i.addEventListener("change", renderMatriz));
 
 /* Por danza */
-$("#d-sel").innerHTML = DANZAS.map((d) => `<option value="${esc(d.id)}">${esc(d.label)} · ${d.s}</option>`).join("");
-const itemHTML = (p, ev) => `<li class="item ${ev.st === "on" ? "on" : ev.st}" data-id="${esc(p.id)}"><span>${esc(p.nombre)} ${rolTag(p)}${cntTag(p)}<span class="why">${esc(ev.why || "")}</span></span>${ev.st === "on" || ev.st === "ok" || ev.st === "warn" ? `<button class="btn small ${ev.st === "on" ? "ghost" : ""}" data-act="toggle">${ev.st === "on" ? "Quitar" : "Asignar"}</button>` : ""}</li>`;
+$("#d-sel").innerHTML = DANZAS.map((d) => `<option value="${esc(d.id)}">${esc(d.label)}</option>`).join("");
+const postulo = (p, d) => (p.postulaciones || []).includes(d);
+const itemHTML = (p, ev, d) => `<li class="item ${ev.st === "on" ? "on" : ev.st}${postulo(p, d) ? " post" : ""}" data-id="${esc(p.id)}"><span>${esc(p.nombre)} ${rolTag(p)}${cntTag(p)}${postulo(p, d) ? ' <span class="tag post">Se postuló</span>' : ""}<span class="why">${esc(ev.why || "")}</span></span>${ev.st === "on" || ev.st === "ok" || ev.st === "warn" ? `<button class="btn small ${ev.st === "on" ? "ghost" : ""}" data-act="toggle">${ev.st === "on" ? "Quitar" : "Asignar"}</button>` : ""}</li>`;
+// Estado de una danza frente a su cupo: completo, faltan o sobran (por rol).
+function estadoCupo(d) {
+  const b = motor.balance(d), cu = CUPOS[d] || {}, H = cu.Hombre ?? null, M = cu.Mujer ?? null;
+  const fH = H === null ? 0 : H - b.h, fM = M === null ? 0 : M - b.m;
+  const faltan = [fH > 0 && pl(fH, "hombre", "hombres"), fM > 0 && pl(fM, "mujer", "mujeres")].filter(Boolean);
+  const sobran = [fH < 0 && pl(-fH, "hombre", "hombres"), fM < 0 && pl(-fM, "mujer", "mujeres")].filter(Boolean);
+  const st = sobran.length ? "bad" : faltan.length ? "falta" : "ok";
+  const txt = sobran.length ? `Excede el cupo en ${sobran.join(" y ")}.` : faltan.length ? `Faltan ${faltan.join(" y ")} para completar el cupo.` : "Cupo completo.";
+  return { b, H, M, fH, fM, st, txt, faltan };
+}
+// Fila de danzas con su estado: permite saltar de una a otra y ver de un vistazo qué falta.
+function renderDanzaChips() {
+  const sel = $("#d-sel").value;
+  $("#d-chips").innerHTML = DANZAS.map((x) => {
+    const e = estadoCupo(x.id), cifras = `${e.b.h}${e.H ? "/" + e.H : ""} H, ${e.b.m}${e.M ? "/" + e.M : ""} M`;
+    return `<button type="button" class="dchip ${e.st}" data-dchip="${esc(x.id)}" aria-pressed="${x.id === sel}" title="${esc(e.txt)}"><b>${esc(x.label)}</b><small>${x.soloMujeres ? `${e.b.m}/${e.M} M` : cifras}</small></button>`;
+  }).join("");
+}
+$("#d-chips").addEventListener("click", (e) => { const b = e.target.closest("[data-dchip]"); if (b) { $("#d-sel").value = b.dataset.dchip; renderDanza(); } });
 function renderDanza() {
-  const d = $("#d-sel").value, X = DZ[d], b = motor.balance(d);
-  $("#d-head").innerHTML = `Bloque ${X.b} · ${esc(BQ[X.b].nombre)} · ${X.s} a ${X.e}${X.soloMujeres ? " · solo mujeres" : ""}${X.pareja ? " · en parejas" : ""}${X.requiere ? ` · exige ${DZ[X.requiere].label}` : ""}${defTag(d)}`;
-  const pend = X.pareja ? Math.abs(b.h - b.m) : 0;
-  const cu = CUPOS[d] || {};
-  $("#d-kpis").innerHTML = `<div class="kpi"><b>${b.h}${cu.Hombre != null ? ` / ${cu.Hombre}` : ""}</b><span>hombres asignados / cupo</span></div><div class="kpi"><b>${b.m}${cu.Mujer != null ? ` / ${cu.Mujer}` : ""}</b><span>mujeres asignadas / cupo</span></div>${X.pareja ? `<div class="kpi"><b>${b.par}</b><span>parejas${pend ? ` · faltan ${pend} ${b.h > b.m ? "mujer(es)" : "hombre(s)"}` : ""}</span></div>` : ""}`;
+  const d = $("#d-sel").value, X = DZ[d], e = estadoCupo(d), b = e.b;
+  renderDanzaChips();
+  const datos = [`Bloque ${X.b}${BQ[X.b].nombre !== X.label ? `, ${esc(BQ[X.b].nombre)}` : ""}`, `De ${X.s} a ${X.e} p. m.`, X.soloMujeres && "Solo mujeres", X.pareja && "En parejas", X.requiere && `Exige ${DZ[X.requiere].label}`].filter(Boolean);
+  $("#d-head").innerHTML = `<h2>${esc(X.label)}${defTag(d)}</h2><p class="hint">${`${datos.join(". ")}.`.replace(/\.\.$/, ".").replace("p. m.. ", "p. m. ")}</p>`;
+  const kpi = (n, c, t) => `<div class="kpi"><b class="${c !== null && n > c ? "exceso" : c !== null && n === c ? "lleno" : ""}">${n}${c !== null ? ` / ${c}` : ""}</b><span>${t}</span></div>`;
+  const posts = D().personas.filter((p) => postulo(p, d) && !motor.asig(p.id).includes(d)).length;
+  $("#d-kpis").innerHTML = (X.soloMujeres ? "" : kpi(b.h, e.H, "hombres asignados / cupo")) + kpi(b.m, e.M, "mujeres asignadas / cupo")
+    + (X.pareja ? `<div class="kpi"><b>${b.par}</b><span>${b.par === 1 ? "pareja" : "parejas"}</span></div>` : "")
+    + `<div class="kpi"><b>${posts}</b><span>${posts === 1 ? "postulación sin asignar" : "postulaciones sin asignar"}</span></div>`;
+  $("#d-estado").textContent = e.txt; $("#d-estado").className = "d-estado " + e.st;
   $("#d-actions").innerHTML = `<button class="btn ghost small" data-act="def">${motor.definida(d) ? "Quitar marca de definida" : "Marcar como definida"}</button><span class="hint">Una danza definida se puede cambiar, pero pide confirmación.</span>`;
   const g = { on: [], ok: [], warn: [], block: [] };
   D().personas.forEach((p) => { const ev = motor.evaluar(p, d); if (g[ev.st]) g[ev.st].push([p, ev]); });
-  const col = (t, l, note) => `<div class="card" style="display:grid;gap:8px"><h3>${t} · ${l.length}</h3>${note ? `<p class="hint" style="margin:0">${note}</p>` : ""}${l.length ? `<ul class="list">${l.map(([p, ev]) => itemHTML(p, ev)).join("")}</ul>` : `<p class="hint" style="margin:0">Nadie.</p>`}</div>`;
+  // Postulados primero en cada grupo.
+  Object.values(g).forEach((l) => l.sort((a, z) => postulo(z[0], d) - postulo(a[0], d)));
+  const lista = (l) => (l.length ? `<ul class="list">${l.map(([p, ev]) => itemHTML(p, ev, d)).join("")}</ul>` : `<p class="hint" style="margin:0">Nadie.</p>`);
+  const col = (t, l, note) => `<div class="card" style="display:grid;gap:8px"><h3>${t} (${l.length})</h3>${note ? `<p class="hint" style="margin:0">${note}</p>` : ""}${lista(l)}</div>`;
   const byRol = (l, r) => l.filter(([p]) => p.rol === r);
-  $("#d-cols").innerHTML = col("Asignados", g.on) + col("Disponibles · hombres", byRol(g.ok, "Hombre")) + col("Disponibles · mujeres", byRol(g.ok, "Mujer"))
-    + col("Con cambio rápido", g.warn, "Pueden entrar, pero con 1 a 4 minutos para cambiarse.") + col("No pueden", g.block);
+  const abierto = $("#d-cols .no-pueden")?.open ? " open" : "";
+  $("#d-cols").innerHTML = col("Asignados", g.on) + (X.soloMujeres ? "" : col("Disponibles, hombres", byRol(g.ok, "Hombre"))) + col("Disponibles, mujeres", byRol(g.ok, "Mujer"))
+    + col("Con cambio rápido", g.warn, "Pueden entrar, pero con 1 a 4 minutos para cambiarse.")
+    + `<details class="card no-pueden"${abierto}><summary>No pueden (${g.block.length})</summary><p class="hint">Cupo lleno, sin tiempo para cambiarse o danzas que no se combinan. El motivo va debajo de cada nombre.</p>${lista(g.block)}</details>`;
 }
-$("#d-sel").addEventListener("change", renderDanza);
 $("#v-danza").addEventListener("click", async (e) => {
   const d = $("#d-sel").value;
   if (e.target.closest('[data-act="def"]')) { try { await store.definir(d, !motor.definida(d)); } catch (err) { msg("No se pudo guardar.", "bad"); } return; }
