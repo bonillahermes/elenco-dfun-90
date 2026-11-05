@@ -304,7 +304,7 @@ function renderBailarin() {
 }
 
 /* ---------- página de inicio ---------- */
-// La portada pública (telón y recorrido fijo) vive en portada.js. Un fallo ahí no debe frenar la aplicación.
+// La portada pública (telón y fotos de la apertura) vive en portada.js. Un fallo ahí no debe frenar la aplicación.
 try { iniciarPortada(); } catch (e) { console.error(e); }
 let verPortada = true, vista = "panel", rolActivo = null;
 try { rolActivo = localStorage.getItem("dfun-v2-rol"); } catch (e) {}
