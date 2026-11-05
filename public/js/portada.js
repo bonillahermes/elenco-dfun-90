@@ -109,7 +109,7 @@ function carrusel(raiz, quieto) {
   ctl.hidden = false;
 }
 
-// #login-msg está junto al botón de la apertura; se repite junto a los otros botones de ingreso para quien entra desde ahí.
+// #login-msg está bajo el Ingresar de la barra; se repite junto al botón de la bienvenida para quien entra desde ahí.
 function ecoLogin(raiz) {
   const origen = $("#login-msg", raiz), ecos = [...raiz.querySelectorAll("[data-eco-login]")];
   if (!origen || !ecos.length) return;

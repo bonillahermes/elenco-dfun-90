@@ -35,7 +35,9 @@
 
 /* Barra superior, sobre la foto */
 #v-inicio .po-barra{display:block;position:absolute;top:0;left:0;right:0;z-index:3;color:#fff;padding-top:env(safe-area-inset-top,0px)}
-#v-inicio .po-barra .po-in{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:18px}
+#v-inicio .po-barra .po-in{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;padding-block:18px}
+/* El aviso de cuenta no UNAL queda bajo el botón Ingresar de la barra. */
+#v-inicio .po-msg-barra{flex-basis:100%;margin-left:auto;max-width:44ch;padding:10px 14px;border-radius:8px;background:rgba(12,9,11,.72);color:#FFD3CC;font-size:14px}
 #v-inicio .po-marca{font-family:var(--po-display);font-size:22px;line-height:1}
 #v-inicio .po-enlace{appearance:none;background:none;border:0;padding:8px 0;color:inherit;font:500 16px/1 var(--po-body);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.5);text-underline-offset:4px}
 #v-inicio .po-enlace:hover{text-decoration-color:#fff}
@@ -50,7 +52,7 @@
 #v-inicio .po-foto img{object-fit:cover;object-position:50% 40%;max-width:none;transform:scale(1);transition:transform 9s linear}
 #v-inicio .po-foto.po-vivo picture.po-on img{transform:scale(1.06)}
 #v-inicio .po-foto::after{z-index:1}
-#v-inicio .po-pausa{position:absolute;z-index:3;right:max(20px,env(safe-area-inset-right,0px));bottom:clamp(40px,8vw,88px);appearance:none;background:none;border:0;padding:8px 0;color:rgba(255,255,255,.85);font:500 14px/1 var(--po-body);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.4);text-underline-offset:4px}
+#v-inicio .po-pausa{justify-self:start;appearance:none;background:none;border:0;padding:6px 0;color:rgba(255,255,255,.85);font:500 14px/1 var(--po-body);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.4);text-underline-offset:4px}
 #v-inicio .po-pausa:hover{color:#fff}
 /* Degradado para contraste AA del texto blanco: oscuro arriba (barra) y abajo (título, subtítulo y botón). */
 #v-inicio .po-foto::after{content:"";position:absolute;inset:0;
@@ -127,7 +129,7 @@
   #v-inicio .po-caminos{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){
-  #v-inicio .po-telon,#v-inicio .po-pausa{display:none}
+  #v-inicio .po-telon,#v-inicio .po-pausa{display:none!important}
   #v-inicio .po-foto picture,#v-inicio .po-foto img,#v-inicio .po-btn,#v-inicio .po-ctl,#v-inicio .po-diapos.po-vivo > .po-d,#v-inicio .po-diapos.po-vivo > .po-d .po-frase{transition:none}
   #v-inicio .po-ctl-pausa{display:none}
   #v-inicio .po-foto.po-vivo picture.po-on img{transform:none}

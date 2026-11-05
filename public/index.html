@@ -13,13 +13,18 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/portada.css">
+<link rel="stylesheet" href="css/inicio.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 </head>
 <body>
 <!-- Portada pública. Estilos en css/portada.css y lógica en js/portada.js. -->
 <main id="v-inicio" class="inicio">
   <header class="po-barra po-g">
-    <div class="po-in"><span class="po-marca">DFUN</span><button class="po-enlace" type="button" data-entrar>Ingresar</button></div>
+    <div class="po-in">
+      <span class="po-marca">DFUN</span>
+      <button class="po-enlace" type="button" data-entrar>Ingresar</button>
+      <p class="msg po-msg po-msg-barra" id="login-msg" aria-live="polite"></p>
+    </div>
   </header>
 
   <section class="po-hero po-g" aria-labelledby="po-titulo">
@@ -38,13 +43,11 @@
         <img data-src="img/portada/6.jpg" width="1920" height="1280" alt="Una treintena de bailarines del grupo posan frente a un muro de ladrillo de la Ciudad Universitaria; adelante, las mujeres abren polleras de colores morado, rosado, verde y naranja.">
       </picture>
     </div>
-    <button class="po-pausa" type="button" id="po-pausa" aria-pressed="false" hidden>Pausar fotos</button>
     <div class="po-telon" aria-hidden="true"><i></i><i></i></div>
     <div class="po-in">
       <h1 id="po-titulo">90 años bailando Colombia</h1>
       <p class="po-sub">Grupo de Danzas Folclóricas de la Universidad Nacional de Colombia, sede Bogotá.</p>
-      <div><button class="po-btn" type="button" data-entrar>Ingresar</button></div>
-      <p class="msg po-msg" id="login-msg" aria-live="polite"></p>
+      <button class="po-pausa" type="button" id="po-pausa" aria-pressed="false" hidden>Pausar fotos</button>
     </div>
   </section>
 
@@ -141,7 +144,7 @@
 <div class="wrap" id="app" hidden>
   <header>
     <div class="topbar">
-      <div class="eyebrow">Danzas Folclóricas UN · Gala 90 años · Miércoles 18 de noviembre</div>
+      <div class="eyebrow">Gala 90 años, miércoles 18 de noviembre</div>
       <div class="user" id="user" hidden></div>
     </div>
     <h1>Elenco DFUN 90 años</h1>

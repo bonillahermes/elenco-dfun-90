@@ -362,7 +362,7 @@ function renderPanel() {
     const conDanza = ps.filter((p) => motor.asig(p.id).length).length, malos = motor.conProblemas().length;
     const completas = DANZAS.filter((d) => { const b = motor.balance(d.id), c = CUPOS[d.id] || {}; return (c.Hombre ?? 0) === b.h && (c.Mujer ?? 0) === b.m; }).length;
     tarjetas.push(`<article class="card rolcard"><span class="badge">${NOMBRE_ROL[P.rol]}</span><h2>Armar el elenco</h2>
-      <p class="hint">${ps.length ? `${conDanza} de ${ps.length} personas con danza · ${completas} de ${DANZAS.length} danzas con cupo completo${malos ? ` · <b style="color:var(--bad)">${malos} con reglas rotas</b>` : ""}` : "Aún no hay personas cargadas."}</p>
+      <p class="hint">${ps.length ? `${conDanza} de ${ps.length} personas tienen danza. ${completas} de ${DANZAS.length} danzas tienen el cupo completo.${malos ? ` <b style="color:var(--bad)">${malos} con reglas rotas.</b>` : ""}` : "Aún no hay personas cargadas."}</p>
       <ul class="encontraras">
         <li><b>Matriz</b>: asigna danzas con un toque; el semáforo dice quién puede entrar y por qué.</li>
         <li><b>Por danza</b>: cupo, parejas, disponibles por rol y quién no puede.</li>
@@ -387,9 +387,9 @@ function renderPanel() {
   }
   const vincular = P.admin && !yo ? vincularHTML(s) : "";
   const sinCorreo = ps.filter((p) => !p.correo);
-  const aviso = P.admin && ps.length && sinCorreo.length ? `<div class="card aviso" style="display:grid;gap:8px"><h3>${sinCorreo.length} de ${ps.length} personas sin correo vinculado</h3><p class="hint" style="margin:0">No podrán ver su programa al ingresar. ${sinCorreo.filter((p) => motor.asig(p.id).length).length} de ellas ya tienen danzas asignadas. Vincúlalas en <b>Elenco → Por persona</b> o con el filtro "Sin correo" de la matriz.</p><div class="row"><button class="btn small" type="button" data-ir-sincorreo>Ver quiénes faltan</button></div></div>` : "";
+  const aviso = P.admin && ps.length && sinCorreo.length ? `<div class="card aviso" style="display:grid;gap:8px"><h3>${sinCorreo.length} de ${ps.length} personas sin correo vinculado</h3><p class="hint" style="margin:0">No podrán ver su programa al ingresar. ${sinCorreo.filter((p) => motor.asig(p.id).length).length} de ellas ya tienen danzas asignadas. Vincúlalas en <b>Elenco</b>, pestaña <b>Por persona</b>, o con el filtro "Sin correo" de la matriz.</p><div class="row"><button class="btn small" type="button" data-ir-sincorreo>Ver quiénes faltan</button></div></div>` : "";
   const cambioRol = P.roles.length > 1 ? `<div class="card" style="display:grid;gap:10px"><h3>Cambiar de rol</h3><p class="hint" style="margin:0">Estás viendo la página como <b>${NOMBRE_ROL[P.rol]}</b>. Cambia para ver exactamente lo que ve cada rol.</p><div class="row">${P.roles.map((r) => `<button class="btn small ${r === P.rol ? "" : "ghost"}" type="button" data-rol="${r}">${NOMBRE_ROL[r]}</button>`).join("")}</div></div>` : "";
-  $("#v-panel").innerHTML = `<div class="panel-h"><h2 class="sec-t">Hola, ${esc(nombre)}</h2><p class="sec-sub">Gala 90 años · miércoles 18 de noviembre · función a las 7:10 p. m.</p></div>
+  $("#v-panel").innerHTML = `<div class="panel-h"><h2 class="sec-t">Hola, ${esc(nombre)}</h2><p class="sec-sub">Gala 90 años, miércoles 18 de noviembre. La función empieza a las 7:10 p. m.</p></div>
     ${aviso}<div class="rolgrid">${tarjetas.join("")}</div>${vincular}${cambioRol}
     <p class="hint"><button class="linkbtn" type="button" data-portada>Ver la portada del grupo</button></p>`;
 }
