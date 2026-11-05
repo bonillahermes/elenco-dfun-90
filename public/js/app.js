@@ -16,9 +16,25 @@ const D = () => store.datos;
 const persona = (id) => D().personas.find((p) => p.id === id);
 
 /* ---------- utilidades de interfaz ---------- */
-let tTimer;
-function toast(t) { const e = $("#toast"); e.textContent = t; e.hidden = false; clearTimeout(tTimer); tTimer = setTimeout(() => (e.hidden = true), 4500); }
-function msg(t, k = "") { const e = $("#status"); e.textContent = t; e.className = "msg " + k; }
+// Aviso fijo abajo: siempre a la vista, aunque el maestro esté en la fila 30 de la matriz.
+// Si trae "deshacer", muestra el botón durante unos segundos.
+let aTimer, aDeshacer = null;
+function cerrarAviso() { clearTimeout(aTimer); $("#aviso").hidden = true; aDeshacer = null; }
+function programarCierre(ms) { clearTimeout(aTimer); aTimer = setTimeout(cerrarAviso, ms); }
+function avisar(t, k = "", deshacer = null) {
+  const e = $("#aviso");
+  $("#aviso-t").textContent = t; e.className = "aviso-accion " + k; e.hidden = false;
+  aDeshacer = deshacer; $("#aviso-deshacer").hidden = !deshacer;
+  programarCierre(deshacer ? 9000 : k === "bad" ? 8000 : 5000);
+}
+$("#aviso-cerrar").addEventListener("click", cerrarAviso);
+$("#aviso-deshacer").addEventListener("click", async () => { const f = aDeshacer; cerrarAviso(); if (f) await f(); });
+// No se cierra mientras el cursor o el foco están encima.
+$("#aviso").addEventListener("pointerenter", () => clearTimeout(aTimer));
+$("#aviso").addEventListener("pointerleave", () => { if (!$("#aviso").hidden) programarCierre(4000); });
+$("#aviso").addEventListener("focusin", () => clearTimeout(aTimer));
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#aviso").hidden && $("#modal").hidden) cerrarAviso(); });
+const msg = (t, k = "") => avisar(t, k);
 function confirmar(titulo, cuerpo) {
   return new Promise((res) => {
     $("#modal-t").textContent = titulo; $("#modal-b").textContent = cuerpo; $("#modal").hidden = false;
@@ -32,7 +48,7 @@ const defTag = (d) => (motor.definida(d) ? ` <span class="badge">Definida</span>
 
 /* ---------- acción central: asignar o quitar ---------- */
 async function alternar(p, d) {
-  const r = motor.alternar(p, d);
+  const r = motor.alternar(p, d), previo = motor.asig(p.id);
   if (!r.ok) return msg(`${p.nombre} no puede bailar ${DZ[d].label}: ${r.why}.`, "bad");
   if (r.def) {
     const qué = r.cambiadas.filter((x) => motor.definida(x)).map((x) => DZ[x].label).join(", ");
@@ -43,9 +59,13 @@ async function alternar(p, d) {
   try {
     await store.guardarElenco(p.id, r.danzas);
     const lista = r.cambiadas.map((x) => DZ[x].label).join(" y ");
-    if (r.accion === "quitar") msg(`${p.nombre}: se quitó ${lista}.`);
-    else msg(`${p.nombre}: asignado a ${lista}.${r.aviso ? " " + r.aviso + "." : ""}`, r.aviso ? "warn" : "ok");
-    if (r.sugerencia) toast(`Sugerencia: ${p.nombre} también podría bailar ${DZ[r.sugerencia].label}.`);
+    // Deshacer vuelve exactamente al conjunto de danzas que tenía antes del toque.
+    const deshacer = async () => {
+      try { await store.guardarElenco(p.id, previo); avisar(`Se deshizo el cambio de ${p.nombre}.`); }
+      catch (e) { avisar("No se pudo deshacer. Revise la conexión.", "bad"); }
+    };
+    if (r.accion === "quitar") avisar(`${p.nombre}: se quitó ${lista}.`, "", deshacer);
+    else avisar(`${p.nombre}: asignado a ${lista}.${r.aviso ? " " + r.aviso + "." : ""}${r.sugerencia ? ` Sugerencia: también podría bailar ${DZ[r.sugerencia].label}.` : ""}`, r.aviso ? "warn" : "ok", deshacer);
   } catch (e) { msg("No se pudo guardar. Revise la conexión o sus permisos.", "bad"); console.error(e); }
 }
 
@@ -424,7 +444,7 @@ function render() {
   $("#v-maestro").hidden = vista !== "maestro";
   $("#v-bailarin").hidden = vista !== "bailarin";
   document.querySelectorAll("[data-admin]").forEach((el) => (el.hidden = !P.admin));
-  if (s.error) msg(s.error, "bad");
+  if (s.error) { $("#status").textContent = s.error; $("#status").className = "msg bad"; }
   if (vista === "panel") renderPanel();
   else if (vista === "maestro") { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); renderVestuario(); $("#prog").innerHTML = programaHTML(false); }
   else renderBailarin();

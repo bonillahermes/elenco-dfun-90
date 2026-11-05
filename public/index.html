@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/portada.css">
 <link rel="stylesheet" href="css/inicio.css">
+<link rel="stylesheet" href="css/elenco.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 </head>
 <body>
@@ -278,7 +279,10 @@
   </div>
 </div>
 <div class="local local-fixed" id="local" hidden>Modo de prueba local (sin Firebase)</div>
-<div class="toast" id="toast" hidden></div>
+<div class="aviso-accion" id="aviso" role="status" aria-live="polite" hidden>
+  <p id="aviso-t"></p>
+  <div class="aviso-botones"><button class="aviso-btn" type="button" id="aviso-deshacer" hidden>Deshacer</button><button class="aviso-btn aviso-x" type="button" id="aviso-cerrar">Cerrar</button></div>
+</div>
 <div class="modal-bg" id="modal" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-t">
   <h3 id="modal-t"></h3><p class="hint" id="modal-b" style="margin:0"></p>
   <div class="row"><button class="btn ghost" type="button" id="modal-no">Cancelar</button><button class="btn" type="button" id="modal-si">Confirmar</button></div>
