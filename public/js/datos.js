@@ -118,7 +118,7 @@ function storeLocal(notificar) {
   const abrir = () => {
     s.sesion = comoBailarin
       ? { estado: "listo", correo: comoBailarin, nombre: comoBailarin, maestro: MAESTROS.includes(comoBailarin), admin: ADMINS.includes(comoBailarin) }
-      : { estado: "listo", correo: ADMINS[0], nombre: "Modo de prueba", maestro: true, admin: true };
+      : { estado: "listo", correo: ADMINS[0], nombre: ADMINS[0], maestro: true, admin: true };
     ordenarPersonas(s.datos.personas); notificar();
   };
   s.iniciar = async () => { s.sesion = { estado: "anonimo" }; notificar(); };

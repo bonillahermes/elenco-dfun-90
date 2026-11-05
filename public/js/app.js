@@ -289,7 +289,7 @@ function renderBailarin() {
   const s = store.sesion, p = D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo);
   let h = "";
   if (!D().personas.length) h += `<div class="card"><p class="hint" style="margin:0">Cargando el elenco…</p></div>`;
-  else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero no aparece en el elenco. Pídele al maestro que lo agregue a tu nombre.</p></div>`;
+  else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero no aparece en el elenco. ${store.sesion.maestro ? "Puedes vincularlo tú mismo desde Inicio." : "Pídele al maestro que lo agregue a tu nombre."}</p></div>`;
   else h += fichaHTML(p, true);
   h += `<div style="display:grid;gap:8px"><h3>Programa de la función</h3><div class="tl">${programaHTML(true)}</div></div>`;
   $("#v-bailarin").innerHTML = h;
@@ -300,43 +300,96 @@ const notas = { "Guabina": "mantilla", "Guaneña y Bambuco sureño": "bebé", "F
 const nombreInicio = { "Guaneña y Bambuco sureño": "Guaneña y Danza de Nariño" };
 $("#momentos").innerHTML = BLOQUES.map((b) => `<li class="momento"><time>${fmt(b.ini)} p. m.</time><h3>${esc(b.nombre)}</h3><ul>${b.danzas.map((d) =>
   `<li>${esc(nombreInicio[d] || DZ[d].label)}${notas[d] ? ` <small>· ${esc(notas[d])}</small>` : ""}</li>`).join("")}</ul></li>`).join("");
-let verInicio = true, vista = "maestro";
-try { if (localStorage.getItem("dfun-v2-vista") === "bailarin") vista = "bailarin"; } catch (e) {}
-document.addEventListener("click", (e) => {
-  if (e.target.closest("[data-entrar]")) { if (store.sesion?.estado === "listo") { verInicio = false; render(); } else { verInicio = false; store.entrar(); } }
-  if (e.target.closest("[data-inicio]")) { verInicio = true; render(); window.scrollTo(0, 0); }
-  const v = e.target.closest("[data-vista]"); if (v) { vista = v.dataset.vista; try { localStorage.setItem("dfun-v2-vista", vista); } catch (err) {} render(); window.scrollTo(0, 0); }
+let verPortada = true, vista = "panel";
+const yoDe = (s) => D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo) || null;
+function ir(v) { vista = v; verPortada = false; render(); window.scrollTo(0, 0); }
+document.addEventListener("click", async (e) => {
+  if (e.target.closest("[data-entrar]")) { if (store.sesion?.estado === "listo") ir("panel"); else { verPortada = false; vista = "panel"; store.entrar(); } return; }
+  if (e.target.closest("[data-inicio]")) return ir("panel");
+  if (e.target.closest("[data-portada]")) { verPortada = true; render(); window.scrollTo(0, 0); return; }
+  const v = e.target.closest("[data-vista]"); if (v) return ir(v.dataset.vista);
+  if (e.target.id === "salir") { verPortada = true; vista = "panel"; store.salir(); return; }
+  if (e.target.id === "vincular") {
+    const id = $("#vincular-sel").value, p = persona(id); if (!p) return;
+    if (p.correo && p.correo !== store.sesion.correo) return msg(`${p.nombre} ya está vinculado a otro correo.`, "bad");
+    const previo = yoDe(store.sesion);
+    try { if (previo && previo.id !== id) await store.actualizarPersona(previo.id, { correo: "" }); await store.actualizarPersona(id, { correo: store.sesion.correo }); msg(`Tu correo quedó vinculado a ${p.nombre}.`, "ok"); }
+    catch (err) { msg("No se pudo vincular. Revise sus permisos.", "bad"); }
+  }
 });
+
+/* ---------- panel de inicio (después de ingresar) ---------- */
+function renderPanel() {
+  const s = store.sesion, yo = yoDe(s), ps = D().personas;
+  const nombre = (yo?.nombre || (s.nombre && !s.nombre.includes("@") ? s.nombre : s.correo.split("@")[0])).split(" ")[0];
+  const S = yo ? motor.asig(yo.id) : [];
+  const tarjetas = [];
+  if (s.maestro) {
+    const conDanza = ps.filter((p) => motor.asig(p.id).length).length, malos = motor.conProblemas().length;
+    const completas = DANZAS.filter((d) => { const b = motor.balance(d.id), c = CUPOS[d.id] || {}; return (c.Hombre ?? 0) === b.h && (c.Mujer ?? 0) === b.m; }).length;
+    tarjetas.push(`<article class="card rolcard"><span class="badge">${s.admin ? "Administrador · Maestro" : "Maestro"}</span><h2>Armar el elenco</h2>
+      <p class="hint">${ps.length ? `${conDanza} de ${ps.length} personas con danza · ${completas} de ${DANZAS.length} danzas con cupo completo${malos ? ` · <b style="color:var(--bad)">${malos} con reglas rotas</b>` : ""}` : "Aún no hay personas cargadas."}</p>
+      <ul class="encontraras">
+        <li><b>Matriz</b>: asigna danzas con un toque; el semáforo dice quién puede entrar y por qué.</li>
+        <li><b>Por danza</b>: cupo, parejas, disponibles por rol y quién no puede.</li>
+        <li><b>Por persona</b>: programa de cada bailarín, su correo y lo que él ve al ingresar.</li>
+        <li><b>Logística</b>: cambios de vestuario, presión de camerino y balance por danza.</li>
+        <li><b>Vestuario</b>: disponible frente a cupo, faltantes y piezas que pasan de mano.</li>
+        <li><b>Programa</b> y <b>Datos</b>: minuto a minuto, inscribir personas y respaldo en Excel.</li>
+      </ul>
+      <button class="btn" type="button" data-vista="maestro">Ir al elenco</button></article>`);
+  }
+  if (yo || !s.maestro) {
+    tarjetas.push(`<article class="card rolcard"><span class="badge">Bailarín</span><h2>Mi programa</h2>
+      <p class="hint">${yo ? (S.length ? `Bailas ${pl(S.length, "danza", "danzas")}: ${S.map((d) => DZ[d].label).join(", ")}. Primera salida a escena: ${DZ[S[0]].s} p. m.` : "Aún no tienes danzas asignadas.") : `Tu correo ${esc(s.correo)} aún no está vinculado a un nombre del elenco. Pídeselo al maestro.`}</p>
+      <ul class="encontraras">
+        <li><b>Llamados del día</b>: llegada, ensayo general, calentamiento y función.</li>
+        <li><b>Una ficha por danza</b>: hora, qué va antes y después en escena y cuánto tiempo tienes para cambiarte.</li>
+        <li><b>Vestuario a alistar</b> para cada danza y lo que aún falta del grupo.</li>
+        <li><b>El elenco</b> con el que bailas cada danza.</li>
+        <li><b>Recomendaciones</b>: cambios rápidos, prendas que entregas o recibes y objetos en escena.</li>
+      </ul>
+      ${yo || !s.maestro ? `<button class="btn" type="button" data-vista="bailarin">Ver mi programa</button>` : ""}</article>`);
+  }
+  let vincular = "";
+  if (s.maestro && !yo && ps.length) {
+    vincular = `<div class="card" style="display:grid;gap:10px"><h3>¿También bailas?</h3><p class="hint" style="margin:0">Vincula tu correo a tu nombre del elenco para ver tu propio programa.</p>
+      <div class="row"><select id="vincular-sel" style="max-width:360px">${ps.filter((p) => !p.correo).map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}</option>`).join("")}</select><button class="btn small" id="vincular" type="button">Vincular</button></div></div>`;
+  }
+  $("#v-panel").innerHTML = `<div class="panel-h"><h2 class="sec-t">Hola, ${esc(nombre)}</h2><p class="sec-sub">Gala 90 años · miércoles 18 de noviembre · función a las 7:10 p. m.</p></div>
+    <div class="rolgrid">${tarjetas.join("")}</div>${vincular}
+    <p class="hint"><button class="linkbtn" type="button" data-portada>Ver la portada del grupo</button></p>`;
+}
 
 /* ---------- render general ---------- */
 function render() {
   const s = store.sesion || { estado: "cargando" };
   $("#local").hidden = store.modo !== "local";
   const listo = s.estado === "listo";
-  const enInicio = !listo || verInicio;
-  $("#v-inicio").hidden = !enInicio;
-  $("#app").hidden = enInicio;
-  document.querySelectorAll("[data-entrar]").forEach((b) => { b.disabled = s.estado === "cargando"; b.textContent = listo ? (s.maestro ? "Ir al elenco" : "Ver mi programa") : b.dataset.txt || (b.dataset.txt = b.textContent); });
-  const yo = listo ? D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo) : null;
-  if (listo && !s.maestro) vista = "bailarin";
+  const enPortada = !listo || verPortada;
+  $("#v-inicio").hidden = !enPortada;
+  $("#app").hidden = enPortada;
+  document.querySelectorAll("[data-entrar]").forEach((b) => { b.disabled = s.estado === "cargando"; b.textContent = listo ? "Ir a mi inicio" : b.dataset.txt || (b.dataset.txt = b.textContent); });
   $("#login-msg").textContent = s.estado === "dominio" ? `${s.correo} no es una cuenta @unal.edu.co. Ingrese con su correo de la universidad.` : s.estado === "error" ? s.msg : "";
   $("#v-cargando").hidden = true;
   $("#user").hidden = !listo;
-  const rolTxt = s.admin ? "Administrador" : s.maestro ? "Maestro" : yo ? "Bailarín" : "";
-  const cambiar = listo && s.maestro && yo ? `<div class="seg" role="group" aria-label="Vista"><button type="button" data-vista="maestro" aria-pressed="${vista === "maestro"}">Elenco</button><button type="button" data-vista="bailarin" aria-pressed="${vista === "bailarin"}">Mi programa</button></div>` : "";
-  if (listo) $("#user").innerHTML = `<button class="btn ghost small" data-inicio type="button">Inicio</button>${cambiar}<span>${esc(s.correo)}${rolTxt ? ` <span class="badge">${rolTxt}</span>` : ""}</span><button class="btn ghost small" id="salir" type="button">Salir</button>`;
-  if (enInicio) return;
-  const comoMaestro = listo && s.maestro && vista === "maestro";
-  $("#v-maestro").hidden = !comoMaestro;
-  $("#v-bailarin").hidden = !(listo && !comoMaestro);
-  document.querySelectorAll("[data-admin]").forEach((el) => (el.hidden = !s.admin));
   if (!listo) return;
-  if (s.error) msg(s.error, "bad");
   motor = crearMotor(D());
-  if (comoMaestro) { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); renderVestuario(); $("#prog").innerHTML = programaHTML(false); }
+  const yo = yoDe(s);
+  if (vista === "maestro" && !s.maestro) vista = "panel";
+  const rolTxt = s.admin ? "Administrador" : s.maestro ? "Maestro" : yo ? "Bailarín" : "";
+  const nav = [["panel", "Inicio"], ...(s.maestro ? [["maestro", "Elenco"]] : []), ...(yo || !s.maestro ? [["bailarin", "Mi programa"]] : [])];
+  $("#user").innerHTML = `<div class="seg" role="group" aria-label="Secciones">${nav.map(([k, t]) => `<button type="button" data-vista="${k}" aria-pressed="${vista === k}">${t}</button>`).join("")}</div><span>${esc(s.correo)}${rolTxt ? ` <span class="badge">${rolTxt}</span>` : ""}</span><button class="btn ghost small" id="salir" type="button">Salir</button>`;
+  if (enPortada) return;
+  $("#v-panel").hidden = vista !== "panel";
+  $("#v-maestro").hidden = vista !== "maestro";
+  $("#v-bailarin").hidden = vista !== "bailarin";
+  document.querySelectorAll("[data-admin]").forEach((el) => (el.hidden = !s.admin));
+  if (s.error) msg(s.error, "bad");
+  if (vista === "panel") renderPanel();
+  else if (vista === "maestro") { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); renderVestuario(); $("#prog").innerHTML = programaHTML(false); }
   else renderBailarin();
 }
-document.addEventListener("click", (e) => { if (e.target.id === "salir") { verInicio = true; store.salir(); } });
 
 try { const v = localStorage.getItem("dfun-v2-tab"); if (VIEWS.includes(v)) show(v); } catch (e) {}
 render();

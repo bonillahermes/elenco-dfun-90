@@ -15,7 +15,7 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 - `public/js/reglas.js`: motor de reglas puro (sin DOM ni red). Cubierto por `tests/`.
 - `public/js/datos.js`: capa de datos con dos implementaciones de la misma interfaz: Firebase y local (localStorage). Si `public/js/config.js` no tiene `apiKey`, corre en modo local de prueba (`?correo=x@unal.edu.co` simula la vista de un bailarín).
 - `public/js/excel.js`: lectura y escritura de Excel (hoja `Inscripción`).
-- `public/js/app.js`: interfaz. Página de inicio pública con botón Ingresar. Maestro: Matriz, Por danza, Por persona, Logística, Programa, Datos. Bailarín: su programa y el programa general.
+- `public/js/app.js`: interfaz. Portada pública con botón Ingresar. Tras ingresar, un panel de Inicio con una tarjeta por rol que explica lo que cada uno encuentra; navegación "Inicio | Elenco | Mi programa" según el rol. Maestro: Matriz, Por danza, Por persona, Logística, Vestuario, Programa, Datos. Bailarín: llamados, ficha por danza, recomendaciones y programa general. Un maestro sin nombre vinculado puede vincular su propio correo desde Inicio.
 - `scripts/sembrar.mjs`: carga inicial única a Firestore con firebase-admin y credenciales de `gcloud auth application-default login`. Lee `datos/semilla.json` (fuera de git).
 - `firestore.rules`: leen cuentas UNAL verificadas; escriben solo los maestros. La lista de maestros está en `firestore.rules` y en `MAESTROS` de `public/js/config.js`; deben coincidir.
 
