@@ -10,13 +10,14 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 - Pruebas: `node --test tests/reglas.test.mjs` (no requiere dependencias).
 
 ## Estructura
-- `js/montaje.js`: bloques, danzas con horas, reglas y minuto a minuto. Es la única fuente de verdad del montaje.
-- `js/reglas.js`: motor de reglas puro (sin DOM ni red). Cubierto por `tests/`.
-- `js/datos.js`: capa de datos con dos implementaciones de la misma interfaz: Firebase y local (localStorage). Si `js/config.js` no tiene `apiKey`, corre en modo local de prueba (`?correo=x@unal.edu.co` simula la vista de un bailarín).
-- `js/excel.js`: lectura y escritura de Excel (hoja `Inscripción`).
-- `js/app.js`: interfaz. Página de inicio pública con botón Ingresar. Maestro: Matriz, Por danza, Por persona, Logística, Programa, Datos. Bailarín: su programa y el programa general.
+- `public/`: todo lo que se publica (index.html, css, js, _headers). `wrangler.jsonc` apunta ahí.
+- `public/js/montaje.js`: bloques, danzas con horas, reglas y minuto a minuto. Es la única fuente de verdad del montaje.
+- `public/js/reglas.js`: motor de reglas puro (sin DOM ni red). Cubierto por `tests/`.
+- `public/js/datos.js`: capa de datos con dos implementaciones de la misma interfaz: Firebase y local (localStorage). Si `public/js/config.js` no tiene `apiKey`, corre en modo local de prueba (`?correo=x@unal.edu.co` simula la vista de un bailarín).
+- `public/js/excel.js`: lectura y escritura de Excel (hoja `Inscripción`).
+- `public/js/app.js`: interfaz. Página de inicio pública con botón Ingresar. Maestro: Matriz, Por danza, Por persona, Logística, Programa, Datos. Bailarín: su programa y el programa general.
 - `scripts/sembrar.mjs`: carga inicial única a Firestore con firebase-admin y credenciales de `gcloud auth application-default login`. Lee `datos/semilla.json` (fuera de git).
-- `firestore.rules`: leen cuentas UNAL verificadas; escriben solo los maestros. La lista de maestros está en `firestore.rules` y en `MAESTROS` de `js/config.js`; deben coincidir.
+- `firestore.rules`: leen cuentas UNAL verificadas; escriben solo los maestros. La lista de maestros está en `firestore.rules` y en `MAESTROS` de `public/js/config.js`; deben coincidir.
 
 ## Datos en Firestore
 - `personas/{id}`: nombre, rol (Hombre | Mujer), vinculo, correo, postulaciones[], obs, creado.

@@ -1,7 +1,7 @@
 // Pruebas del motor de reglas. Ejecutar: node --test tests/
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { crearMotor, cambios } from "../js/reglas.js";
+import { crearMotor, cambios } from "../public/js/reglas.js";
 
 const H = (id) => ({ id, nombre: id, rol: "Hombre" });
 const M = (id) => ({ id, nombre: id, rol: "Mujer" });
