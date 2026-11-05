@@ -312,9 +312,9 @@ const PROG=[
  {i:"8:23",e:"8:28",a:"Venias y fotografía grupal final"}
 ];
 // Asignaciones definitivas iniciales (se aplican una sola vez, por coincidencia de nombre)
-const SEMILLAS=[{id:"palo-negro-v1",danza:"Palo negro",cerrar:true,nombres:[
-  ["daniel","alarcon"],["sebastian","molina"],["gina","diaz"],["laura","teresa","quintero"],["alejandra","rojas"]
-]}];
+// Los nombres van como huella (hash) para no publicarlos en el código.
+const SEMILLAS=[{id:"palo-negro-v1",danza:"Palo negro",cerrar:true,huellas:["vv3dde", "1ahh9s6", "77rsmd", "xlggr8", "m3srqt"]}];
+const huella=s=>{let x=5381;for(const c of norm(s))x=((x<<5)+x+c.codePointAt(0))>>>0;return x.toString(36)};
 
 const toMin=t=>{const[h,m]=t.split(":").map(Number);return (h+12)*60+m};
 const fmt=m=>{const h=Math.floor(m/60)-12,mm=String(m%60).padStart(2,"0");return `${h}:${mm}`};
@@ -409,8 +409,8 @@ function aplicarSemillas(){
   let changed=false;
   SEMILLAS.forEach(s=>{
     if(data.config.semillas[s.id]) return;
-    s.nombres.forEach(tokens=>{
-      const m=ps.filter(p=>tokens.every(t=>norm(p.nombre).split(" ").includes(t)));
+    s.huellas.forEach(hu=>{
+      const m=ps.filter(p=>huella(p.nombre)===hu);
       if(m.length===1){const S=asig(m[0].id);if(!S.includes(s.danza))data.elenco[m[0].id]={danzas:ordenar(S.concat([s.danza]))}}
     });
     if(s.cerrar) data.config.cerradas[s.danza]=true;
