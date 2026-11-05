@@ -109,11 +109,11 @@ function carrusel(raiz, quieto) {
   ctl.hidden = false;
 }
 
-// #login-msg está junto al botón de la apertura; se repite junto al botón del elenco para quien ingresó desde abajo.
+// #login-msg está junto al botón de la apertura; se repite junto a los otros botones de ingreso para quien entra desde ahí.
 function ecoLogin(raiz) {
-  const origen = $("#login-msg", raiz), eco = $("[data-eco-login]", raiz);
-  if (!origen || !eco) return;
-  const copiar = () => { eco.textContent = origen.textContent; };
+  const origen = $("#login-msg", raiz), ecos = [...raiz.querySelectorAll("[data-eco-login]")];
+  if (!origen || !ecos.length) return;
+  const copiar = () => ecos.forEach((e) => { e.textContent = origen.textContent; });
   new MutationObserver(copiar).observe(origen, { childList: true, characterData: true, subtree: true });
   copiar();
 }
