@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Elenco DFUN">
+<title>Elenco DFUN 90 años</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Herramienta del maestro: matriz por bloques con semáforo, vistas por danza, persona, logística y programa. */
+:root{
+  --bg:#F5F6F8; --surface:#FFFFFF; --ink:#1B1F2A; --muted:#5D6475; --line:#DCE0E8;
+  --accent:#A3174F; --accent-soft:#F6E3EB; --accent-ink:#FFFFFF;
+  --ok:#1F7A4D; --ok-soft:#E1F3E8; --warn:#B36B00; --warn-soft:#FFF1D6; --bad:#B42318; --bad-soft:#FDE7E4;
+  --hombre:#6A4FB3; --mujer:#C46A14; --hombre-soft:#ECE7F8; --mujer-soft:#FBEBDC;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141A; --surface:#1B1E26; --ink:#E9EBF1; --muted:#9AA1B2; --line:#2E3340;
+  --accent:#E25C8E; --accent-soft:#3A1A28; --accent-ink:#12141A;
+  --ok:#4CC38A; --ok-soft:#12301F; --warn:#F0B44C; --warn-soft:#3A2A0E; --bad:#F27A6B; --bad-soft:#3D1712;
+  --hombre:#9479E0; --mujer:#C97A2C; --hombre-soft:#262046; --mujer-soft:#3A2814; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+.wrap{max-width:1240px;margin:0 auto;padding-block:22px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+header{display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,5vw,40px);line-height:1.05;margin:0}
+h2{font-family:var(--display);font-weight:600;font-size:20px;margin:0}
+h3{font-family:var(--display);font-weight:600;font-size:16px;margin:0}
+.summary{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.summary b{color:var(--ink);font-variant-numeric:tabular-nums}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.hint{font-size:13px;color:var(--muted)}
+.msg{font-size:13px;color:var(--muted);min-height:18px}
+.msg.bad{color:var(--bad)} .msg.warn{color:var(--warn)} .msg.ok{color:var(--ok)}
+.tabs{display:flex;flex-wrap:wrap;gap:2px;border-bottom:1px solid var(--line)}
+.tab{appearance:none;border:0;background:none;font:inherit;font-weight:600;color:var(--muted);padding:9px 12px;border-bottom:3px solid transparent;cursor:pointer;touch-action:manipulation}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible,.cell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{appearance:none;font:inherit;font-weight:700;font-size:14px;border-radius:6px;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;touch-action:manipulation}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line);font-weight:600}
+.btn.small{padding:4px 10px;font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+input[type=text],select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+.field{display:grid;gap:5px} .field label,.lbl{font-weight:600;font-size:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.chip span{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-size:14px;background:var(--bg)}
+.chip input:checked+span{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:baseline}
+.dot.H{background:var(--hombre)} .dot.M{background:var(--mujer)}
+.rol{display:inline-block;font-size:11px;font-weight:800;border-radius:4px;padding:1px 5px;vertical-align:1px}
+.rol.H{background:var(--hombre-soft);color:var(--hombre)} .rol.M{background:var(--mujer-soft);color:var(--mujer)}
+.cnt{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);margin-left:4px}
+.cnt.full{color:var(--bad);font-weight:700}
+/* Leyenda */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);align-items:center}
+.sw{display:inline-grid;place-items:center;width:20px;height:18px;border-radius:4px;font-size:11px;font-weight:800;vertical-align:middle;margin-right:4px;border:1px solid var(--line)}
+/* Matriz */
+.tablebox{overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);max-height:72vh}
+table{border-collapse:separate;border-spacing:0;font-size:14px;width:max-content;min-width:100%}
+th,td{border-bottom:1px solid var(--line);padding:4px 3px;text-align:center;vertical-align:middle;background:var(--surface)}
+thead th{position:sticky;z-index:2}
+thead tr.b th{top:0;height:30px;white-space:nowrap;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-left:2px solid var(--line)}
+thead tr.d th{top:30px;height:150px;vertical-align:bottom;font-size:12px;color:var(--ink);font-weight:700}
+thead tr.d th span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
+thead tr.d th small{display:block;font-weight:400;color:var(--muted);font-size:10px;margin-top:4px}
+th.bstart,td.bstart{border-left:2px solid var(--line)}
+th.name,td.name{position:sticky;left:0;z-index:1;text-align:left;min-width:210px;max-width:240px;padding:4px 8px}
+thead th.name{z-index:3}
+tfoot td{position:sticky;bottom:0;background:var(--bg);font-size:12px;font-variant-numeric:tabular-nums;font-weight:700;z-index:1}
+tfoot td.name{z-index:2}
+.cell{appearance:none;width:30px;height:28px;border-radius:5px;border:1px solid transparent;background:transparent;font:inherit;font-size:12px;font-weight:800;cursor:pointer;padding:0;position:relative;touch-action:manipulation}
+.cell.s-ok{color:var(--ok)} .cell.s-ok::before{content:"";display:block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin:auto;opacity:.55}
+.cell.s-warn{color:var(--warn)} .cell.s-warn::before{content:"";display:block;width:8px;height:8px;border-radius:2px;background:var(--warn);margin:auto;transform:rotate(45deg)}
+.cell.s-block{color:var(--bad);background:var(--bad-soft)} .cell.s-block::before{content:"×";font-size:15px;line-height:1}
+.cell.s-na{color:var(--muted);cursor:default} .cell.s-na::before{content:"–"}
+.cell.s-closed{color:var(--muted);cursor:default} .cell.s-closed::before{content:"🔒";font-size:11px;filter:grayscale(1);opacity:.6}
+.cell.on{background:var(--ink);color:var(--bg);border-color:var(--ink)} .cell.on::before{content:"✓";font-size:14px;line-height:1}
+.cell.on.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.cell.on.warn{background:var(--warn);border-color:var(--warn);color:#fff}
+.cell.post::after{content:"";position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+tr.sel td{background:var(--accent-soft)}
+/* Paneles */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;align-items:start}
+.list{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.item{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-size:14px}
+.item .why{display:block;font-size:12px;color:var(--muted)}
+.item.ok{border-left:4px solid var(--ok)} .item.warn{border-left:4px solid var(--warn)} .item.block{border-left:4px solid var(--bad);opacity:.85} .item.on{border-left:4px solid var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi b{display:block;font-family:var(--display);font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tag.ok{border-color:var(--ok);color:var(--ok)} .tag.warn{border-color:var(--warn);color:var(--warn)} .tag.bad{border-color:var(--bad);color:var(--bad)}
+.tl{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.tl > div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.tl > div:last-child{border-bottom:0}
+.tl time{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px}
+.tl .chg{background:var(--bg);font-size:13px;color:var(--muted);padding:6px 14px}
+.tl .chg.warn{color:var(--warn);background:var(--warn-soft)} .tl .chg.bad{color:var(--bad);background:var(--bad-soft)}
+.tl .dz{background:var(--accent-soft)}
+.ttable{width:100%;font-size:14px}
+.ttable th,.ttable td{text-align:left;padding:8px 10px;background:transparent}
+.ttable th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:14px;max-width:min(92vw,520px);z-index:20;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+@media (max-width:640px){
+  .wrap{padding-block:14px 48px;gap:14px}
+  th.name,td.name{min-width:128px;max-width:140px;white-space:normal;line-height:1.2}
+  .cell{width:26px;height:26px}
+  .tl > div{grid-template-columns:1fr;gap:2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Danzas Folclóricas UN · Gala 90 años · Miércoles 18 de noviembre</div>
+    <h1>Elenco DFUN 90 años</h1>
+    <div class="summary" id="summary"></div>
+    <div class="row between">
+      <div class="msg" id="status" role="status"></div>
+      <div class="row">
+        <button class="btn ghost small" type="button" id="xls">Exportar a Excel</button>
+        <label class="btn ghost small" for="imp" style="cursor:pointer">Importar Excel</label>
+        <input type="file" id="imp" accept=".xlsx" hidden>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-view="matriz" aria-selected="true">Matriz</button>
+    <button class="tab" role="tab" data-view="danza" aria-selected="false">Por danza</button>
+    <button class="tab" role="tab" data-view="persona" aria-selected="false">Por persona</button>
+    <button class="tab" role="tab" data-view="logistica" aria-selected="false">Logística</button>
+    <button class="tab" role="tab" data-view="programa" aria-selected="false">Programa</button>
+    <button class="tab" role="tab" data-view="inscribir" aria-selected="false">Inscribir</button>
+  </nav>
+
+  <!-- MATRIZ -->
+  <section id="v-matriz" class="view" style="display:grid;gap:12px">
+    <div class="row between">
+      <div class="row" style="flex:1;min-width:220px"><input type="text" id="q" placeholder="Buscar por nombre" aria-label="Buscar por nombre" style="max-width:300px"></div>
+      <div class="chips" role="radiogroup" aria-label="Filtrar por rol">
+        <label class="chip"><input type="radio" name="frol" value="" checked><span>Todos</span></label>
+        <label class="chip"><input type="radio" name="frol" value="Hombre"><span>Hombres</span></label>
+        <label class="chip"><input type="radio" name="frol" value="Mujer"><span>Mujeres</span></label>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--ink);color:var(--bg)">✓</i>Asignado</span>
+      <span><i class="sw" style="color:var(--ok)">●</i>Disponible</span>
+      <span><i class="sw" style="color:var(--warn)">◆</i>Cambio rápido (1 a 4 min)</span>
+      <span><i class="sw" style="color:var(--bad);background:var(--bad-soft)">×</i>No puede</span>
+      <span><i class="sw">–</i>No aplica</span>
+      <span><i class="sw">🔒</i>Elenco cerrado</span>
+      <span><i class="sw" style="position:relative"><i style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--accent)"></i></i>Se postuló</span>
+    </div>
+    <p class="hint" style="margin:0">Toque una casilla para asignar o quitar. Toque el nombre para ver el detalle de la persona.</p>
+    <div class="tablebox"><table id="mx"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+  </section>
+
+  <!-- POR DANZA -->
+  <section id="v-danza" class="view" hidden style="display:grid;gap:14px">
+    <div class="card" style="display:grid;gap:12px">
+      <div class="grid2">
+        <div class="field"><label for="d-sel">Danza</label><select id="d-sel"></select></div>
+        <div id="d-head" class="hint" style="align-self:end"></div>
+      </div>
+      <div class="kpis" id="d-kpis"></div>
+      <div class="row" id="d-actions"></div>
+    </div>
+    <div class="cols" id="d-cols"></div>
+  </section>
+
+  <!-- POR PERSONA -->
+  <section id="v-persona" class="view" hidden style="display:grid;gap:14px">
+    <div class="card" style="display:grid;gap:12px">
+      <div class="field"><label for="p-sel">Persona</label><select id="p-sel"></select></div>
+      <div id="p-head" class="hint"></div>
+    </div>
+    <div class="cols">
+      <div style="display:grid;gap:8px"><h3>Su programa</h3><div class="tl" id="p-tl"></div></div>
+      <div style="display:grid;gap:8px"><h3>Qué más puede bailar</h3><ul class="list" id="p-opts"></ul></div>
+    </div>
+  </section>
+
+  <!-- LOGÍSTICA -->
+  <section id="v-logistica" class="view" hidden style="display:grid;gap:14px">
+    <div class="kpis" id="l-kpis"></div>
+    <div class="card" style="display:grid;gap:10px">
+      <h2>Cambios de vestuario entre bloques</h2>
+      <p class="hint" style="margin:0">Dentro de un bloque se usa el mismo vestuario. La presión suma cuántas personas se cambian y qué tan poco tiempo tiene cada una.</p>
+      <div style="overflow-x:auto"><table class="ttable" id="l-trans"></table></div>
+    </div>
+    <div class="card" style="display:grid;gap:10px">
+      <h2>Balance por danza</h2>
+      <div style="overflow-x:auto"><table class="ttable" id="l-bal"></table></div>
+    </div>
+    <div class="card" style="display:grid;gap:10px">
+      <h2>Carga por persona</h2>
+      <div style="overflow-x:auto"><table class="ttable" id="l-per"></table></div>
+    </div>
+  </section>
+
+  <!-- PROGRAMA -->
+  <section id="v-programa" class="view" hidden style="display:grid;gap:12px">
+    <div class="row between"><h2>Minuto a minuto de la función</h2><span class="hint">Llegada 2:00 p. m. · Función 7:10 a 8:28 p. m.</span></div>
+    <div class="tl" id="prog"></div>
+  </section>
+
+  <!-- INSCRIBIR -->
+  <section id="v-inscribir" class="view" hidden>
+    <form class="card" id="f-new" style="display:grid;gap:12px;max-width:640px" autocomplete="off">
+      <h2>Inscribir bailarín(a)</h2>
+      <div class="field"><label for="f-nombre">Nombre completo</label><input type="text" id="f-nombre" maxlength="120" required></div>
+      <div class="field"><span class="lbl">Rol</span>
+        <div class="chips"><label class="chip"><input type="radio" name="rol" value="Hombre"><span>Hombre</span></label><label class="chip"><input type="radio" name="rol" value="Mujer"><span>Mujer</span></label></div></div>
+      <div class="field"><span class="lbl">Vínculo</span>
+        <div class="chips"><label class="chip"><input type="radio" name="vin" value="Estudiante"><span>Estudiante</span></label><label class="chip"><input type="radio" name="vin" value="Egresado"><span>Egresado(a)</span></label></div></div>
+      <div class="row"><button class="btn" type="submit">Inscribir</button><span class="msg" id="f-msg"></span></div>
+      <p class="hint" style="margin:0">Las danzas se asignan después, desde la matriz o desde Por danza.</p>
+    </form>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>/*__XLSX__*/</script>
+<script>
+"use strict";
+/* ============================================================
+   1. CONFIGURACIÓN DEL MONTAJE (fuente: minuto a minuto y reglas del maestro)
+   ============================================================ */
+const BLOQUES=[
+  {id:1,nombre:"Guabina"},
+  {id:2,nombre:"Sur"},
+  {id:3,nombre:"Fandanguillo y Cortadeña",corto:"Fand. y Cort."},
+  {id:4,nombre:"Rajaleña"},
+  {id:5,nombre:"Arcos y Chicha",corto:"Arcos y Chicha"},
+  {id:6,nombre:"Palo negro"},
+  {id:7,nombre:"Costas"}
+];
+// id = nombre de la columna en los datos (no cambiar: compatibilidad con datos guardados)
+const DANZAS=[
+  {id:"Guabina",                 label:"Guabina",          b:1, s:"7:23", e:"7:26", pareja:true},
+  {id:"Guaneña y Bambuco sureño",label:"Guaneña y Nariño", b:2, s:"7:28", e:"7:34"},
+  {id:"Fandanguillo",            label:"Fandanguillo",     b:3, s:"7:34", e:"7:39"},
+  {id:"Cortadeña",               label:"Cortadeña",        b:3, s:"7:39", e:"7:42", requiere:"Fandanguillo"},
+  {id:"Rajaleña",                label:"Rajaleña",         b:4, s:"7:47", e:"7:51"},
+  {id:"Arcos",                   label:"Arcos",            b:5, s:"7:56", e:"7:59"},
+  {id:"Chicha",                  label:"Chicha",           b:5, s:"8:02", e:"8:05"},
+  {id:"Palo negro",              label:"Palo negro",       b:6, s:"8:05", e:"8:08", pareja:true},
+  {id:"Cumbia",                  label:"Cumbia",           b:7, s:"8:08", e:"8:12", pareja:true, excluye:"Bullerengue"},
+  {id:"Bullerengue",             label:"Bullerengue",      b:7, s:"8:12", e:"8:15", soloMujeres:true, excluye:"Cumbia"},
+  {id:"Pilanderas",              label:"Pilanderas",       b:7, s:"8:15", e:"8:19", sugeridaPor:"Cumbia"}
+];
+const REGLAS={ maxDanzasMujer:4, maxDanzasHombre:null, margenRapido:5 }; // < margenRapido min = cambio rápido; 0 = imposible
+const PROG=[
+ {i:"7:10",e:"7:20",a:"Palabras de inicio y bienvenida"},
+ {i:"7:20",e:"7:23",a:"Instalación DFUN – Jacinto"},
+ {i:"7:23",e:"7:26",d:"Guabina",n:"Objeto articulador: mantilla"},
+ {i:"7:26",e:"7:28",a:"Intervención / voz M. Sandino"},
+ {i:"7:28",e:"7:34",d:"Guaneña y Bambuco sureño",n:"Guaneña 7:28 · Danza de Nariño 7:31 (objeto: bebé)"},
+ {i:"7:34",e:"7:39",d:"Fandanguillo",n:"Coplas para Marla Patricia"},
+ {i:"7:39",e:"7:42",d:"Cortadeña"},
+ {i:"7:42",e:"7:47",a:"Intervención Rafa"},
+ {i:"7:47",e:"7:51",d:"Rajaleña"},
+ {i:"7:51",e:"7:56",a:"Intervención Felipe (objeto: arcos)"},
+ {i:"7:56",e:"7:59",d:"Arcos"},
+ {i:"7:59",e:"8:02",a:"Brindis por José David (chicha y vasos)"},
+ {i:"8:02",e:"8:05",d:"Chicha"},
+ {i:"8:05",e:"8:08",d:"Palo negro"},
+ {i:"8:08",e:"8:12",d:"Cumbia",n:"Objeto articulador: velas"},
+ {i:"8:12",e:"8:15",d:"Bullerengue",n:"Delia"},
+ {i:"8:15",e:"8:19",d:"Pilanderas",n:"Objeto articulador: balay y pilón"},
+ {i:"8:19",e:"8:23",a:"Voz de despedida"},
+ {i:"8:23",e:"8:28",a:"Venias y fotografía grupal final"}
+];
+// Asignaciones definitivas iniciales (se aplican una sola vez, por coincidencia de nombre)
+const SEMILLAS=[{id:"palo-negro-v1",danza:"Palo negro",cerrar:true,nombres:[
+  ["daniel","alarcon"],["sebastian","molina"],["gina","diaz"],["laura","teresa","quintero"],["alejandra","rojas"]
+]}];
+
+const toMin=t=>{const[h,m]=t.split(":").map(Number);return (h+12)*60+m};
+const fmt=m=>{const h=Math.floor(m/60)-12,mm=String(m%60).padStart(2,"0");return `${h}:${mm}`};
+DANZAS.forEach(d=>{d.ini=toMin(d.s);d.fin=toMin(d.e)});
+const DZ=Object.fromEntries(DANZAS.map(d=>[d.id,d]));
+const BQ=Object.fromEntries(BLOQUES.map(b=>[b.id,b]));
+BLOQUES.forEach(b=>{const ds=DANZAS.filter(d=>d.b===b.id);b.ini=Math.min(...ds.map(d=>d.ini));b.fin=Math.max(...ds.map(d=>d.fin));b.danzas=ds.map(d=>d.id)});
+
+/* ============================================================
+   2. ALMACENAMIENTO (local hoy; se reemplaza por la base de datos después)
+   ============================================================ */
+const Store=(()=>{
+  const KEY="dfun90-datos-v1"; let data, ok=true; const subs=[];
+  try{const raw=localStorage.getItem(KEY);data=raw?JSON.parse(raw):null}catch(e){ok=false}
+  if(!data) data={bailarines:{},elenco:{},config:{}};
+  data.bailarines=data.bailarines||{}; data.elenco=data.elenco||{}; data.config=data.config||{};
+  data.config.cerradas=data.config.cerradas||{}; data.config.semillas=data.config.semillas||{};
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data));ok=true}catch(e){ok=false}subs.forEach(f=>f())};
+  return{get:()=>data,save,replace(next){data=next;data.config=data.config||{};data.config.cerradas=data.config.cerradas||{};data.config.semillas=data.config.semillas||{};save()},
+    on:f=>subs.push(f),ok:()=>ok};
+})();
+
+/* ============================================================
+   3. MOTOR DE REGLAS
+   ============================================================ */
+const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const people=()=>Object.entries(Store.get().bailarines).map(([id,v])=>({id,...v})).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+const asig=id=>(Store.get().elenco[id]?.danzas||[]).filter(d=>DZ[d]);
+const cerrada=d=>!!Store.get().config.cerradas[d];
+const isH=p=>p.rol==="Hombre", isM=p=>p.rol==="Mujer";
+const maxDe=p=>isM(p)?REGLAS.maxDanzasMujer:isH(p)?REGLAS.maxDanzasHombre:null;
+const ordenar=ds=>ds.slice().sort((a,b)=>DZ[a].ini-DZ[b].ini);
+
+// Cambios de vestuario de un conjunto de danzas: pares consecutivos en bloques distintos
+function cambios(ds){
+  const s=ordenar(ds), out=[];
+  for(let i=1;i<s.length;i++){const a=DZ[s[i-1]],b=DZ[s[i]];if(a.b!==b.b)out.push({de:a.id,a:b.id,min:b.ini-a.fin})}
+  return out;
+}
+const nivel=min=>min<=0?"block":min<REGLAS.margenRapido?"warn":"ok";
+
+// Evalúa qué pasaría si se asigna la danza d a la persona p
+function evaluar(p,d){
+  const S=asig(p.id), D=DZ[d];
+  if(S.includes(d)) return {st:"on",...problemas(p,S,d)};
+  if(D.soloMujeres&&!isM(p)) return {st:"na",why:"Danza solo de mujeres"};
+  if(cerrada(d)) return {st:"closed",why:"Elenco cerrado"};
+  const add=[d]; if(D.requiere&&!S.includes(D.requiere)){
+    if(cerrada(D.requiere)) return {st:"block",why:`Requiere ${D.requiere}, que tiene elenco cerrado`};
+    add.push(D.requiere);
+  }
+  for(const x of add){const ex=DZ[x].excluye;if(ex&&S.includes(ex))return {st:"block",why:`No se combina con ${ex}`}}
+  const N=S.concat(add), mx=maxDe(p);
+  if(mx&&N.length>mx) return {st:"block",why:`Llegaría a ${N.length} danzas (máximo ${mx})`};
+  const cs=cambios(N).filter(c=>add.includes(c.de)||add.includes(c.a));
+  const peor=cs.reduce((m,c)=>!m||c.min<m.min?c:m,null);
+  const extra=add.length>1?` · incluye ${add.slice(1).join(", ")}`:"";
+  if(peor&&nivel(peor.min)==="block") return {st:"block",why:`Sin tiempo: ${peor.de} → ${peor.a} (0 min)`};
+  if(peor&&nivel(peor.min)==="warn") return {st:"warn",why:`Cambio rápido: ${peor.de} → ${peor.a} (${peor.min} min)${extra}`,add};
+  return {st:"ok",why:(peor?`Cambio de ${peor.min} min`:"Sin cambio de vestuario")+extra,add};
+}
+// Problemas de una asignación existente (por si las reglas o los datos cambiaron)
+function problemas(p,S,d){
+  const D=DZ[d];
+  if(D.soloMujeres&&!isM(p)) return {bad:true,why:"Danza solo de mujeres"};
+  if(D.requiere&&!S.includes(D.requiere)) return {bad:true,why:`Falta ${D.requiere}`};
+  if(D.excluye&&S.includes(D.excluye)) return {bad:true,why:`No se combina con ${D.excluye}`};
+  const mx=maxDe(p); if(mx&&S.length>mx) return {bad:true,why:`${S.length} danzas (máximo ${mx})`};
+  const cs=cambios(S).filter(c=>c.de===d||c.a===d);
+  const peor=cs.reduce((m,c)=>!m||c.min<m.min?c:m,null);
+  if(peor&&peor.min<=0) return {bad:true,why:`Sin tiempo: ${peor.de} → ${peor.a}`};
+  if(peor&&peor.min<REGLAS.margenRapido) return {warn:true,why:`Cambio rápido de ${peor.min} min`};
+  return {why:"Asignado"};
+}
+function asignar(p,d){
+  const S=asig(p.id); const data=Store.get();
+  if(S.includes(d)){ // quitar (y lo que dependa de ella)
+    if(cerrada(d)) return msg(`${DZ[d].label} tiene elenco cerrado. Ábralo en Por danza para cambiarlo.`,"warn");
+    const quitar=new Set([d]); DANZAS.forEach(x=>{if(x.requiere===d&&S.includes(x.id))quitar.add(x.id)});
+    data.elenco[p.id]={danzas:S.filter(x=>!quitar.has(x))}; Store.save();
+    return msg(`${p.nombre}: se quitó ${[...quitar].map(x=>DZ[x].label).join(" y ")}.`);
+  }
+  const ev=evaluar(p,d);
+  if(ev.st==="na"||ev.st==="closed"||ev.st==="block") return msg(`${p.nombre} no puede bailar ${DZ[d].label}: ${ev.why}.`,"bad");
+  data.elenco[p.id]={danzas:ordenar(S.concat(ev.add))}; Store.save();
+  msg(`${p.nombre}: asignado a ${ev.add.map(x=>DZ[x].label).join(" y ")}.${ev.st==="warn"?" "+ev.why+".":""}`,ev.st==="warn"?"warn":"ok");
+  const sug=DANZAS.find(x=>x.sugeridaPor===d&&!asig(p.id).includes(x.id)&&evaluar(p,x.id).st!=="block");
+  if(sug) toast(`Sugerencia: ${p.nombre} también podría bailar ${sug.label}.`);
+}
+function aplicarSemillas(){
+  const data=Store.get(); const ps=people(); if(!ps.length) return;
+  let changed=false;
+  SEMILLAS.forEach(s=>{
+    if(data.config.semillas[s.id]) return;
+    s.nombres.forEach(tokens=>{
+      const m=ps.filter(p=>tokens.every(t=>norm(p.nombre).split(" ").includes(t)));
+      if(m.length===1){const S=asig(m[0].id);if(!S.includes(s.danza))data.elenco[m[0].id]={danzas:ordenar(S.concat([s.danza]))}}
+    });
+    if(s.cerrar) data.config.cerradas[s.danza]=true;
+    data.config.semillas[s.id]=true; changed=true;
+  });
+  if(changed) Store.save();
+}
+
+/* ============================================================
+   4. ESTADÍSTICAS
+   ============================================================ */
+const elencoDe=d=>people().filter(p=>asig(p.id).includes(d));
+function balance(d){const l=elencoDe(d);const h=l.filter(isH).length,m=l.filter(isM).length;return{l,h,m,par:Math.min(h,m)}}
+function transiciones(){
+  const out=[];
+  for(let i=1;i<BLOQUES.length;i++){
+    const A=BLOQUES[i-1],B=BLOQUES[i];
+    out.push({A,B,min:B.ini-A.fin,gente:[]});
+  }
+  // cada cambio de una persona se asocia a la transición en la que ocurre (el bloque de llegada)
+  people().forEach(p=>cambios(asig(p.id)).forEach(c=>{
+    const t=out.find(t=>t.B.id===DZ[c.a].b); if(t) t.gente.push({p,c});
+  }));
+  return out;
+}
+
+/* ============================================================
+   5. INTERFAZ
+   ============================================================ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let tTimer; function toast(t){const e=$("#toast");e.textContent=t;e.hidden=false;clearTimeout(tTimer);tTimer=setTimeout(()=>e.hidden=true,4500)}
+function msg(t,k){const e=$("#status");e.textContent=t;e.className="msg "+(k||"");}
+const rolTag=p=>p.rol?`<span class="rol ${isH(p)?"H":"M"}">${isH(p)?"H":"M"}</span>`:"";
+const cntTag=p=>{const mx=maxDe(p),n=asig(p.id).length;return mx?`<span class="cnt ${n>=mx?"full":""}">${n}/${mx}</span>`:`<span class="cnt">${n}</span>`};
+
+const VIEWS=["matriz","danza","persona","logistica","programa","inscribir"];
+function show(v){document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.view===v));VIEWS.forEach(x=>$("#v-"+x).hidden=x!==v);try{localStorage.setItem("dfun-tab2",v)}catch(e){}}
+$(".tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(t){e.preventDefault();show(t.dataset.view)}});
+
+function renderSummary(){
+  const ps=people(), asg=ps.filter(p=>asig(p.id).length);
+  const malos=ps.filter(p=>asig(p.id).some(d=>problemas(p,asig(p.id),d).bad)).length;
+  $("#summary").innerHTML=`<span><b>${ps.length}</b> en el grupo</span><span><span class="dot H"></span><b>${ps.filter(isH).length}</b> hombres</span><span><span class="dot M"></span><b>${ps.filter(isM).length}</b> mujeres</span><span><b>${asg.length}</b> con danza asignada</span>${malos?`<span style="color:var(--bad)"><b style="color:var(--bad)">${malos}</b> con asignaciones que rompen reglas</span>`:""}`;
+}
+
+/* --- Matriz --- */
+function renderMatriz(){
+  const t=$("#mx"); const q=norm($("#q").value); const fr=document.querySelector('input[name="frol"]:checked').value;
+  const ps=people().filter(p=>(!q||norm(p.nombre).includes(q))&&(!fr||p.rol===fr));
+  t.tHead.innerHTML=`<tr class="b"><th class="name"></th>${BLOQUES.map(b=>`<th colspan="${b.danzas.length}" class="bstart" title="${esc(b.nombre)}">${esc(b.corto||b.nombre)}</th>`).join("")}</tr>
+  <tr class="d"><th class="name">Nombre</th>${DANZAS.map((d,i)=>`<th class="${i===0||DANZAS[i-1].b!==d.b?"bstart":""}"><span>${esc(d.label)}${cerrada(d.id)?" 🔒":""}</span><small>${d.s}</small></th>`).join("")}</tr>`;
+  if(!ps.length){t.tBodies[0].innerHTML=`<tr><td class="name" colspan="${DANZAS.length+1}" style="padding:16px">${people().length?"Nadie coincide con la búsqueda.":"Sin datos todavía: toque Importar Excel y elija el archivo del elenco."}</td></tr>`;t.tFoot.innerHTML="";return}
+  t.tBodies[0].innerHTML=ps.map(p=>{
+    const post=new Set(p.danzas||[]);
+    return `<tr data-id="${esc(p.id)}"><td class="name"><button class="cell" data-act="persona" style="width:auto;height:auto;text-align:left;font-weight:600;font-size:14px;padding:2px 0">${esc(p.nombre)}</button> ${rolTag(p)}${cntTag(p)}</td>${DANZAS.map((d,i)=>{
+      const ev=evaluar(p,d.id); let cls="cell", tip=ev.why||"";
+      if(ev.st==="on"){cls+=" on"+(ev.bad?" bad":ev.warn?" warn":"")}else cls+=" s-"+ev.st;
+      if(post.has(d.id))cls+=" post",tip+=" · Se postuló";
+      return `<td class="${i===0||DANZAS[i-1].b!==d.b?"bstart":""}"><button class="${cls}" data-d="${esc(d.id)}" title="${esc(d.label)}: ${esc(tip)}" aria-label="${esc(d.label)}, ${esc(p.nombre)}: ${esc(tip)}"></button></td>`}).join("")}</tr>`}).join("");
+  t.tFoot.innerHTML=`<tr><td class="name">Hombres / Mujeres</td>${DANZAS.map((d,i)=>{const b=balance(d.id);return `<td class="${i===0||DANZAS[i-1].b!==d.b?"bstart":""}" title="${b.h} hombres, ${b.m} mujeres">${b.h}/${b.m}</td>`}).join("")}</tr>`;
+}
+$("#mx").addEventListener("click",e=>{
+  const tr=e.target.closest("tr[data-id]");if(!tr)return;const p=people().find(x=>x.id===tr.dataset.id);if(!p)return;
+  if(e.target.closest('[data-act="persona"]')){$("#p-sel").value=p.id;renderPersona();show("persona");return}
+  const c=e.target.closest(".cell[data-d]");if(c)asignar(p,c.dataset.d);
+});
+$("#q").addEventListener("input",renderMatriz);
+document.querySelectorAll('input[name="frol"]').forEach(i=>i.addEventListener("change",renderMatriz));
+
+/* --- Por danza --- */
+$("#d-sel").innerHTML=DANZAS.map(d=>`<option value="${esc(d.id)}">${esc(d.label)} · ${d.s}</option>`).join("");
+function itemHTML(p,ev,act){
+  return `<li class="item ${ev.st==="on"?"on":ev.st}" data-id="${esc(p.id)}"><span>${esc(p.nombre)} ${rolTag(p)}${cntTag(p)}<span class="why">${esc(ev.why||"")}</span></span>${act?`<button class="btn small ${ev.st==="on"?"ghost":""}" data-act="toggle">${ev.st==="on"?"Quitar":"Asignar"}</button>`:""}</li>`;
+}
+function renderDanza(){
+  const d=$("#d-sel").value, D=DZ[d], b=balance(d), ps=people();
+  $("#d-head").innerHTML=`Bloque ${D.b} · ${esc(BQ[D.b].nombre)} · ${D.s} a ${D.e}${D.soloMujeres?" · solo mujeres":""}${D.pareja?" · en parejas":""}${D.requiere?` · exige ${D.requiere}`:""}`;
+  const pend=D.pareja?Math.abs(b.h-b.m):0;
+  $("#d-kpis").innerHTML=`<div class="kpi"><b>${b.h}</b><span>hombres asignados</span></div><div class="kpi"><b>${b.m}</b><span>mujeres asignadas</span></div>${D.pareja?`<div class="kpi"><b>${b.par}</b><span>parejas${pend?` · faltan ${pend} ${b.h>b.m?"mujer(es)":"hombre(s)"}`:""}</span></div>`:""}<div class="kpi"><b>${cerrada(d)?"Cerrado":"Abierto"}</b><span>estado del elenco</span></div>`;
+  $("#d-actions").innerHTML=`<button class="btn ${cerrada(d)?"ghost":""} small" data-act="lock">${cerrada(d)?"Abrir elenco":"Cerrar elenco"}</button><span class="hint">Cerrar fija el elenco: nadie más se puede asignar ni quitar.</span>`;
+  const groups={on:[],ok:[],warn:[],block:[]};
+  ps.forEach(p=>{const ev=evaluar(p,d);if(ev.st==="on")groups.on.push([p,ev]);else if(ev.st==="ok")groups.ok.push([p,ev]);else if(ev.st==="warn")groups.warn.push([p,ev]);else if(ev.st==="block")groups.block.push([p,ev])});
+  const col=(t,l,act,note)=>`<div class="card" style="display:grid;gap:8px"><h3>${t} · ${l.length}</h3>${note?`<p class="hint" style="margin:0">${note}</p>`:""}${l.length?`<ul class="list">${l.map(([p,ev])=>itemHTML(p,ev,act)).join("")}</ul>`:`<p class="hint" style="margin:0">Nadie.</p>`}</div>`;
+  const byRol=(l,r)=>l.filter(([p])=>p.rol===r);
+  const open=!cerrada(d);
+  $("#d-cols").innerHTML=col("Asignados",groups.on,open)
+    +(open?col("Disponibles · hombres",byRol(groups.ok,"Hombre"),true)+col("Disponibles · mujeres",byRol(groups.ok,"Mujer"),true)
+    +col("Con cambio rápido",groups.warn,true,"Pueden entrar, pero con 1 a 4 minutos para cambiarse.")
+    +col("No pueden",groups.block,false):"");
+}
+$("#d-sel").addEventListener("change",renderDanza);
+$("#v-danza").addEventListener("click",e=>{
+  const d=$("#d-sel").value;
+  if(e.target.closest('[data-act="lock"]')){const c=Store.get().config.cerradas;c[d]=!c[d];if(!c[d])delete c[d];Store.save();msg(`${DZ[d].label}: elenco ${cerrada(d)?"cerrado":"abierto"}.`);return}
+  const li=e.target.closest("li[data-id]");if(li&&e.target.closest('[data-act="toggle"]')){const p=people().find(x=>x.id===li.dataset.id);if(p)asignar(p,d)}
+});
+
+/* --- Por persona --- */
+function renderPersonaSel(){
+  const cur=$("#p-sel").value;
+  $("#p-sel").innerHTML=people().map(p=>`<option value="${esc(p.id)}">${esc(p.nombre)}${p.rol?` (${isH(p)?"H":"M"})`:""}</option>`).join("");
+  if(cur&&Store.get().bailarines[cur])$("#p-sel").value=cur;
+}
+function renderPersona(){
+  const p=people().find(x=>x.id===$("#p-sel").value);
+  if(!p){$("#p-head").textContent="No hay personas cargadas.";$("#p-tl").innerHTML="";$("#p-opts").innerHTML="";return}
+  const S=ordenar(asig(p.id)), cs=cambios(S), mx=maxDe(p);
+  $("#p-head").innerHTML=`${rolTag(p)} ${p.vinculo?esc(p.vinculo)+" · ":""}${S.length} danza${S.length===1?"":"s"}${mx?` de ${mx} posibles`:""} · ${cs.length} cambio${cs.length===1?"":"s"} de vestuario`;
+  if(!S.length) $("#p-tl").innerHTML=`<div><span class="hint">Sin danzas asignadas.</span></div>`;
+  else{
+    let h="";S.forEach((d,i)=>{
+      if(i){const c=cs.find(c=>c.a===d);if(c){const n=nivel(c.min);h+=`<div class="chg ${n==="ok"?"":n==="warn"?"warn":"bad"}">Cambio de vestuario: ${c.min} min</div>`}}
+      const D=DZ[d],pr=problemas(p,S,d);
+      h+=`<div class="dz"><time>${D.s} – ${D.e}</time><div><b>${esc(D.label)}</b> <span class="hint">· ${esc(BQ[D.b].nombre)}</span>${pr.bad?`<div class="msg bad">${esc(pr.why)}</div>`:""}</div></div>`;
+    });
+    $("#p-tl").innerHTML=h;
+  }
+  const ord={on:0,ok:1,warn:2,block:3,closed:4,na:5};
+  $("#p-opts").innerHTML=DANZAS.map(d=>[d,evaluar(p,d.id)]).filter(([,ev])=>ev.st!=="on").sort((a,b)=>ord[a[1].st]-ord[b[1].st]||a[0].ini-b[0].ini)
+    .map(([d,ev])=>`<li class="item ${ev.st==="closed"||ev.st==="na"?"block":ev.st}" data-d="${esc(d.id)}"><span><b>${esc(d.label)}</b> <span class="hint">${d.s}</span><span class="why">${esc(ev.why||"")}</span></span>${ev.st==="ok"||ev.st==="warn"?`<button class="btn small" data-act="add">Asignar</button>`:""}</li>`).join("");
+}
+$("#p-sel").addEventListener("change",renderPersona);
+$("#p-opts").addEventListener("click",e=>{const li=e.target.closest("li[data-d]");if(li&&e.target.closest('[data-act="add"]')){const p=people().find(x=>x.id===$("#p-sel").value);if(p)asignar(p,li.dataset.d)}});
+
+/* --- Logística --- */
+function renderLogistica(){
+  const ts=transiciones(), ps=people().filter(p=>asig(p.id).length);
+  const totalCambios=ts.reduce((s,t)=>s+t.gente.length,0);
+  const rapidos=ts.reduce((s,t)=>s+t.gente.filter(g=>g.c.min<REGLAS.margenRapido).length,0);
+  const vest=BLOQUES.reduce((s,b)=>s+people().filter(p=>asig(p.id).some(d=>DZ[d].b===b.id)).length,0);
+  const peor=ts.reduce((m,t)=>{const pr=t.gente.reduce((s,g)=>s+1/Math.max(g.c.min,1),0);return !m||pr>m.pr?{t,pr}:m},null);
+  $("#l-kpis").innerHTML=`<div class="kpi"><b>${ps.length}</b><span>personas con danza</span></div><div class="kpi"><b>${vest}</b><span>vestuarios a alistar (persona × bloque)</span></div><div class="kpi"><b>${totalCambios}</b><span>cambios de vestuario</span></div><div class="kpi"><b style="color:${rapidos?"var(--warn)":"inherit"}">${rapidos}</b><span>cambios rápidos (menos de ${REGLAS.margenRapido} min)</span></div>${peor&&peor.t.gente.length?`<div class="kpi"><b>→ ${esc(peor.t.B.nombre)}</b><span>llegada más exigente</span></div>`:""}`;
+  const presion=t=>t.gente.reduce((s,g)=>s+1/Math.max(g.c.min,1),0);const maxP=Math.max(1,...ts.map(presion));
+  $("#l-trans").innerHTML=`<tr><th>Transición</th><th>Margen</th><th>Se cambian</th><th>Presión</th><th>Quiénes</th></tr>`+ts.map(t=>{
+    const pr=t.gente.reduce((s,g)=>s+1/Math.max(g.c.min,1),0);const n=nivel(t.min);
+    return `<tr><td><b>${esc(t.A.nombre)}</b> → <b>${esc(t.B.nombre)}</b><div class="hint">${fmt(t.A.fin)} a ${fmt(t.B.ini)}</div></td><td><span class="tag ${n==="ok"?"ok":n==="warn"?"warn":"bad"}">${t.min} min</span></td><td>${t.gente.length}</td><td><div class="bar" title="${pr.toFixed(1)} personas por minuto"><i style="width:${pr/maxP*100}%"></i></div></td><td class="hint">${t.gente.map(g=>`${esc(g.p.nombre)} (${esc(DZ[g.c.de].label)}, ${g.c.min} min)`).join(", ")||"Nadie"}</td></tr>`}).join("")
+    +`<tr><td colspan="5" class="hint">El margen es entre bloques seguidos; 0 min significa que nadie puede pasar directo del uno al otro. Quien llega desde una danza anterior (por ejemplo Arcos → Palo negro, Chicha → Pilanderas) aparece con su propio margen entre paréntesis.</td></tr>`;
+  $("#l-bal").innerHTML=`<tr><th>Danza</th><th>Hora</th><th>Hombres</th><th>Mujeres</th><th>Parejas</th><th>Estado</th></tr>`+DANZAS.map(d=>{const b=balance(d.id);const dif=d.pareja?b.h-b.m:0;
+    return `<tr><td><b>${esc(d.label)}</b></td><td>${d.s}</td><td>${b.h}</td><td>${b.m}</td><td>${d.pareja?b.par:d.soloMujeres?"solo mujeres":"–"}</td><td>${cerrada(d.id)?'<span class="tag">Cerrado</span> ':""}${dif?`<span class="tag warn">faltan ${Math.abs(dif)} ${dif>0?"mujer(es)":"hombre(s)"}</span>`:""}</td></tr>`}).join("");
+  const rows=ps.map(p=>{const cs=cambios(asig(p.id));const mn=cs.length?Math.min(...cs.map(c=>c.min)):null;return{p,n:asig(p.id).length,cs:cs.length,mn}}).sort((a,b)=>(a.mn??99)-(b.mn??99)||b.n-a.n);
+  $("#l-per").innerHTML=`<tr><th>Persona</th><th>Danzas</th><th>Cambios</th><th>Cambio más corto</th></tr>`+(rows.length?rows.map(r=>`<tr><td>${esc(r.p.nombre)} ${rolTag(r.p)}</td><td>${r.n}${maxDe(r.p)?` / ${maxDe(r.p)}`:""}</td><td>${r.cs}</td><td>${r.mn===null?"–":`<span class="tag ${nivel(r.mn)==="ok"?"ok":nivel(r.mn)==="warn"?"warn":"bad"}">${r.mn} min</span>`}</td></tr>`).join(""):`<tr><td colspan="4" class="hint">Aún no hay asignaciones.</td></tr>`);
+}
+
+/* --- Programa --- */
+function renderPrograma(){
+  $("#prog").innerHTML=PROG.map(x=>{
+    if(!x.d) return `<div><time>${x.i} – ${x.e}</time><div class="hint">${esc(x.a)}</div></div>`;
+    const b=balance(x.d),D=DZ[x.d];
+    return `<div class="dz"><time>${x.i} – ${x.e}</time><div><b>${esc(D.label)}</b> <span class="hint">· bloque ${esc(BQ[D.b].nombre)}${x.n?" · "+esc(x.n):""}</span><div class="hint"><span class="dot H"></span>${b.h} hombres · <span class="dot M"></span>${b.m} mujeres${D.pareja?` · ${b.par} parejas`:""}${cerrada(x.d)?" · elenco cerrado":""}</div></div></div>`;
+  }).join("");
+}
+
+/* --- Inscribir --- */
+$("#f-new").addEventListener("submit",e=>{
+  e.preventDefault();
+  const nombre=$("#f-nombre").value.replace(/\s+/g," ").trim(), rol=document.querySelector('input[name="rol"]:checked')?.value, vin=document.querySelector('input[name="vin"]:checked')?.value||"";
+  if(!nombre||!rol){$("#f-msg").textContent="Escriba el nombre y elija el rol.";return}
+  if(people().some(p=>norm(p.nombre)===norm(nombre))){$("#f-msg").textContent="Esa persona ya está en el grupo.";return}
+  const id="n"+Date.now().toString(36);Store.get().bailarines[id]={nombre,rol,vinculo:vin,danzas:[],obs:"",creado:Date.now()};Store.save();
+  e.target.reset();$("#f-msg").textContent=`${nombre} quedó inscrito(a).`;
+});
+
+/* --- Excel --- */
+function exportar(){
+  if(typeof XLSX==="undefined") return msg("La exportación no está disponible.","bad");
+  const wb=XLSX.utils.book_new(), ps=people();
+  const a1=[["Nombre","Rol","Vínculo",...DANZAS.map(d=>d.id),"Observaciones"]].concat(ps.map(p=>{const S=asig(p.id),P=p.danzas||[];return[p.nombre,p.rol||"",p.vinculo||"",...DANZAS.map(d=>S.includes(d.id)?"Confirmado":P.includes(d.id)?"Postulado":""),p.obs||""]}));
+  const w1=XLSX.utils.aoa_to_sheet(a1);w1["!cols"]=[{wch:36},{wch:9},{wch:12},...DANZAS.map(()=>({wch:12})),{wch:30}];XLSX.utils.book_append_sheet(wb,w1,"Inscripción");
+  const a2=[["Danza","Hora","Bloque","Rol","Nombre"]];DANZAS.forEach(d=>elencoDe(d.id).sort((a,b)=>(a.rol>b.rol?1:-1)).forEach(p=>a2.push([d.label,d.s,BQ[d.b].nombre,p.rol||"",p.nombre])));
+  const w2=XLSX.utils.aoa_to_sheet(a2);w2["!cols"]=[{wch:22},{wch:7},{wch:24},{wch:9},{wch:36}];XLSX.utils.book_append_sheet(wb,w2,"Elenco por danza");
+  const a3=[["Nombre","Rol","Danzas","Cambios","Detalle"]];ps.forEach(p=>{const cs=cambios(asig(p.id));if(asig(p.id).length)a3.push([p.nombre,p.rol||"",ordenar(asig(p.id)).join(", "),cs.length,cs.map(c=>`${c.de} → ${c.a} (${c.min} min)`).join("; ")])});
+  const w3=XLSX.utils.aoa_to_sheet(a3);w3["!cols"]=[{wch:36},{wch:9},{wch:60},{wch:9},{wch:60}];XLSX.utils.book_append_sheet(wb,w3,"Programa por persona");
+  const f=new Date(),name=`Elenco_DFUN_90_${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,"0")}-${String(f.getDate()).padStart(2,"0")}.xlsx`;
+  XLSX.writeFile(wb,name); msg("Archivo exportado.","ok");
+}
+$("#xls").addEventListener("click",()=>{try{exportar()}catch(e){msg("No se pudo exportar.","bad")}});
+$("#imp").addEventListener("change",async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{
+    const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});const ws=wb.Sheets["Inscripción"];
+    if(!ws)throw new Error("El archivo no tiene la hoja Inscripción.");
+    const a=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});const h=a[0].map(String);
+    const iN=h.indexOf("Nombre"),iR=h.indexOf("Rol"),iV=h.indexOf("Vínculo"),iO=h.indexOf("Observaciones");
+    if(iN<0)throw new Error("No se encontró la columna Nombre.");
+    const prev=Store.get(), next={bailarines:{},elenco:{},config:{cerradas:{...prev.config.cerradas},semillas:{...prev.config.semillas}}};
+    a.slice(1).forEach((r,k)=>{const n=String(r[iN]||"").trim();if(!n)return;const id="i"+String(k).padStart(3,"0");const pd=[],cd=[];
+      DANZAS.forEach(d=>{const j=h.indexOf(d.id);if(j<0)return;const v=norm(r[j]);if(v.startsWith("conf")){cd.push(d.id);pd.push(d.id)}else if(v.startsWith("post")||v==="x")pd.push(d.id)});
+      next.bailarines[id]={nombre:n,rol:iR>=0?String(r[iR]):"",vinculo:iV>=0?String(r[iV]):"",danzas:pd,obs:iO>=0?String(r[iO]):"",creado:Date.now()+k};
+      if(cd.length)next.elenco[id]={danzas:cd}});
+    const n=Object.keys(next.bailarines).length;if(!n)throw new Error("El archivo no tiene personas.");
+    Store.replace(next);aplicarSemillas();msg(`Se importaron ${n} personas.`,"ok");
+  }catch(err){msg("No se pudo importar: "+(err.message||"archivo no válido"),"bad")}
+});
+
+/* --- Arranque --- */
+function renderAll(){renderSummary();renderMatriz();renderPersonaSel();renderPersona();renderDanza();renderLogistica();renderPrograma()}
+Store.on(renderAll);
+aplicarSemillas();
+renderAll();
+if(!Store.ok()) msg("Este navegador no permite guardar: los cambios se perderán al cerrar. Abra la página en Safari o Chrome.","bad");
+else if(!people().length) msg("Sin datos todavía: toque Importar Excel y elija el archivo del elenco.");
+else msg("Guardado en este dispositivo.");
+try{const v=localStorage.getItem("dfun-tab2");if(VIEWS.includes(v))show(v)}catch(e){}
+</script>
+</body>
+</html>
