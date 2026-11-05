@@ -15,9 +15,12 @@ service cloud.firestore {
     function maestro() {
       return admin() || (unal() && request.auth.token.email.lower() in ['bsilvab@unal.edu.co']);
     }
+    // Vincular correos (quién es quién) es solo del administrador.
     match /personas/{id} {
       allow read: if unal();
-      allow create, update: if maestro();
+      allow create: if admin() || (maestro() && request.resource.data.get('correo', '') == '');
+      allow update: if admin() || (maestro()
+        && request.resource.data.get('correo', '') == resource.data.get('correo', ''));
       allow delete: if admin();
     }
     match /elenco/{id} {

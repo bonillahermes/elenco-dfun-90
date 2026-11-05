@@ -150,7 +150,7 @@ $("#p-ficha").addEventListener("toggle", () => renderPersona());
 $("#p-opts").addEventListener("click", (e) => { const li = e.target.closest("li[data-d]"); if (li && e.target.closest('[data-act="add"]')) { const p = persona($("#p-sel").value); if (p) alternar(p, li.dataset.d); } });
 $("#p-form").addEventListener("submit", async (e) => {
   e.preventDefault(); const p = persona($("#p-sel").value); if (!p) return;
-  const correo = $("#p-correo").value.trim().toLowerCase();
+  const correo = store.sesion?.admin ? $("#p-correo").value.trim().toLowerCase() : (p.correo || "");
   if (correo && !/^[^@\s]+@unal\.edu\.co$/.test(correo)) return msg("El correo debe terminar en @unal.edu.co.", "bad");
   if (correo && D().personas.some((x) => x.id !== p.id && x.correo === correo)) return msg("Ese correo ya está vinculado a otra persona.", "bad");
   try { await store.actualizarPersona(p.id, { correo, rol: $("#p-rol").value, vinculo: $("#p-vin").value }); msg(`Datos de ${p.nombre} guardados.`, "ok"); document.activeElement?.blur(); }
@@ -190,7 +190,7 @@ function programaHTML(conNombres) {
 /* Datos: inscribir, importar, exportar */
 $("#f-new").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const nombre = $("#f-nombre").value.replace(/\s+/g, " ").trim(), correo = $("#f-correo").value.trim().toLowerCase();
+  const nombre = $("#f-nombre").value.replace(/\s+/g, " ").trim(), correo = store.sesion?.admin ? $("#f-correo").value.trim().toLowerCase() : "";
   const rol = document.querySelector('input[name="rol"]:checked')?.value, vinculo = document.querySelector('input[name="vin"]:checked')?.value || "";
   if (!nombre || !rol) return ($("#f-msg").textContent = "Escriba el nombre y elija el rol.");
   if (correo && !/^[^@\s]+@unal\.edu\.co$/.test(correo)) return ($("#f-msg").textContent = "El correo debe terminar en @unal.edu.co.");
@@ -289,8 +289,8 @@ function renderBailarin() {
   const s = store.sesion, p = D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo);
   let h = "";
   if (!D().personas.length) h += `<div class="card"><p class="hint" style="margin:0">Cargando el elenco…</p></div>`;
-  else if (!p && store.sesion.maestro) h += vincularHTML() || `<div class="card"><p class="hint" style="margin:0">Todos los nombres ya tienen correo vinculado.</p></div>`;
-  else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero no aparece en el elenco. ${store.sesion.maestro ? "Puedes vincularlo tú mismo desde Inicio." : "Pídele al maestro que lo agregue a tu nombre."}</p></div>`;
+  else if (!p && store.sesion.admin) h += vincularHTML() || `<div class="card"><p class="hint" style="margin:0">Todos los nombres ya tienen correo vinculado.</p></div>`;
+  else if (!p) h += `<div class="card" style="display:grid;gap:6px"><h2>Tu correo aún no está vinculado</h2><p class="hint" style="margin:0">Ingresaste como <b>${esc(s.correo)}</b>, pero no aparece en el elenco. Pídele al administrador que lo vincule a tu nombre.</p></div>`;
   else h += fichaHTML(p, true);
   h += `<div style="display:grid;gap:8px"><h3>Programa de la función</h3><div class="tl">${programaHTML(true)}</div></div>`;
   $("#v-bailarin").innerHTML = h;
@@ -321,6 +321,7 @@ document.addEventListener("click", async (e) => {
   if (e.target.id === "salir") { verPortada = true; vista = "panel"; store.salir(); return; }
   if (e.target.closest("[data-rol]")) { rolActivo = e.target.closest("[data-rol]").dataset.rol; try { localStorage.setItem("dfun-v2-rol", rolActivo); } catch (err) {} return ir(rolActivo === "bailarin" ? "bailarin" : "panel"); }
   if (e.target.id === "vincular") {
+    if (!store.sesion?.admin) return msg("Solo el administrador puede vincular correos.", "bad");
     const id = $("#vincular-sel").value, p = persona(id); if (!p) return;
     if (p.correo && p.correo !== store.sesion.correo) return msg(`${p.nombre} ya está vinculado a otro correo.`, "bad");
     const previo = yoDe(store.sesion);
@@ -358,7 +359,7 @@ function renderPanel() {
   }
   if (yo || P.rol === "bailarin") {
     tarjetas.push(`<article class="card rolcard"><span class="badge">Bailarín</span><h2>Mi programa</h2>
-      <p class="hint">${yo ? (S.length ? `Bailas ${pl(S.length, "danza", "danzas")}: ${S.map((d) => DZ[d].label).join(", ")}. Primera salida a escena: ${DZ[S[0]].s} p. m.` : "Aún no tienes danzas asignadas.") : `Tu correo ${esc(s.correo)} aún no está vinculado a un nombre del elenco.${s.maestro ? " Vincúlalo aquí abajo." : " Pídeselo al maestro."}`}</p>
+      <p class="hint">${yo ? (S.length ? `Bailas ${pl(S.length, "danza", "danzas")}: ${S.map((d) => DZ[d].label).join(", ")}. Primera salida a escena: ${DZ[S[0]].s} p. m.` : "Aún no tienes danzas asignadas.") : `Tu correo ${esc(s.correo)} aún no está vinculado a un nombre del elenco.${s.admin ? " Vincúlalo aquí abajo." : " Pídeselo al administrador."}`}</p>
       <ul class="encontraras">
         <li><b>Llamados del día</b>: llegada, ensayo general, calentamiento y función.</li>
         <li><b>Una ficha por danza</b>: hora, qué va antes y después en escena y cuánto tiempo tienes para cambiarte.</li>
@@ -368,7 +369,7 @@ function renderPanel() {
       </ul>
       ${yo ? `<button class="btn" type="button" data-vista="bailarin">Ver mi programa</button>` : ""}</article>`);
   }
-  const vincular = s.maestro && !yo ? vincularHTML() : "";
+  const vincular = s.admin && !yo ? vincularHTML() : "";
   const cambioRol = P.roles.length > 1 ? `<div class="card" style="display:grid;gap:10px"><h3>Cambiar de rol</h3><p class="hint" style="margin:0">Estás viendo la página como <b>${NOMBRE_ROL[P.rol]}</b>. Cambia para ver exactamente lo que ve cada rol.</p><div class="row">${P.roles.map((r) => `<button class="btn small ${r === P.rol ? "" : "ghost"}" type="button" data-rol="${r}">${NOMBRE_ROL[r]}</button>`).join("")}</div></div>` : "";
   $("#v-panel").innerHTML = `<div class="panel-h"><h2 class="sec-t">Hola, ${esc(nombre)}</h2><p class="sec-sub">Gala 90 años · miércoles 18 de noviembre · función a las 7:10 p. m.</p></div>
     <div class="rolgrid">${tarjetas.join("")}</div>${vincular}${cambioRol}
