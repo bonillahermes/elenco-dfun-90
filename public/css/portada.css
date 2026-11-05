@@ -43,8 +43,15 @@
 
 /* 1. Apertura */
 #v-inicio .po-hero{position:relative;min-height:min(92vh,880px);min-height:min(92svh,880px);display:grid;align-items:end;color:#fff;overflow:hidden;background:var(--po-chal)}
-#v-inicio .po-foto,#v-inicio .po-foto img{position:absolute;inset:0;width:100%;height:100%}
-#v-inicio .po-foto img{object-fit:cover;object-position:50% 40%;max-width:none}
+/* Fotos del hero: se cruzan lentamente (portada.js) con un acercamiento suave sobre la foto activa. */
+#v-inicio .po-foto,#v-inicio .po-foto picture,#v-inicio .po-foto img{position:absolute;inset:0;width:100%;height:100%}
+#v-inicio .po-foto picture{opacity:0;transition:opacity 1.6s ease-in-out}
+#v-inicio .po-foto picture.po-on{opacity:1}
+#v-inicio .po-foto img{object-fit:cover;object-position:50% 40%;max-width:none;transform:scale(1);transition:transform 9s linear}
+#v-inicio .po-foto.po-vivo picture.po-on img{transform:scale(1.06)}
+#v-inicio .po-foto::after{z-index:1}
+#v-inicio .po-pausa{position:absolute;z-index:3;right:max(20px,env(safe-area-inset-right,0px));bottom:clamp(40px,8vw,88px);appearance:none;background:none;border:0;padding:8px 0;color:rgba(255,255,255,.85);font:500 14px/1 var(--po-body);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.4);text-underline-offset:4px}
+#v-inicio .po-pausa:hover{color:#fff}
 /* Degradado para contraste AA del texto blanco: oscuro arriba (barra) y abajo (título, subtítulo y botón). */
 #v-inicio .po-foto::after{content:"";position:absolute;inset:0;
   background:
@@ -54,7 +61,7 @@
   /* En teléfono el texto ocupa todo el ancho: basta el degradado vertical. */
   #v-inicio .po-foto::after{background:linear-gradient(180deg,rgba(12,9,11,.78) 0,rgba(12,9,11,.35) 12%,rgba(12,9,11,.05) 24%,rgba(12,9,11,.5) 46%,rgba(12,9,11,.84) 64%,rgba(12,9,11,.9) 100%)}
 }
-#v-inicio .po-hero > .po-in{position:relative;z-index:1;width:100%;padding-block:120px clamp(40px,8vw,88px);display:grid;gap:22px;justify-items:start}
+#v-inicio .po-hero > .po-in{position:relative;z-index:2;width:100%;padding-block:120px clamp(40px,8vw,88px);display:grid;gap:22px;justify-items:start}
 #v-inicio .po-hero h1{font-size:clamp(52px,9vw,128px);line-height:.92;max-width:11ch;text-shadow:0 1px 24px rgba(0,0,0,.35)}
 #v-inicio .po-sub{font-size:clamp(17px,1.8vw,21px);max-width:38ch;color:rgba(255,255,255,.92)}
 
@@ -66,34 +73,31 @@
 @keyframes po-abre{from{transform:translateX(0)}to{transform:translateX(var(--po-x))}}
 
 /* 2. Linaje */
-#v-inicio .po-linaje .po-in{padding-block:clamp(72px,10vw,140px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,6vw,96px)}
+#v-inicio .po-linaje .po-in{padding-block:clamp(72px,10vw,140px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,6vw,96px);align-items:start}
 #v-inicio .po-linaje h2{font-size:clamp(34px,4.6vw,60px);line-height:1.04}
-#v-inicio .po-lead{color:var(--po-gris);max-width:44ch;margin-top:18px}
-#v-inicio .po-maestros{list-style:none;margin:0;padding:0;display:grid}
-#v-inicio .po-maestros li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;padding:18px 0;border-top:1px solid var(--po-concreto-2);align-items:baseline}
-#v-inicio .po-maestros li:last-child{border-bottom:1px solid var(--po-concreto-2)}
-#v-inicio .po-maestros b{font-family:var(--po-display);font-weight:400;font-size:26px;line-height:1.15}
-#v-inicio .po-maestros span{display:block;color:var(--po-gris);font-size:15px}
-#v-inicio .po-maestros .po-n{font-variant-numeric:tabular-nums;font-size:14px}
-#v-inicio .po-maestros .po-hoy b{color:var(--po-vinotinto)}
+#v-inicio .po-linaje-txt{display:grid;gap:24px;padding-top:22px;border-top:1px solid var(--po-concreto-2)}
+#v-inicio .po-cita{font-family:var(--po-display);font-style:italic;font-size:clamp(24px,2.6vw,34px);line-height:1.25;color:var(--po-vinotinto);max-width:30ch}
+#v-inicio .po-lead{color:var(--po-gris);max-width:48ch}
 
 /* 3. Recorrido fijo. Sin JavaScript es una sola pantalla con el primer bloque;
    con .po-vivo (lo pone portada.js) mide una pantalla por bloque y la escena queda fija. */
 #v-inicio .po-rec{position:relative}
 #v-inicio .po-rec.po-vivo{height:calc(var(--n,7) * 100vh);height:calc(var(--n,7) * 100svh)}
-#v-inicio .po-escena{position:sticky;top:0;height:100vh;height:100svh;min-height:520px;overflow:hidden;background:var(--c,var(--po-panoleta));color:var(--t,#fff);transition:background-color .9s var(--po-ease),color .9s var(--po-ease)}
-#v-inicio .po-escena .po-in{height:100%;display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:clamp(24px,5vw,72px);align-items:center;padding-block:56px}
+/* La escena tiene posiciones fijas: el reloj y la foto no se mueven aunque cambie el número de danzas o el largo de la frase. */
+#v-inicio .po-escena{position:sticky;top:0;height:100vh;height:100svh;min-height:520px;overflow:hidden;background:var(--c,var(--po-panoleta));color:var(--t,#fff);transition:background-color .5s var(--po-ease),color .5s var(--po-ease)}
+#v-inicio .po-escena .po-in{--po-alto:min(72vh,640px);--po-alto:min(72svh,640px);height:100%;display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);grid-template-rows:var(--po-alto);gap:clamp(24px,5vw,72px);align-content:center;padding-block:56px}
+#v-inicio .po-mom{grid-column:1;grid-row:1;align-self:stretch;display:flex;flex-direction:column;justify-content:flex-start;min-width:0}
 #v-inicio .po-reloj{font-family:var(--po-display);font-size:clamp(80px,14vw,200px);line-height:.9;font-variant-numeric:tabular-nums;white-space:nowrap}
 #v-inicio .po-reloj small{font-family:var(--po-body);font-size:.16em;margin-left:.3em;opacity:.8}
 #v-inicio .po-mom h3{font-size:clamp(32px,4.4vw,58px);line-height:1.02;margin-top:18px}
 #v-inicio .po-mom ul{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:6px;font-size:17px}
 #v-inicio .po-que{margin-top:18px;max-width:40ch;opacity:.9}
-#v-inicio .po-mom{transition:opacity .45s var(--po-ease),transform .45s var(--po-ease)}
-#v-inicio .po-mom.po-sale{opacity:0;transform:translateY(10px)}
-#v-inicio .po-escena .po-ph{position:relative;aspect-ratio:4/5;width:100%;max-height:72vh;max-height:72svh;border-radius:6px;overflow:hidden;background:rgba(0,0,0,.18)}
+#v-inicio .po-mom > *{transition:opacity .25s ease-out}
+#v-inicio .po-mom.po-sale > *{opacity:0}
+#v-inicio .po-escena .po-ph{grid-column:2;grid-row:1;position:relative;width:100%;height:100%;border-radius:6px;overflow:hidden;background:rgba(0,0,0,.18)}
 #v-inicio .po-escena .po-ph picture,#v-inicio .po-escena .po-ph img{position:absolute;inset:0;width:100%;height:100%}
 #v-inicio .po-escena .po-ph img{object-fit:cover;max-width:none}
-#v-inicio .po-escena .po-ph picture{opacity:0;transition:opacity .6s var(--po-ease)}
+#v-inicio .po-escena .po-ph picture{opacity:0;transition:opacity .5s var(--po-ease)}
 #v-inicio .po-escena .po-ph picture.po-on{opacity:1}
 #v-inicio .po-pasos{position:absolute;left:0;right:0;bottom:22px;display:flex;gap:6px;justify-content:center}
 #v-inicio .po-pasos i{width:28px;height:3px;border-radius:2px;background:currentColor;opacity:.3;transition:opacity .4s}
@@ -118,17 +122,21 @@
 #v-inicio .po-pie .po-in{padding-block:36px 48px;padding-bottom:max(48px,env(safe-area-inset-bottom,0px));color:var(--po-gris);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
 @media (max-width:760px){
-  #v-inicio .po-linaje .po-in,#v-inicio .po-escena .po-in,#v-inicio .po-elenco > .po-in{grid-template-columns:minmax(0,1fr)}
-  #v-inicio .po-escena .po-in{align-content:center;gap:20px;padding-block:48px 56px}
-  #v-inicio .po-escena .po-ph{aspect-ratio:auto;height:30vh;height:30svh}
+  #v-inicio .po-linaje .po-in,#v-inicio .po-elenco > .po-in{grid-template-columns:minmax(0,1fr)}
+  /* En teléfono la foto va arriba con alto fijo y el texto empieza siempre en el mismo punto. */
+  #v-inicio .po-escena .po-in{grid-template-columns:minmax(0,1fr);grid-template-rows:40vh minmax(0,1fr);grid-template-rows:40svh minmax(0,1fr);align-content:stretch;gap:24px;padding-block:max(28px,env(safe-area-inset-top,0px)) 64px}
+  #v-inicio .po-escena .po-ph{grid-column:1;grid-row:1}
+  #v-inicio .po-mom{grid-column:1;grid-row:2;justify-content:flex-start}
   #v-inicio .po-elenco .po-ph{min-height:260px}
   #v-inicio .po-txt{padding:48px 20px 56px}
 }
 @media (max-width:760px) and (max-height:700px){
-  #v-inicio .po-escena .po-ph{height:24svh}
-  #v-inicio .po-reloj{font-size:68px}
+  #v-inicio .po-escena .po-in{grid-template-rows:24svh minmax(0,1fr);gap:16px}
+  #v-inicio .po-reloj{font-size:64px}
+  #v-inicio .po-mom h3{margin-top:10px}
 }
 @media (prefers-reduced-motion:reduce){
-  #v-inicio .po-telon{display:none}
-  #v-inicio .po-escena,#v-inicio .po-mom,#v-inicio .po-escena .po-ph picture,#v-inicio .po-pasos i,#v-inicio .po-btn{transition:none}
+  #v-inicio .po-telon,#v-inicio .po-pausa{display:none}
+  #v-inicio .po-escena,#v-inicio .po-mom > *,#v-inicio .po-escena .po-ph picture,#v-inicio .po-foto picture,#v-inicio .po-foto img,#v-inicio .po-pasos i,#v-inicio .po-btn{transition:none}
+  #v-inicio .po-foto.po-vivo picture.po-on img{transform:none}
 }

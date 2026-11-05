@@ -1,4 +1,4 @@
-// Portada pública (#v-inicio): telón que se abre una vez y recorrido fijo de la función.
+// Portada pública (#v-inicio): telón que se abre una vez, fotos que rotan en la apertura y recorrido fijo de la función.
 // Horas, bloques y danzas salen de montaje.js; aquí solo va la presentación de cada bloque.
 import { BLOQUES, DANZAS, DZ, fmt } from "./montaje.js";
 
@@ -6,14 +6,15 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 // Color (paleta del vestuario), foto y frase de cada bloque, por id de bloque.
+// Las fotos se eligieron por el vestuario que se ve en cada una; "foto" es el data-foto del HTML.
 const ESCENA = {
   1: { c: "var(--po-panoleta)", foto: "ruanas", frase: "Pañoletas rojas y sombreros negros abren la noche." },
-  2: { c: "var(--po-chal)", foto: "escenario", frase: "Chales negros y faldas del sur." },
-  3: { c: "var(--po-vinotinto)", foto: "ruanas", frase: "Faldas vinotinto de Antioquia, ponchos y machetes." },
-  4: { c: "var(--po-rajalena)", foto: "escenario", frase: "Blusas de colores y pantalones blancos." },
-  5: { c: "var(--po-arcos)", foto: "ruanas", frase: "Arcos de flores y un brindis en escena." },
-  6: { c: "var(--po-tinta)", foto: "escenario", frase: "Tres parejas, tocados hechos a mano." },
-  7: { c: "var(--po-vela)", t: "var(--po-tinta)", foto: "escenario", frase: "Las velas encendidas cierran el recorrido." },
+  2: { c: "var(--po-chal)", foto: "bebe", frase: "Chales negros y faldas del sur." },
+  3: { c: "var(--po-vinotinto)", foto: "vinotinto", frase: "Faldas vinotinto de Antioquia, ponchos y machetes." },
+  4: { c: "var(--po-rajalena)", foto: "panuelos", frase: "Blusas de colores y pantalones blancos." },
+  5: { c: "var(--po-arcos)", foto: "bastones", frase: "Arcos de flores y un brindis en escena." },
+  6: { c: "var(--po-tinta)", foto: "manos", frase: "Tres parejas, tocados hechos a mano." },
+  7: { c: "var(--po-vela)", t: "var(--po-tinta)", foto: "bateas", frase: "Las velas encendidas cierran el recorrido." },
 };
 // Nombre para el público y objeto en escena, por id de danza.
 const NOMBRE = { "Guaneña y Bambuco sureño": "Guaneña y Danza de Nariño" };
@@ -41,6 +42,7 @@ export function iniciarPortada() {
   if (!raiz) return;
   const quieto = matchMedia("(prefers-reduced-motion: reduce)");
   telon(raiz, quieto);
+  hero(raiz, quieto);
   recorrido(raiz, quieto);
   ecoLogin(raiz);
   cuenta(raiz);
@@ -53,6 +55,40 @@ function telon(raiz, quieto) {
   if (quieto.matches) return t.remove();
   t.addEventListener("animationend", () => t.remove(), { once: true });
   setTimeout(() => t.remove(), 2600);
+}
+
+// Fotos de la apertura: la primera viene en el HTML; las demás se cargan después de la página y se cruzan cada 7 s.
+// Se detienen con el botón de pausa, fuera de pantalla, con la pestaña oculta o con movimiento reducido.
+function hero(raiz, quieto) {
+  const caja = $("#po-fotos", raiz), boton = $("#po-pausa", raiz);
+  const fotos = caja ? [...caja.querySelectorAll("[data-slide]")] : [];
+  if (fotos.length < 2 || quieto.matches) return;
+  const cargar = () => fotos.forEach((p) => {
+    p.querySelectorAll("source[data-srcset]").forEach((e) => { e.srcset = e.dataset.srcset; e.removeAttribute("data-srcset"); });
+    p.querySelectorAll("img[data-src]").forEach((e) => { e.src = e.dataset.src; e.removeAttribute("data-src"); });
+  });
+  if (document.readyState === "complete") cargar(); else addEventListener("load", cargar, { once: true });
+  const lista = (p) => { const img = p.querySelector("img"); return !!img.getAttribute("src") && img.complete && img.naturalWidth > 0; };
+  let actual = 0, pausado = false, visible = true;
+  const mostrar = (k) => {
+    actual = k;
+    fotos.forEach((p, j) => { p.classList.toggle("po-on", j === k); if (j === k) p.removeAttribute("aria-hidden"); else p.setAttribute("aria-hidden", "true"); });
+  };
+  setInterval(() => {
+    if (pausado || !visible || document.hidden || raiz.hidden) return;
+    for (let paso = 1; paso < fotos.length; paso++) { const k = (actual + paso) % fotos.length; if (lista(fotos[k])) return mostrar(k); }
+  }, 7000);
+  if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(caja);
+  setTimeout(() => caja.classList.add("po-vivo"), 50);
+  if (boton) {
+    boton.hidden = false;
+    boton.addEventListener("click", () => {
+      pausado = !pausado;
+      boton.setAttribute("aria-pressed", String(pausado));
+      boton.textContent = pausado ? "Reanudar fotos" : "Pausar fotos";
+      caja.classList.toggle("po-vivo", !pausado);
+    });
+  }
 }
 
 function recorrido(raiz, quieto) {
@@ -83,10 +119,11 @@ function recorrido(raiz, quieto) {
     escena.style.setProperty("--t", m.t);
     [...pasos.children].forEach((p, k) => p.classList.toggle("po-on", k === i));
     fotos.forEach((f) => f.classList.toggle("po-on", f.dataset.foto === m.foto));
+    // Color, foto y texto cambian a la vez: el texto se apaga mientras el fondo y la foto se cruzan.
     clearTimeout(timer);
     if (inmediato || quieto.matches) { mom.classList.remove("po-sale"); return escribir(m); }
     mom.classList.add("po-sale");
-    timer = setTimeout(() => { escribir(m); mom.classList.remove("po-sale"); }, 260);
+    timer = setTimeout(() => { escribir(m); mom.classList.remove("po-sale"); }, 250);
   }
   function medir(inmediato) {
     if (raiz.hidden) return;

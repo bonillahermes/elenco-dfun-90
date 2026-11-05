@@ -23,10 +23,22 @@
   </header>
 
   <section class="po-hero po-g" aria-labelledby="po-titulo">
-    <picture class="po-foto">
-      <source type="image/webp" srcset="img/portada/apertura.webp">
-      <img src="img/portada/apertura.jpg" width="1920" height="1280" fetchpriority="high" alt="Una treintena de bailarines del grupo posan frente a un muro de ladrillo de la Ciudad Universitaria; adelante, las mujeres abren polleras de colores morado, rosado, verde y naranja.">
-    </picture>
+    <!-- La primera foto se carga de entrada; portada.js carga y rota las demás. -->
+    <div class="po-foto" id="po-fotos">
+      <picture class="po-on" data-slide>
+        <source type="image/webp" srcset="img/portada/apertura.webp">
+        <img src="img/portada/apertura.jpg" width="1920" height="1280" fetchpriority="high" alt="Una treintena de bailarines del grupo posan frente a un muro de ladrillo de la Ciudad Universitaria; adelante, las mujeres abren polleras de colores morado, rosado, verde y naranja.">
+      </picture>
+      <picture data-slide aria-hidden="true">
+        <source type="image/webp" data-srcset="img/portada/escenario.webp">
+        <img data-src="img/portada/escenario.jpg" width="1920" height="1280" alt="El grupo en un escenario con telón rojo: hombres de blanco con sombrero de paja y pañoleta, y mujeres sentadas adelante con polleras de colores.">
+      </picture>
+      <picture data-slide aria-hidden="true">
+        <source type="image/webp" data-srcset="img/portada/blancas.webp">
+        <img data-src="img/portada/blancas.jpg" width="1920" height="1280" alt="Bailarinas con polleras blancas y flores rojas en el cabello abren sus faldas sobre un escenario oscuro.">
+      </picture>
+    </div>
+    <button class="po-pausa" type="button" id="po-pausa" aria-pressed="false" hidden>Pausar fotos</button>
     <div class="po-telon" aria-hidden="true"><i></i><i></i></div>
     <div class="po-in">
       <h1 id="po-titulo">90 años bailando Colombia</h1>
@@ -38,24 +50,11 @@
 
   <section class="po-linaje po-g" aria-labelledby="po-linaje-t">
     <div class="po-in">
-      <div>
-        <h2 id="po-linaje-t">Desde 1936<!-- POR CONFIRMAR: año de fundación -->, de Jacinto Jaramillo a hoy.</h2>
-        <p class="po-lead">Las danzas de las cuatro regiones del país, enseñadas de maestro a maestro. La gala honra a quienes han dirigido el grupo: varias de sus voces sonarán esa noche entre una danza y otra.</p>
+      <h2 id="po-linaje-t">Desde 1936<!-- POR CONFIRMAR: año de fundación -->, de maestro a maestro.</h2>
+      <div class="po-linaje-txt">
+        <p class="po-cita">Por el grupo han pasado muchos maestros. Cada uno dejó sus danzas, su manera de enseñarlas y una generación de bailarines.</p>
+        <p class="po-lead">Las danzas de las cuatro regiones del país, enseñadas de maestro a alumno durante noventa años. La gala es un homenaje a todos ellos: varias de sus voces sonarán esa noche entre una danza y otra.</p>
       </div>
-      <ol class="po-maestros">
-        <!-- POR CONFIRMAR: Jacinto Jaramillo -->
-        <li><span class="po-n">1</span><div><b>Jacinto Jaramillo</b><span>Fundador. Formado en Nueva York en la escuela de Isadora Duncan.</span></div></li>
-        <!-- POR CONFIRMAR: Delia Zapata -->
-        <li><span class="po-n">2</span><div><b>Delia Zapata</b><span>Las danzas del Caribe y el Pacífico.</span></div></li>
-        <!-- POR CONFIRMAR: Edgar Sandino -->
-        <li><span class="po-n">3</span><div><b>Edgar Sandino</b><span>Maestro del grupo.</span></div></li>
-        <!-- POR CONFIRMAR: Felipe Lozano -->
-        <li><span class="po-n">4</span><div><b>Felipe Lozano</b><span>Director entre 2005 y 2009, alumno de Jaramillo.</span></div></li>
-        <!-- POR CONFIRMAR: Rafael Barrera -->
-        <li><span class="po-n">5</span><div><b>Rafael Barrera</b><span>Director en el aniversario 75.</span></div></li>
-        <!-- POR CONFIRMAR: Nicolás Silva -->
-        <li class="po-hoy"><span class="po-n">6</span><div><b>Nicolás Silva</b><span>Maestro del elenco de la gala 90 años.</span></div></li>
-      </ol>
     </div>
   </section>
 
@@ -77,9 +76,29 @@
             <source type="image/webp" srcset="img/portada/ruanas.webp">
             <img src="img/portada/ruanas.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Bailarines frente a un muro de ladrillo: los hombres con sombrero negro, pañoleta roja y ruana gris; las mujeres con chal negro, blusa rosada y una vasija pequeña sobre la cabeza.">
           </picture>
-          <picture data-foto="escenario">
-            <source type="image/webp" srcset="img/portada/escenario.webp">
-            <img src="img/portada/escenario.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="El grupo en un escenario con telón rojo: hombres de blanco con sombrero de paja y pañoleta, y mujeres sentadas adelante con polleras de colores.">
+          <picture data-foto="bebe">
+            <source type="image/webp" srcset="img/portada/bebe.webp">
+            <img src="img/portada/bebe.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Una pareja en escena: él con poncho y sombrero, ella con falda roja y chal vinotinto; juntos sostienen un bebé.">
+          </picture>
+          <picture data-foto="vinotinto">
+            <source type="image/webp" srcset="img/portada/vinotinto.webp">
+            <img src="img/portada/vinotinto.jpg" width="1200" height="600" loading="lazy" decoding="async" alt="Parejas tomadas de la mano en escena: ellas con vestidos largos vinotinto, rojos y negros con encaje; ellos de traje negro.">
+          </picture>
+          <picture data-foto="panuelos">
+            <source type="image/webp" srcset="img/portada/panuelos.webp">
+            <img src="img/portada/panuelos.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Parejas bailan con pañuelos de colores en alto: ellas con polleras de colores, ellos de blanco con sombrero.">
+          </picture>
+          <picture data-foto="bastones">
+            <source type="image/webp" srcset="img/portada/bastones.webp">
+            <img src="img/portada/bastones.jpg" width="1200" height="704" loading="lazy" decoding="async" alt="Bailarinas con blusa blanca o rosada, falda negra con franjas rojas y una vasija sobre la cabeza; detrás, los hombres de camisa beige con bastón.">
+          </picture>
+          <picture data-foto="manos">
+            <source type="image/webp" srcset="img/portada/manos.webp">
+            <img src="img/portada/manos.jpg" width="1200" height="676" loading="lazy" decoding="async" alt="Dos manos tomadas bajo una luz dorada.">
+          </picture>
+          <picture data-foto="bateas">
+            <source type="image/webp" srcset="img/portada/bateas.webp">
+            <img src="img/portada/bateas.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Bailarinas de espaldas levantan bateas tejidas sobre la cabeza; llevan polleras de colores.">
           </picture>
         </div>
       </div>
