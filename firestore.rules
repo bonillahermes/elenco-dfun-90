@@ -1,0 +1,36 @@
+rules_version = '2';
+// Reglas de seguridad del elenco DFUN 90 años.
+// Leen: cuentas @unal.edu.co verificadas. Escriben: correos listados en la colección maestros.
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function unal() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('.*@unal[.]edu[.]co$');
+    }
+    function maestro() {
+      return unal() && exists(/databases/$(db)/documents/maestros/$(request.auth.token.email.lower()));
+    }
+    match /personas/{id} {
+      allow read: if unal();
+      allow write: if maestro();
+    }
+    match /elenco/{id} {
+      allow read: if unal();
+      allow delete: if maestro();
+      allow create, update: if maestro()
+        && request.resource.data.danzas is list
+        && request.resource.data.danzas.size() <= 11;
+    }
+    match /config/{doc} {
+      allow read: if unal();
+      allow write: if maestro();
+    }
+    // Se administra solo desde la consola de Firebase.
+    match /maestros/{correo} {
+      allow get: if unal() && request.auth.token.email.lower() == correo;
+      allow list: if maestro();
+      allow write: if false;
+    }
+  }
+}
