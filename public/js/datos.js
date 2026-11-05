@@ -6,8 +6,8 @@
 //   personas/{id}   { nombre, rol, vinculo, correo, postulaciones[], obs, creado }
 //   elenco/{id}     { danzas[], actualizado, por }        (id = id de la persona)
 //   config/estado   { definidas: { [danza]: true } }
-// Los maestros (con permiso de edición) están en config.js y en firestore.rules.
-import { firebaseConfig, DOMINIO, MAESTROS } from "./config.js";
+// Roles (admin, maestro) en config.js y en firestore.rules.
+import { firebaseConfig, DOMINIO, MAESTROS, ADMINS } from "./config.js";
 import { DEFINIDAS_INICIALES } from "./montaje.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.12.2";
@@ -47,8 +47,8 @@ function storeFirebase(notificar) {
         s.sesion = { estado: "dominio", correo };
         return notificar();
       }
-      const maestro = MAESTROS.includes(correo);
-      s.sesion = { estado: "listo", correo, nombre: u.displayName || correo, maestro };
+      const admin = ADMINS.includes(correo), maestro = admin || MAESTROS.includes(correo);
+      s.sesion = { estado: "listo", correo, nombre: u.displayName || correo, maestro, admin };
       const err = (e) => { s.sesion.error = "No se pudo leer la base de datos. Revise su conexión."; notificar(); console.error(e); };
       unsubs.push(fs.onSnapshot(fs.collection(db, "personas"), (q) => {
         s.datos.personas = ordenarPersonas(q.docs.map((d) => ({ id: d.id, ...d.data() }))); notificar();
@@ -117,8 +117,8 @@ function storeLocal(notificar) {
 
   const abrir = () => {
     s.sesion = comoBailarin
-      ? { estado: "listo", correo: comoBailarin, nombre: comoBailarin, maestro: false }
-      : { estado: "listo", correo: MAESTROS[0], nombre: "Modo de prueba", maestro: true };
+      ? { estado: "listo", correo: comoBailarin, nombre: comoBailarin, maestro: MAESTROS.includes(comoBailarin), admin: ADMINS.includes(comoBailarin) }
+      : { estado: "listo", correo: ADMINS[0], nombre: "Modo de prueba", maestro: true, admin: true };
     ordenarPersonas(s.datos.personas); notificar();
   };
   s.iniciar = async () => { s.sesion = { estado: "anonimo" }; notificar(); };

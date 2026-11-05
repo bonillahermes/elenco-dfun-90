@@ -184,3 +184,7 @@ tr.sel td{background:var(--accent-soft)}
 .llamados{list-style:none;padding:0}
 .llamados time{display:inline-block;min-width:84px;font-weight:700;font-variant-numeric:tabular-nums}
 details summary{cursor:pointer;font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{appearance:none;border:0;background:var(--surface);font:inherit;font-weight:600;font-size:13px;padding:5px 10px;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.user{flex-wrap:wrap;justify-content:flex-end}

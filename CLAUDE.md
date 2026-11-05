@@ -37,8 +37,11 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 - `PIEZAS_COMPARTIDAS`: prendas físicas que pasan de una danza a otra de distinto bloque; se calcula quién entrega y quién recibe.
 - El bailarín ve una ficha por danza: hora, danza anterior y siguiente en escena, su cambio, vestuario a alistar, elenco y recomendaciones.
 
-## Maestros
-- bsilvab@unal.edu.co (maestro del grupo) y hyate@unal.edu.co (Hermes, administrador).
+## Roles
+- Administrador: hyate@unal.edu.co (Hermes). Todo lo del maestro, más restaurar datos desde Excel y borrar personas.
+- Maestro: arma el elenco. Lista en `MAESTROS` (config.js) y en `maestro()` de firestore.rules.
+- Bailarín: cualquier cuenta UNAL cuyo correo esté vinculado a una persona; ve su propio programa.
+- Un mismo usuario puede tener varios roles: si es maestro y bailarín, el encabezado ofrece "Elenco | Mi programa".
 
 ## Principio de uso
 - La operación diaria no usa Excel: todo se guarda en Firestore. El Excel es solo respaldo (exportar) o restauración de emergencia.

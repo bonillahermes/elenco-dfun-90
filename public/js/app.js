@@ -201,6 +201,7 @@ $("#f-new").addEventListener("submit", async (e) => {
 $("#xls").addEventListener("click", () => { try { exportarExcel(D(), motor); msg("Archivo exportado.", "ok"); } catch (e) { msg("No se pudo exportar: " + e.message, "bad"); } });
 $("#imp").addEventListener("change", async (e) => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  if (!store.sesion?.admin) return msg("Solo el administrador puede restaurar datos.", "bad");
   try {
     const { personas, elenco } = await leerExcel(f);
     if (D().personas.length && !(await confirmar("Reemplazar todos los datos", `Se cargarán ${personas.length} personas y se borrarán las ${D().personas.length} actuales con sus asignaciones. Esto afecta a todos los usuarios.`))) return;
@@ -262,7 +263,7 @@ function recomendaciones(p) {
 }
 function fichaHTML(p, propio) {
   const S = motor.asig(p.id), cs = cambios(S);
-  let h = `<div class="card" style="display:grid;gap:8px"><h2>${propio ? `Hola, ${esc(p.nombre.split(" ")[0])}` : esc(p.nombre)}</h2><p class="hint" style="margin:0">${S.length ? `${pl(S.length, "danza", "danzas")} · ${pl(cs.length, "cambio de vestuario", "cambios de vestuario")}.${propio ? " Se actualiza en vivo cuando el maestro hace cambios." : ""}` : "Aún no tiene danzas asignadas."}</p></div>`;
+  let h = `<div class="card" style="display:grid;gap:8px"><h2>${propio ? `Hola, ${esc(p.nombre.split(" ")[0])}` : esc(p.nombre)}</h2><p class="hint" style="margin:0">${S.length ? `${pl(S.length, "danza", "danzas")} · ${pl(cs.length, "cambio de vestuario", "cambios de vestuario")}.${propio ? " Se actualiza en vivo cuando el maestro hace cambios." : ""}` : propio ? "Aún no tienes danzas asignadas. Esta página se actualiza sola cuando el maestro te asigne." : "Aún no tiene danzas asignadas."}</p></div>`;
   if (!S.length) return h;
   h += `<div class="card" style="display:grid;gap:8px"><h3>Llamados del día · miércoles 18 de noviembre</h3><ul class="llamados">${LLAMADOS.map(([t, a]) => `<li><time>${t}</time> ${esc(a)}</li>`).join("")}</ul></div>`;
   S.forEach((d, i) => {
@@ -299,10 +300,12 @@ const notas = { "Guabina": "mantilla", "Guaneña y Bambuco sureño": "bebé", "F
 const nombreInicio = { "Guaneña y Bambuco sureño": "Guaneña y Danza de Nariño" };
 $("#momentos").innerHTML = BLOQUES.map((b) => `<li class="momento"><time>${fmt(b.ini)} p. m.</time><h3>${esc(b.nombre)}</h3><ul>${b.danzas.map((d) =>
   `<li>${esc(nombreInicio[d] || DZ[d].label)}${notas[d] ? ` <small>· ${esc(notas[d])}</small>` : ""}</li>`).join("")}</ul></li>`).join("");
-let verInicio = true;
+let verInicio = true, vista = "maestro";
+try { if (localStorage.getItem("dfun-v2-vista") === "bailarin") vista = "bailarin"; } catch (e) {}
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-entrar]")) { if (store.sesion?.estado === "listo") { verInicio = false; render(); } else { verInicio = false; store.entrar(); } }
   if (e.target.closest("[data-inicio]")) { verInicio = true; render(); window.scrollTo(0, 0); }
+  const v = e.target.closest("[data-vista]"); if (v) { vista = v.dataset.vista; try { localStorage.setItem("dfun-v2-vista", vista); } catch (err) {} render(); window.scrollTo(0, 0); }
 });
 
 /* ---------- render general ---------- */
@@ -314,17 +317,23 @@ function render() {
   $("#v-inicio").hidden = !enInicio;
   $("#app").hidden = enInicio;
   document.querySelectorAll("[data-entrar]").forEach((b) => { b.disabled = s.estado === "cargando"; b.textContent = listo ? (s.maestro ? "Ir al elenco" : "Ver mi programa") : b.dataset.txt || (b.dataset.txt = b.textContent); });
+  const yo = listo ? D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo) : null;
+  if (listo && !s.maestro) vista = "bailarin";
   $("#login-msg").textContent = s.estado === "dominio" ? `${s.correo} no es una cuenta @unal.edu.co. Ingrese con su correo de la universidad.` : s.estado === "error" ? s.msg : "";
   $("#v-cargando").hidden = true;
   $("#user").hidden = !listo;
-  if (listo) $("#user").innerHTML = `<button class="btn ghost small" data-inicio type="button">Inicio</button><span>${esc(s.correo)}${s.maestro ? ' <span class="badge">Maestro</span>' : ""}</span><button class="btn ghost small" id="salir" type="button">Salir</button>`;
+  const rolTxt = s.admin ? "Administrador" : s.maestro ? "Maestro" : yo ? "Bailarín" : "";
+  const cambiar = listo && s.maestro && yo ? `<div class="seg" role="group" aria-label="Vista"><button type="button" data-vista="maestro" aria-pressed="${vista === "maestro"}">Elenco</button><button type="button" data-vista="bailarin" aria-pressed="${vista === "bailarin"}">Mi programa</button></div>` : "";
+  if (listo) $("#user").innerHTML = `<button class="btn ghost small" data-inicio type="button">Inicio</button>${cambiar}<span>${esc(s.correo)}${rolTxt ? ` <span class="badge">${rolTxt}</span>` : ""}</span><button class="btn ghost small" id="salir" type="button">Salir</button>`;
   if (enInicio) return;
-  $("#v-maestro").hidden = !(listo && s.maestro);
-  $("#v-bailarin").hidden = !(listo && !s.maestro);
+  const comoMaestro = listo && s.maestro && vista === "maestro";
+  $("#v-maestro").hidden = !comoMaestro;
+  $("#v-bailarin").hidden = !(listo && !comoMaestro);
+  document.querySelectorAll("[data-admin]").forEach((el) => (el.hidden = !s.admin));
   if (!listo) return;
   if (s.error) msg(s.error, "bad");
   motor = crearMotor(D());
-  if (s.maestro) { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); renderVestuario(); $("#prog").innerHTML = programaHTML(false); }
+  if (comoMaestro) { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); renderVestuario(); $("#prog").innerHTML = programaHTML(false); }
   else renderBailarin();
 }
 document.addEventListener("click", (e) => { if (e.target.id === "salir") { verInicio = true; store.salir(); } });

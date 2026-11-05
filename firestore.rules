@@ -8,13 +8,17 @@ service cloud.firestore {
         && request.auth.token.email_verified == true
         && request.auth.token.email.matches('.*@unal[.]edu[.]co$');
     }
-    // Debe coincidir con MAESTROS en js/config.js.
+    // Deben coincidir con ADMINS y MAESTROS en public/js/config.js.
+    function admin() {
+      return unal() && request.auth.token.email.lower() in ['hyate@unal.edu.co'];
+    }
     function maestro() {
-      return unal() && request.auth.token.email.lower() in ['bsilvab@unal.edu.co', 'hyate@unal.edu.co'];
+      return admin() || (unal() && request.auth.token.email.lower() in ['bsilvab@unal.edu.co']);
     }
     match /personas/{id} {
       allow read: if unal();
-      allow write: if maestro();
+      allow create, update: if maestro();
+      allow delete: if admin();
     }
     match /elenco/{id} {
       allow read: if unal();
