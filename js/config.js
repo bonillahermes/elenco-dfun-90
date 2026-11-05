@@ -11,3 +11,6 @@ export const firebaseConfig = {
 
 // Dominio de correo permitido para iniciar sesión.
 export const DOMINIO = "unal.edu.co";
+
+// Correos con permiso de edición. Debe coincidir con la lista de firestore.rules.
+export const MAESTROS = ["bsilvab@unal.edu.co", "hyate@unal.edu.co"];

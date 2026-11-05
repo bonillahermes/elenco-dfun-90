@@ -14,24 +14,64 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 </head>
 <body>
-<div class="wrap">
+<!-- Página de inicio -->
+<main id="v-inicio" class="inicio" hidden>
+  <section class="hero">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <div class="hero-eyebrow">Universidad Nacional de Colombia · 1936 – 2026</div>
+        <h1 class="hero-t">Grupo de Danzas Folclóricas</h1>
+        <p class="hero-90"><span>90</span> años bailando Colombia</p>
+        <div class="row hero-cta">
+          <button class="btn btn-lg" type="button" data-entrar>Ingresar</button>
+          <a class="btn btn-lg btn-line" href="#programa">Ver el programa</a>
+        </div>
+        <div class="msg bad" id="login-msg"></div>
+      </div>
+      <div class="falda" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <section class="gala">
+    <div class="gala-in">
+      <div><span class="k">Gala 90 años</span><b>Miércoles 18 de noviembre</b></div>
+      <div><span class="k">Función</span><b>7:10 p. m.</b></div>
+      <div><span class="k">Lugar</span><b>Auditorio León de Greiff</b></div>
+      <div><span class="k">En escena</span><b>12 danzas · 7 momentos</b></div>
+    </div>
+  </section>
+
+  <section class="recorrido" id="programa">
+    <div class="rec-in">
+      <h2 class="sec-t">El recorrido de la noche</h2>
+      <p class="sec-sub">Siete momentos, cada uno con su vestuario y sus objetos en escena.</p>
+      <ol class="momentos" id="momentos"></ol>
+    </div>
+  </section>
+
+  <section class="acceso">
+    <div class="acceso-in">
+      <div>
+        <h2 class="sec-t">Para el elenco</h2>
+        <p class="sec-sub">Ingresa con tu correo @unal.edu.co. Si eres bailarín, verás en vivo qué danzas te asignaron, a qué hora entras y cuánto tiempo tienes para cada cambio de vestuario. El maestro arma el elenco desde aquí mismo.</p>
+      </div>
+      <button class="btn btn-lg" type="button" data-entrar>Ingresar con correo UNAL</button>
+    </div>
+  </section>
+
+  <footer class="pie">Grupo de Danzas Folclóricas · Universidad Nacional de Colombia, sede Bogotá</footer>
+</main>
+
+<div class="wrap" id="app" hidden>
   <header>
     <div class="topbar">
       <div class="eyebrow">Danzas Folclóricas UN · Gala 90 años · Miércoles 18 de noviembre</div>
       <div class="user" id="user" hidden></div>
     </div>
     <h1>Elenco DFUN 90 años</h1>
-    <div class="local" id="local" hidden>Modo de prueba local: los datos se guardan solo en este navegador. Falta conectar Firebase en js/config.js.</div>
+
     <div class="msg" id="status" role="status"></div>
   </header>
-
-  <!-- Inicio de sesión -->
-  <section id="v-login" class="card login" hidden>
-    <h2>Ingresa con tu correo de la universidad</h2>
-    <p class="hint" style="margin:0">Usa tu cuenta @unal.edu.co. El maestro ve y edita el elenco; cada bailarín ve su propio programa.</p>
-    <button class="btn" type="button" id="entrar">Entrar con Google UNAL</button>
-    <div class="msg bad" id="login-msg"></div>
-  </section>
 
   <section id="v-cargando" class="hint">Cargando…</section>
 
@@ -131,17 +171,18 @@
         <div class="row"><button class="btn" type="submit">Inscribir</button><span class="msg" id="f-msg"></span></div>
       </form>
       <div class="card" style="display:grid;gap:10px">
-        <h2>Excel</h2>
-        <p class="hint" style="margin:0">Exportar descarga el elenco completo. Importar reemplaza todas las personas y asignaciones con las del archivo (hoja Inscripción con columnas Nombre, Rol, Vínculo, Correo, una por danza y Observaciones).</p>
+        <h2>Respaldo en Excel</h2>
+        <p class="hint" style="margin:0">Los cambios se guardan solos en la base de datos. Exportar descarga una copia del elenco. Restaurar reemplaza todas las personas y asignaciones con las del archivo; úselo solo en caso de emergencia.</p>
         <div class="row">
           <button class="btn ghost small" type="button" id="xls">Exportar a Excel</button>
-          <label class="btn ghost small" for="imp" style="cursor:pointer">Importar Excel</label>
+          <label class="btn ghost small" for="imp" style="cursor:pointer">Restaurar desde Excel</label>
           <input type="file" id="imp" accept=".xlsx" hidden>
         </div>
       </div>
     </section>
   </div>
 </div>
+<div class="local local-fixed" id="local" hidden>Modo de prueba local (sin Firebase)</div>
 <div class="toast" id="toast" hidden></div>
 <div class="modal-bg" id="modal" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-t">
   <h3 id="modal-t"></h3><p class="hint" id="modal-b" style="margin:0"></p>

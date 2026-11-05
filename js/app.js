@@ -218,16 +218,31 @@ function renderBailarin() {
   $("#v-bailarin").innerHTML = h;
 }
 
+/* ---------- página de inicio ---------- */
+const notas = { "Guabina": "mantilla", "Guaneña y Bambuco sureño": "bebé", "Fandanguillo": "coplas para Marla Patricia", "Arcos": "arcos", "Chicha": "brindis con chicha", "Cumbia": "velas", "Bullerengue": "Delia", "Pilanderas": "balay y pilón" };
+const nombreInicio = { "Guaneña y Bambuco sureño": "Guaneña y Danza de Nariño" };
+$("#momentos").innerHTML = BLOQUES.map((b) => `<li class="momento"><time>${fmt(b.ini)} p. m.</time><h3>${esc(b.nombre)}</h3><ul>${b.danzas.map((d) =>
+  `<li>${esc(nombreInicio[d] || DZ[d].label)}${notas[d] ? ` <small>· ${esc(notas[d])}</small>` : ""}</li>`).join("")}</ul></li>`).join("");
+let verInicio = true;
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-entrar]")) { if (store.sesion?.estado === "listo") { verInicio = false; render(); } else { verInicio = false; store.entrar(); } }
+  if (e.target.closest("[data-inicio]")) { verInicio = true; render(); window.scrollTo(0, 0); }
+});
+
 /* ---------- render general ---------- */
 function render() {
   const s = store.sesion || { estado: "cargando" };
   $("#local").hidden = store.modo !== "local";
-  $("#v-cargando").hidden = s.estado !== "cargando";
-  $("#v-login").hidden = !["anonimo", "dominio", "error"].includes(s.estado);
-  $("#login-msg").textContent = s.estado === "dominio" ? `${s.correo} no es una cuenta @unal.edu.co. Ingrese con su correo de la universidad.` : s.estado === "error" ? s.msg : "";
   const listo = s.estado === "listo";
+  const enInicio = !listo || verInicio;
+  $("#v-inicio").hidden = !enInicio;
+  $("#app").hidden = enInicio;
+  document.querySelectorAll("[data-entrar]").forEach((b) => { b.disabled = s.estado === "cargando"; b.textContent = listo ? (s.maestro ? "Ir al elenco" : "Ver mi programa") : b.dataset.txt || (b.dataset.txt = b.textContent); });
+  $("#login-msg").textContent = s.estado === "dominio" ? `${s.correo} no es una cuenta @unal.edu.co. Ingrese con su correo de la universidad.` : s.estado === "error" ? s.msg : "";
+  $("#v-cargando").hidden = true;
   $("#user").hidden = !listo;
-  if (listo) $("#user").innerHTML = `<span>${esc(s.correo)}${s.maestro ? ' <span class="badge">Maestro</span>' : ""}</span>${store.modo === "firebase" ? '<button class="btn ghost small" id="salir" type="button">Salir</button>' : ""}`;
+  if (listo) $("#user").innerHTML = `<button class="btn ghost small" data-inicio type="button">Inicio</button><span>${esc(s.correo)}${s.maestro ? ' <span class="badge">Maestro</span>' : ""}</span><button class="btn ghost small" id="salir" type="button">Salir</button>`;
+  if (enInicio) return;
   $("#v-maestro").hidden = !(listo && s.maestro);
   $("#v-bailarin").hidden = !(listo && !s.maestro);
   if (!listo) return;
@@ -236,8 +251,7 @@ function render() {
   if (s.maestro) { renderSummary(); renderMatriz(); renderPersonaSel(); renderPersona(); renderDanza(); renderLogistica(); $("#prog").innerHTML = programaHTML(false); }
   else renderBailarin();
 }
-document.addEventListener("click", (e) => { if (e.target.id === "salir") store.salir(); });
-$("#entrar").addEventListener("click", () => store.entrar());
+document.addEventListener("click", (e) => { if (e.target.id === "salir") { verInicio = true; store.salir(); } });
 
 try { const v = localStorage.getItem("dfun-v2-tab"); if (VIEWS.includes(v)) show(v); } catch (e) {}
 render();

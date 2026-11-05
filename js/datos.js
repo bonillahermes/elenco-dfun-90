@@ -6,8 +6,8 @@
 //   personas/{id}   { nombre, rol, vinculo, correo, postulaciones[], obs, creado }
 //   elenco/{id}     { danzas[], actualizado, por }        (id = id de la persona)
 //   config/estado   { definidas: { [danza]: true } }
-//   maestros/{correo} { nombre }                           (lo crea el administrador en la consola)
-import { firebaseConfig, DOMINIO } from "./config.js";
+// Los maestros (con permiso de edición) están en config.js y en firestore.rules.
+import { firebaseConfig, DOMINIO, MAESTROS } from "./config.js";
 import { DEFINIDAS_INICIALES } from "./montaje.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.12.2";
@@ -47,8 +47,7 @@ function storeFirebase(notificar) {
         s.sesion = { estado: "dominio", correo };
         return notificar();
       }
-      let maestro = false;
-      try { maestro = (await fs.getDoc(fs.doc(db, "maestros", correo))).exists(); } catch (e) { maestro = false; }
+      const maestro = MAESTROS.includes(correo);
       s.sesion = { estado: "listo", correo, nombre: u.displayName || correo, maestro };
       const err = (e) => { s.sesion.error = "No se pudo leer la base de datos. Revise su conexión."; notificar(); console.error(e); };
       unsubs.push(fs.onSnapshot(fs.collection(db, "personas"), (q) => {
@@ -116,13 +115,15 @@ function storeLocal(notificar) {
   s.datos = raw || { personas: [], elenco: {}, definidas: { ...DEFINIDAS_INICIALES } };
   const guardar = () => { try { localStorage.setItem(KEY, JSON.stringify(s.datos)); } catch (e) {} ordenarPersonas(s.datos.personas); notificar(); return Promise.resolve(); };
 
-  s.iniciar = async () => {
+  const abrir = () => {
     s.sesion = comoBailarin
       ? { estado: "listo", correo: comoBailarin, nombre: comoBailarin, maestro: false }
-      : { estado: "listo", correo: "maestro@" + DOMINIO, nombre: "Modo de prueba", maestro: true };
+      : { estado: "listo", correo: MAESTROS[0], nombre: "Modo de prueba", maestro: true };
     ordenarPersonas(s.datos.personas); notificar();
   };
-  s.entrar = s.salir = async () => {};
+  s.iniciar = async () => { s.sesion = { estado: "anonimo" }; notificar(); };
+  s.entrar = async () => abrir();
+  s.salir = async () => { s.sesion = { estado: "anonimo" }; notificar(); };
   s.guardarElenco = (id, danzas) => { s.datos.elenco[id] = danzas; return guardar(); };
   s.crearPersona = (p) => { const id = nuevoId(); s.datos.personas.push({ id, ...p, creado: Date.now() }); return guardar().then(() => id); };
   s.actualizarPersona = (id, patch) => { Object.assign(s.datos.personas.find((p) => p.id === id) || {}, patch); return guardar(); };

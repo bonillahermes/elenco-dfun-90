@@ -1,0 +1,6 @@
+{
+  "name": "elenco-dfun-90-scripts",
+  "private": true,
+  "type": "module",
+  "dependencies": { "firebase-admin": "^12.1.0" }
+}

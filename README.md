@@ -7,11 +7,11 @@ Herramienta del maestro para armar el elenco de la Gala 90 años del Grupo de Da
 
 ## Puesta en marcha
 1. Firebase: proyecto con Authentication (Google) y Firestore. Copiar la configuración web en `js/config.js`.
-2. Firebase → Authentication → Authorized domains: `dfun.app` y el dominio `*.pages.dev`.
-3. Firestore: crear `maestros/{correo}` para cada persona que puede editar.
-4. Reglas: `firebase deploy --only firestore:rules` (o pegar `firestore.rules` en la consola).
-5. Cloudflare Pages: conectar el repositorio, sin build, salida `/`, dominio `dfun.app`.
-6. Ingresar como maestro, pestaña Datos, Importar Excel.
+2. Firebase → Authentication → Authorized domains: `dfun.app`.
+   Agregar también `elenco-dfun-90.bonillahermes.workers.dev` y `v2-elenco-dfun-90.bonillahermes.workers.dev`.
+3. Reglas: `firebase deploy --only firestore:rules` (o pegar `firestore.rules` en la consola).
+4. Carga inicial (una sola vez): `gcloud auth application-default login`, luego `cd scripts && npm install && node sembrar.mjs ../datos/semilla.json --proyecto <id>`.
+5. Cloudflare: el Worker `elenco-dfun-90` ya está conectado al repositorio y a `dfun.app`.
 
 ## Desarrollo
 - Servidor local: `npx serve .` (los módulos ES no funcionan abriendo el archivo directamente).
