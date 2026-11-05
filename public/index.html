@@ -58,60 +58,69 @@
     </div>
   </section>
 
-  <!-- Galería: fotos del grupo con frases por los 90 años. -->
-  <section class="po-galeria po-g" id="galeria" aria-labelledby="po-galeria-t">
-    <div class="po-in">
+  <!-- Carrusel: fotos del grupo con frases por los 90 años. Se desliza con el dedo o con la rueda;
+       portada.js agrega los botones y el contador. -->
+  <section class="po-galeria" id="galeria" aria-labelledby="po-galeria-t" aria-roledescription="carrusel">
+    <div class="po-g"><div class="po-in">
       <h2 id="po-galeria-t">Noventa años en escena</h2>
       <p class="po-galeria-sub">En cada danza, una región del país; en cada bailarín, una historia.</p>
-      <div class="po-galeria-grid">
-      <figure class="po-g-foto po-g-a">
-        <picture>
-          <source type="image/webp" srcset="img/portada/bebe.webp">
-          <img src="img/portada/bebe.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Una pareja en escena: él con poncho y sombrero, ella con falda roja y chal vinotinto; juntos sostienen un bebé.">
-        </picture>
-      </figure>
-      <p class="po-frase po-g-f1">Noventa años de pasos que pasan de una generación a la siguiente.</p>
-      <p class="po-frase po-g-f2">Cada falda que gira guarda la memoria de quienes bailaron antes.</p>
-      <figure class="po-g-foto po-g-b">
-        <picture>
-          <source type="image/webp" srcset="img/portada/panuelos.webp">
-          <img src="img/portada/panuelos.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Parejas bailan con pañuelos de colores en alto: ellas con polleras de colores, ellos de blanco con sombrero.">
-        </picture>
-      </figure>
-      <figure class="po-g-foto po-g-t">
-        <picture>
-          <source type="image/webp" srcset="img/portada/ruanas.webp">
-          <img src="img/portada/ruanas.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Bailarines frente a un muro de ladrillo: los hombres con sombrero negro, pañoleta roja y ruana gris; las mujeres con chal negro, blusa rosada y una vasija pequeña sobre la cabeza.">
-        </picture>
-      </figure>
-      <figure class="po-g-foto po-g-t">
-        <picture>
-          <source type="image/webp" srcset="img/portada/bastones.webp">
-          <img src="img/portada/bastones.jpg" width="1200" height="704" loading="lazy" decoding="async" alt="Bailarinas con blusa blanca o rosada, falda negra con franjas rojas y una vasija sobre la cabeza; detrás, los hombres de camisa beige con bastón.">
-        </picture>
-      </figure>
-      <figure class="po-g-foto po-g-t po-g-t3">
-        <picture>
-          <source type="image/webp" srcset="img/portada/bateas.webp">
-          <img src="img/portada/bateas.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Bailarinas de espaldas levantan bateas tejidas sobre la cabeza; llevan polleras de colores.">
-        </picture>
-      </figure>
-      <figure class="po-g-foto po-g-c">
-        <picture>
-          <source type="image/webp" srcset="img/portada/vinotinto.webp">
-          <img src="img/portada/vinotinto.jpg" width="1200" height="600" loading="lazy" decoding="async" alt="Parejas tomadas de la mano en escena: ellas con vestidos largos vinotinto, rojos y negros con encaje; ellos de traje negro.">
-        </picture>
-      </figure>
-      <p class="po-frase po-g-f3">La tradición no se guarda: se baila.</p>
-      <figure class="po-g-foto po-g-d">
-        <picture>
-          <source type="image/webp" srcset="img/portada/manos.webp">
-          <img src="img/portada/manos.jpg" width="1200" height="676" loading="lazy" decoding="async" alt="Dos manos tomadas bajo una luz dorada.">
-        </picture>
-      </figure>
-      <p class="po-frase po-g-f4">Noventa años después, seguimos tomados de la mano.</p>
-      </div>
-    </div>
+    </div></div>
+    <ul class="po-pista" id="po-pista" tabindex="0" aria-label="Fotos y frases, desliza para ver más">
+        <li class="po-d po-d-vinotinto" role="group" aria-roledescription="diapositiva" aria-label="1 de 7">
+          <picture>
+            <source type="image/webp" srcset="img/portada/bebe.webp">
+            <img src="img/portada/bebe.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Una pareja en escena: él con poncho y sombrero, ella con falda roja y chal vinotinto; juntos sostienen un bebé.">
+          </picture>
+          <p class="po-frase">Noventa años de pasos que pasan de una generación a la siguiente.</p>
+        </li>
+        <li class="po-d po-d-rajalena" role="group" aria-roledescription="diapositiva" aria-label="2 de 7">
+          <picture>
+            <source type="image/webp" srcset="img/portada/panuelos.webp">
+            <img src="img/portada/panuelos.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Parejas bailan con pañuelos de colores en alto: ellas con polleras de colores, ellos de blanco con sombrero.">
+          </picture>
+          <p class="po-frase">Cada falda que gira guarda la memoria de quienes bailaron antes.</p>
+        </li>
+        <li class="po-d po-d-chal" role="group" aria-roledescription="diapositiva" aria-label="3 de 7">
+          <picture>
+            <source type="image/webp" srcset="img/portada/ruanas.webp">
+            <img src="img/portada/ruanas.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Bailarines frente a un muro de ladrillo: los hombres con sombrero negro, pañoleta roja y ruana gris; las mujeres con chal negro, blusa rosada y una vasija pequeña sobre la cabeza.">
+          </picture>
+          <p class="po-frase">Ruanas, sombreros y pañoletas: el país entero cabe en un escenario.</p>
+        </li>
+        <li class="po-d po-d-panoleta" role="group" aria-roledescription="diapositiva" aria-label="4 de 7">
+          <picture>
+            <source type="image/webp" srcset="img/portada/bastones.webp">
+            <img src="img/portada/bastones.jpg" width="1200" height="704" loading="lazy" decoding="async" alt="Bailarinas con blusa blanca o rosada, falda negra con franjas rojas y una vasija sobre la cabeza; detrás, los hombres de camisa beige con bastón.">
+          </picture>
+          <p class="po-frase">Lo que nos enseñaron nuestros maestros, lo seguimos enseñando bailando.</p>
+        </li>
+        <li class="po-d po-d-arcos" role="group" aria-roledescription="diapositiva" aria-label="5 de 7">
+          <picture>
+            <source type="image/webp" srcset="img/portada/bateas.webp">
+            <img src="img/portada/bateas.jpg" width="1200" height="800" loading="lazy" decoding="async" alt="Bailarinas de espaldas levantan bateas tejidas sobre la cabeza; llevan polleras de colores.">
+          </picture>
+          <p class="po-frase">La tradición no se guarda: se baila.</p>
+        </li>
+        <li class="po-d po-d-vinotinto" role="group" aria-roledescription="diapositiva" aria-label="6 de 7">
+          <picture>
+            <source type="image/webp" srcset="img/portada/vinotinto.webp">
+            <img src="img/portada/vinotinto.jpg" width="1200" height="600" loading="lazy" decoding="async" alt="Parejas tomadas de la mano en escena: ellas con vestidos largos vinotinto, rojos y negros con encaje; ellos de traje negro.">
+          </picture>
+          <p class="po-frase">Noventa años de ensayos, aplausos y telones que se abren.</p>
+        </li>
+        <li class="po-d po-d-vela po-d-fin" role="group" aria-roledescription="diapositiva" aria-label="7 de 7">
+          <picture>
+            <source type="image/webp" srcset="img/portada/manos.webp">
+            <img src="img/portada/manos.jpg" width="1200" height="676" loading="lazy" decoding="async" alt="Dos manos tomadas bajo una luz dorada.">
+          </picture>
+          <p class="po-frase">Noventa años después, seguimos tomados de la mano.</p>
+        </li>
+    </ul>
+    <div class="po-g"><div class="po-in po-controles" id="po-controles" hidden>
+      <button class="po-ctl" type="button" data-carrusel="-1">Anterior</button>
+      <button class="po-ctl" type="button" data-carrusel="1">Siguiente</button>
+      <span class="po-cuenta-d" id="po-cuenta-d" aria-live="polite">1 de 7</span>
+    </div></div>
   </section>
 
   <section class="po-gala po-g" aria-labelledby="po-gala-t">

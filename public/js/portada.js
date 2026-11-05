@@ -1,4 +1,4 @@
-// Portada pública (#v-inicio): telón que se abre una vez, fotos que rotan en la apertura y cifras de la gala.
+// Portada pública (#v-inicio): telón que se abre una vez, fotos que rotan en la apertura y carrusel de fotos y cifras de la gala.
 // El número de danzas y bloques sale de montaje.js.
 import { BLOQUES, DANZAS } from "./montaje.js";
 
@@ -10,6 +10,7 @@ export function iniciarPortada() {
   const quieto = matchMedia("(prefers-reduced-motion: reduce)");
   telon(raiz, quieto);
   hero(raiz, quieto);
+  carrusel(raiz, quieto);
   ecoLogin(raiz);
   cuenta(raiz);
 }
@@ -55,6 +56,43 @@ function hero(raiz, quieto) {
       caja.classList.toggle("po-vivo", !pausado);
     });
   }
+}
+
+// Carrusel: se desliza de forma nativa; aquí solo van los botones Anterior y Siguiente y el contador.
+function carrusel(raiz, quieto) {
+  const pista = $("#po-pista", raiz), ctl = $("#po-controles", raiz), cuenta = $("#po-cuenta-d", raiz);
+  if (!pista || !ctl) return;
+  const items = [...pista.children];
+  const [antes, despues] = ctl.querySelectorAll("[data-carrusel]");
+  // Índice de la diapositiva alineada con el borde izquierdo de la pista.
+  const indice = () => {
+    const borde = pista.getBoundingClientRect().left + (parseFloat(getComputedStyle(pista).paddingLeft) || 0);
+    let mejor = 0, dist = Infinity;
+    items.forEach((it, k) => { const d = Math.abs(it.getBoundingClientRect().left - borde); if (d < dist) { dist = d; mejor = k; } });
+    return mejor;
+  };
+  const alFinal = () => pista.scrollLeft + pista.clientWidth >= pista.scrollWidth - 2;
+  const actualizar = () => {
+    const k = alFinal() ? items.length - 1 : indice();
+    cuenta.textContent = `${k + 1} de ${items.length}`;
+    antes.disabled = pista.scrollLeft <= 2;
+    despues.disabled = alFinal();
+  };
+  const ir = (paso) => {
+    const k = Math.min(Math.max(indice() + paso, 0), items.length - 1);
+    const destino = pista.scrollLeft + items[k].getBoundingClientRect().left - pista.getBoundingClientRect().left - (parseFloat(getComputedStyle(pista).paddingLeft) || 0);
+    pista.scrollTo({ left: destino, behavior: quieto.matches ? "instant" : "smooth" });
+  };
+  ctl.addEventListener("click", (e) => { const b = e.target.closest("[data-carrusel]"); if (b) ir(Number(b.dataset.carrusel)); });
+  pista.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); ir(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); ir(-1); }
+  });
+  let pendiente = false;
+  pista.addEventListener("scroll", () => { if (pendiente) return; pendiente = true; requestAnimationFrame(() => { pendiente = false; actualizar(); }); }, { passive: true });
+  addEventListener("resize", actualizar);
+  ctl.hidden = false;
+  actualizar();
 }
 
 // #login-msg está junto al botón de la apertura; se repite junto al botón del elenco para quien ingresó desde abajo.
