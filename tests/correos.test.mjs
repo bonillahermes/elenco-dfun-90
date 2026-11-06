@@ -50,10 +50,17 @@ test("no reemplaza un correo ya vinculado y reconoce el que ya estaba igual", ()
   assert.deepEqual(r.iguales, ["Lucía Mora Díaz"]);
 });
 
-test("rechaza correos no institucionales, mal escritos o repetidos", () => {
-  const r = cruzar(tsv([["Andrés Pérez Gómez", "a@gmail.com"], ["Pedro Gil Rey", "pe dro@unal.edu.co"], ["Juan Díaz Ortiz", "j@unal.edu.co"], ["Juan Díaz", "j@unal.edu.co"]]), base());
+test("rechaza correos mal escritos o repetidos", () => {
+  const r = cruzar(tsv([["Andrés Pérez Gómez", "a@gmail"], ["Pedro Gil Rey", "pe dro@unal.edu.co"], ["Juan Díaz Ortiz", "j@unal.edu.co"], ["Juan Díaz", "j@unal.edu.co"]]), base());
   assert.equal(r.cambios.length, 1);
   assert.equal(r.problemas.length, 3);
+});
+
+test("acepta correos externos de egresados y los marca", () => {
+  const r = cruzar(tsv([["Andrés Pérez Gómez", "A.Perez@Gmail.com"], ["Pedro Gil Rey", "pgil@unal.edu.co"]]), base());
+  assert.deepEqual(r.cambios.map((x) => [x.p.id, x.correo, x.externo]), [["a", "a.perez@gmail.com", true], ["f", "pgil@unal.edu.co", false]]);
+  const ya = cruzar(tsv([["Lucía Mora Díaz", "lmora@gmail.com"]]), [{ id: "c", nombre: "Lucía Mora Díaz", correo: "lmora@gmail.com" }]);
+  assert.deepEqual(ya.externosIguales.map((x) => x.correo), ["lmora@gmail.com"]);
 });
 
 test("no asigna dos correos a la misma persona ni un correo de otra", () => {

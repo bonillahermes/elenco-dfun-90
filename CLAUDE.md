@@ -5,7 +5,7 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 ## Stack
 - HTML, CSS y JavaScript en módulos ES, sin paso de compilación.
 - Alojamiento: Cloudflare Workers con assets estáticos, conectado a este repositorio. `main` = producción en `dfun.app` y `elenco-dfun-90.bonillahermes.workers.dev`; otras ramas = vista previa en `<rama>-elenco-dfun-90.bonillahermes.workers.dev`. Sin build.
-- Firebase Authentication (Google, solo cuentas `@unal.edu.co`) y Cloud Firestore en tiempo real. SDK 10.12.2 desde gstatic.
+- Firebase Authentication (Google: cuentas `@unal.edu.co` y egresados con Gmail autorizado) y Cloud Firestore en tiempo real. SDK 10.12.2 desde gstatic.
 - SheetJS 0.18.5 desde cdnjs para importar y exportar Excel.
 - Pruebas: `node --test tests/*.test.mjs` (no requiere dependencias): reglas del montaje y cruce de correos.
 
@@ -27,6 +27,7 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 - `personas/{id}`: nombre, rol (Hombre | Mujer), vinculo, correo, postulaciones[], obs, creado.
 - `elenco/{id}`: danzas[], actualizado, por. El id es el de la persona.
 - `config/estado`: definidas { [danza]: true }.
+- `externos/{correo}`: persona, actualizado, por. Autoriza a un egresado con correo no UNAL (Gmail). La app la crea o borra al cambiar el correo de una persona; `scripts/correos.mjs` también. Las reglas exigen además que la persona señalada tenga ese mismo correo.
 
 ## Reglas del montaje (dadas por el maestro)
 - 6 bloques; dentro de un bloque se comparte vestuario. Guabina, Guaneña y Danza de Nariño forman un solo bloque (cambio leve, `leve: true`).
@@ -45,7 +46,8 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 ## Roles
 - Administrador: hyate@unal.edu.co (Hermes). Todo lo del maestro, más restaurar datos desde Excel, borrar personas y vincular correos a nombres (la UI y las reglas lo restringen al admin).
 - Maestro: bsilvab@unal.edu.co (Bryan Nicolás Silva Bermúdez) y el administrador. Arma el elenco. Lista en `MAESTROS` (config.js) y en `maestro()` de firestore.rules.
-- Bailarín: cualquier cuenta UNAL cuyo correo esté vinculado a una persona; ve su propio programa. Sin vínculo no hay ficha: vincular es la unión entre la cuenta y el nombre del elenco.
+- Bailarín: cualquier cuenta UNAL cuyo correo esté vinculado a una persona; ve su propio programa.
+- Egresado: quien estudió antes de que existiera el correo UNAL. El administrador vincula su Gmail a su nombre y la portada tiene "¿Eres egresado? Ingresa con tu cuenta de Google" (sin limitar a UNAL). Ve lo mismo que un bailarín; nunca es maestro ni administrador. Sin vínculo no hay ficha: vincular es la unión entre la cuenta y el nombre del elenco.
 - Vincular: solo con el rol Administrador activo. El panel sugiere la persona cuyo nombre coincide con el nombre de la cuenta de Google, avisa cuántos faltan y la matriz tiene el filtro "Sin correo". Restaurar desde Excel conserva los correos ya vinculados (por nombre) cuando el archivo no los trae.
 - Un mismo usuario puede tener varios roles. El selector "Ver como" (encabezado y panel de Inicio) cambia el rol activo: Administrador, Maestro o Bailarín. Es solo de interfaz; los permisos reales los dan las reglas de Firestore. Se recuerda en localStorage (`dfun-v2-rol`).
 

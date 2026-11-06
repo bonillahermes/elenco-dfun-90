@@ -11,6 +11,9 @@ export const firebaseConfig = {
 
 // Dominio de correo permitido para iniciar sesión.
 export const DOMINIO = "unal.edu.co";
+export const esUnal = (c) => String(c || "").toLowerCase().endsWith("@" + DOMINIO);
+// Correo bien escrito. Los que no son UNAL (egresados con Gmail) se autorizan en externos/{correo} al vincularlos.
+export const CORREO_VALIDO = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 // Roles. Deben coincidir con las listas de firestore.rules.
 // admin: todo lo del maestro, más restaurar datos y borrar personas.

@@ -1,6 +1,7 @@
 import { BLOQUES, DANZAS, DZ, BQ, PROGRAMA, REGLAS, CUPOS, VESTUARIO, PIEZAS_COMPARTIDAS, LLAMADOS, fmt } from "./montaje.js";
 import { crearMotor, cambios, nivel, maxDe } from "./reglas.js";
 import { crearStore } from "./datos.js";
+import { esUnal, CORREO_VALIDO } from "./config.js";
 import { leerExcel, exportarExcel } from "./excel.js";
 import { iniciarPortada } from "./portada.js";
 
@@ -246,7 +247,7 @@ function renderPersona() {
   if (!p) { $("#p-head").textContent = D().personas.length ? "Nadie coincide con la búsqueda." : "No hay personas cargadas."; $("#p-tl").innerHTML = ""; $("#p-opts").innerHTML = ""; $("#p-datos").hidden = true; return; }
   $("#p-datos").hidden = false;
   const S = motor.asig(p.id), cs = cambios(S), mx = maxDe(p), esAdmin = rolActivo === "admin" && store.sesion?.admin;
-  $("#p-head").innerHTML = `<h2>${esc(p.nombre)} ${rolTag(p)}</h2><p class="hint">${pl(S.length, "danza", "danzas")}${mx ? ` de ${mx} posibles` : ""}. ${pl(cs.length, "cambio", "cambios")} de vestuario. ${p.correo ? esc(p.correo) : "Sin correo vinculado: no puede ver su programa."}</p>`;
+  $("#p-head").innerHTML = `<h2>${esc(p.nombre)} ${rolTag(p)}</h2><p class="hint">${pl(S.length, "danza", "danzas")}${mx ? ` de ${mx} posibles` : ""}. ${pl(cs.length, "cambio", "cambios")} de vestuario. ${p.correo ? esc(p.correo) + (esUnal(p.correo) ? "" : " (correo externo de egresado)") : "Sin correo vinculado: no puede ver su programa."}</p>`;
   // Al cambiar de persona, el administrador ve abiertos los datos si falta el correo.
   if ($("#p-datos").dataset.id !== p.id) { $("#p-datos").dataset.id = p.id; $("#p-datos").open = esAdmin && !p.correo; }
   if (document.activeElement?.closest("#p-form") == null) { $("#p-nombre").value = p.nombre || ""; $("#p-correo").value = p.correo || ""; $("#p-rol").value = p.rol || ""; $("#p-vin").value = p.vinculo || ""; }
@@ -274,9 +275,10 @@ $("#p-form").addEventListener("submit", async (e) => {
   if (!nombre) return msg("Escriba el nombre completo.", "bad");
   if (D().personas.some((x) => x.id !== p.id && norm(x.nombre) === norm(nombre))) return msg("Ya hay otra persona con ese nombre.", "bad");
   const correo = store.sesion?.admin ? $("#p-correo").value.trim().toLowerCase() : (p.correo || "");
-  if (correo && !/^[^@\s]+@unal\.edu\.co$/.test(correo)) return msg("El correo debe terminar en @unal.edu.co.", "bad");
-  if (correo && D().personas.some((x) => x.id !== p.id && x.correo === correo)) return msg("Ese correo ya está vinculado a otra persona.", "bad");
-  try { await store.actualizarPersona(p.id, { nombre, correo, rol: $("#p-rol").value, vinculo: $("#p-vin").value }); msg(`Datos de ${nombre} guardados.`, "ok"); document.activeElement?.blur(); }
+  if (correo && !CORREO_VALIDO.test(correo)) return msg("El correo está mal escrito.", "bad");
+  if (correo && D().personas.some((x) => x.id !== p.id && (x.correo || "").toLowerCase() === correo)) return msg("Ese correo ya está vinculado a otra persona.", "bad");
+  const ext = correo && correo !== (p.correo || "").toLowerCase() && !esUnal(correo) ? ` Correo externo: ${correo} podrá ingresar como egresado con su cuenta de Google.` : "";
+  try { await store.actualizarPersona(p.id, { nombre, correo, rol: $("#p-rol").value, vinculo: $("#p-vin").value }); msg(`Datos de ${nombre} guardados.${ext}`, "ok"); document.activeElement?.blur(); }
   catch (err) { msg("No se pudo guardar.", "bad"); }
 });
 
@@ -320,9 +322,10 @@ $("#f-new").addEventListener("submit", async (e) => {
   const nombre = $("#f-nombre").value.replace(/\s+/g, " ").trim(), correo = store.sesion?.admin ? $("#f-correo").value.trim().toLowerCase() : "";
   const rol = document.querySelector('input[name="rol"]:checked')?.value, vinculo = document.querySelector('input[name="vin"]:checked')?.value || "";
   if (!nombre || !rol) return ($("#f-msg").textContent = "Escriba el nombre y elija el rol.");
-  if (correo && !/^[^@\s]+@unal\.edu\.co$/.test(correo)) return ($("#f-msg").textContent = "El correo debe terminar en @unal.edu.co.");
+  if (correo && !CORREO_VALIDO.test(correo)) return ($("#f-msg").textContent = "El correo está mal escrito.");
+  if (correo && D().personas.some((p) => (p.correo || "").toLowerCase() === correo)) return ($("#f-msg").textContent = "Ese correo ya está vinculado a otra persona.");
   if (D().personas.some((p) => norm(p.nombre) === norm(nombre))) return ($("#f-msg").textContent = "Esa persona ya está en el grupo.");
-  try { await store.crearPersona({ nombre, rol, vinculo, correo, postulaciones: [], obs: "" }); e.target.reset(); $("#f-msg").textContent = `${nombre} quedó inscrito(a).`; }
+  try { await store.crearPersona({ nombre, rol, vinculo, correo, postulaciones: [], obs: "" }); e.target.reset(); $("#f-msg").textContent = `${nombre} quedó inscrito(a).${correo && !esUnal(correo) ? " Con correo externo: podrá ingresar como egresado." : ""}`; }
   catch (err) { $("#f-msg").textContent = "No se pudo guardar."; }
 });
 $("#xls").addEventListener("click", () => { try { exportarExcel(D(), motor); msg("Archivo exportado.", "ok"); } catch (e) { msg("No se pudo exportar: " + e.message, "bad"); } });
@@ -446,7 +449,8 @@ function permisos(s) {
 const yoDe = (s) => D().personas.find((x) => (x.correo || "").toLowerCase() === s.correo) || null;
 function ir(v) { vista = v; verPortada = false; render(); window.scrollTo(0, 0); }
 document.addEventListener("click", async (e) => {
-  if (e.target.closest("[data-entrar]")) { if (store.sesion?.estado === "listo") ir("panel"); else { verPortada = false; vista = "panel"; store.entrar(); } return; }
+  const en = e.target.closest("[data-entrar]");
+  if (en) { if (store.sesion?.estado === "listo") ir("panel"); else { verPortada = false; vista = "panel"; store.entrar({ externo: en.dataset.entrar === "externo" }); } return; }
   if (e.target.closest("[data-inicio]")) return ir("panel");
   if (e.target.closest("[data-portada]")) { verPortada = true; render(); window.scrollTo(0, 0); return; }
   const v = e.target.closest("[data-vista]"); if (v) return ir(v.dataset.vista);
@@ -540,8 +544,11 @@ function render() {
   const enPortada = !listo || verPortada;
   $("#v-inicio").hidden = !enPortada;
   $("#app").hidden = enPortada;
-  document.querySelectorAll("[data-entrar]").forEach((b) => { b.disabled = s.estado === "cargando"; b.textContent = listo ? "Ir a mi inicio" : b.dataset.txt || (b.dataset.txt = b.textContent); });
-  $("#login-msg").textContent = s.estado === "dominio" ? `${s.correo} no es una cuenta @unal.edu.co. Ingrese con su correo de la universidad.` : s.estado === "error" ? s.msg : "";
+  document.querySelectorAll("[data-entrar]").forEach((b) => { b.disabled = s.estado === "cargando"; if (b.dataset.entrar !== "externo") b.textContent = listo ? "Ir a mi inicio" : b.dataset.txt || (b.dataset.txt = b.textContent); });
+  document.querySelectorAll("[data-egresado]").forEach((x) => { x.hidden = listo; });
+  $("#login-msg").textContent = s.estado === "dominio" ? `La cuenta ${s.correo} no tiene el correo verificado en Google.`
+    : s.estado === "externo" ? `${s.correo} no está vinculado a ningún nombre del elenco. Si eres egresado, pídele al administrador que lo vincule; si estudias o trabajas en la UNAL, ingresa con tu correo @unal.edu.co.`
+    : s.estado === "error" ? s.msg : "";
   $("#v-cargando").hidden = true;
   $("#user").hidden = !listo;
   $("#modo-admin").hidden = !(listo && permisos(s).admin);

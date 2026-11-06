@@ -6,8 +6,9 @@
 //   personas/{id}   { nombre, rol, vinculo, correo, postulaciones[], obs, creado }
 //   elenco/{id}     { danzas[], actualizado, por }        (id = id de la persona)
 //   config/estado   { definidas: { [danza]: true } }
+//   externos/{correo} { persona, actualizado, por }        (autoriza a un egresado con correo no UNAL; solo el admin la escribe)
 // Roles (admin, maestro) en config.js y en firestore.rules.
-import { firebaseConfig, DOMINIO, MAESTROS, ADMINS } from "./config.js";
+import { firebaseConfig, DOMINIO, MAESTROS, ADMINS, esUnal } from "./config.js";
 import { DEFINIDAS_INICIALES } from "./montaje.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.12.2";
@@ -42,13 +43,12 @@ function storeFirebase(notificar) {
       cortar();
       if (!u) { s.sesion = { estado: "anonimo" }; return notificar(); }
       const correo = (u.email || "").toLowerCase();
-      if (!correo.endsWith("@" + DOMINIO) || !u.emailVerified) {
-        await auth.signOut(A);
-        s.sesion = { estado: "dominio", correo };
-        return notificar();
-      }
-      const admin = ADMINS.includes(correo), maestro = admin || MAESTROS.includes(correo);
-      s.sesion = { estado: "listo", correo, nombre: u.displayName || correo, maestro, admin };
+      if (!u.emailVerified) { await auth.signOut(A); s.sesion = { estado: "dominio", correo }; return notificar(); }
+      const externo = !esUnal(correo);
+      // Egresado con correo externo: entra solo si el administrador lo vinculó a una persona del elenco.
+      if (externo && !(await autorizado(correo))) { await auth.signOut(A); s.sesion = { estado: "externo", correo }; return notificar(); }
+      const admin = !externo && ADMINS.includes(correo), maestro = admin || (!externo && MAESTROS.includes(correo));
+      s.sesion = { estado: "listo", correo, nombre: u.displayName || correo, maestro, admin, externo };
       const err = (e) => { s.sesion.error = "No se pudo leer la base de datos. Revise su conexión."; notificar(); console.error(e); };
       unsubs.push(fs.onSnapshot(fs.collection(db, "personas"), (q) => {
         s.datos.personas = ordenarPersonas(q.docs.map((d) => ({ id: d.id, ...d.data() }))); notificar();
@@ -63,10 +63,22 @@ function storeFirebase(notificar) {
     });
   };
 
-  s.entrar = async () => {
+  // La autorización existe y la persona que señala sigue teniendo ese correo (lo mismo que exigen las reglas).
+  async function autorizado(correo) {
+    const { fs, db } = fb;
+    try {
+      const a = await fs.getDoc(fs.doc(db, "externos", correo));
+      if (!a.exists()) return false;
+      const p = await fs.getDoc(fs.doc(db, "personas", a.data().persona));
+      return p.exists() && (p.data().correo || "").toLowerCase() === correo;
+    } catch (e) { return false; }
+  }
+
+  // externo: sin limitar el selector de Google a cuentas UNAL (egresados con Gmail).
+  s.entrar = async ({ externo = false } = {}) => {
     const { auth, A } = await cargarSDK();
     const p = new auth.GoogleAuthProvider();
-    p.setCustomParameters({ hd: DOMINIO, prompt: "select_account" });
+    p.setCustomParameters(externo ? { prompt: "select_account" } : { hd: DOMINIO, prompt: "select_account" });
     try { await auth.signInWithPopup(A, p); }
     catch (e) {
       if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment"].includes(e.code)) return auth.signInWithRedirect(A, p);
@@ -76,11 +88,35 @@ function storeFirebase(notificar) {
   s.salir = async () => { const { auth, A } = await cargarSDK(); await auth.signOut(A); };
 
   const meta = () => ({ actualizado: fb.fs.serverTimestamp(), por: s.sesion.correo });
+  const refExterno = (c) => fb.fs.doc(fb.db, "externos", c);
+  const correoDe = (id) => (s.datos.personas.find((p) => p.id === id)?.correo || "").toLowerCase();
+  // Mantiene externos/{correo} al día cuando cambia el correo de una persona (solo el admin cambia correos).
+  const sincronizarExterno = (b, id, antes, despues) => {
+    if (antes && antes !== despues && !esUnal(antes)) b.delete(refExterno(antes));
+    if (despues && antes !== despues && !esUnal(despues)) b.set(refExterno(despues), { persona: id, ...meta() });
+  };
   s.guardarElenco = (id, danzas) => fb.fs.setDoc(fb.fs.doc(fb.db, "elenco", id), { danzas, ...meta() });
-  s.crearPersona = (p) => { const id = nuevoId(); return fb.fs.setDoc(fb.fs.doc(fb.db, "personas", id), { ...p, creado: Date.now() }).then(() => id); };
-  s.actualizarPersona = (id, patch) => fb.fs.updateDoc(fb.fs.doc(fb.db, "personas", id), patch);
+  s.crearPersona = (p) => {
+    const id = nuevoId(), b = fb.fs.writeBatch(fb.db);
+    b.set(fb.fs.doc(fb.db, "personas", id), { ...p, creado: Date.now() });
+    sincronizarExterno(b, id, "", (p.correo || "").toLowerCase());
+    return b.commit().then(() => id);
+  };
+  s.actualizarPersona = (id, patch) => {
+    const antes = correoDe(id), despues = "correo" in patch ? (patch.correo || "").toLowerCase() : antes;
+    if (antes === despues) return fb.fs.updateDoc(fb.fs.doc(fb.db, "personas", id), patch);
+    const b = fb.fs.writeBatch(fb.db);
+    b.update(fb.fs.doc(fb.db, "personas", id), patch);
+    sincronizarExterno(b, id, antes, despues);
+    return b.commit();
+  };
   // Borra a la persona y sus danzas en una sola escritura (las reglas lo permiten solo al administrador).
-  s.borrarPersona = (id) => { const b = fb.fs.writeBatch(fb.db); b.delete(fb.fs.doc(fb.db, "elenco", id)); b.delete(fb.fs.doc(fb.db, "personas", id)); return b.commit(); };
+  s.borrarPersona = (id) => {
+    const b = fb.fs.writeBatch(fb.db);
+    b.delete(fb.fs.doc(fb.db, "elenco", id)); b.delete(fb.fs.doc(fb.db, "personas", id));
+    sincronizarExterno(b, id, correoDe(id), "");
+    return b.commit();
+  };
   s.definir = (d, v) => {
     const def = { ...s.datos.definidas }; if (v) def[d] = true; else delete def[d];
     return fb.fs.setDoc(fb.fs.doc(fb.db, "config", "estado"), { definidas: def });
@@ -92,6 +128,10 @@ function storeFirebase(notificar) {
     Object.keys(s.datos.elenco).forEach((id) => ops.push((b) => b.delete(fs.doc(db, "elenco", id))));
     personas.forEach((p) => { const { id, ...v } = p; ops.push((b) => b.set(fs.doc(db, "personas", id), v)); });
     Object.entries(elenco).forEach(([id, danzas]) => ops.push((b) => b.set(fs.doc(db, "elenco", id), { danzas, actualizado: fs.serverTimestamp(), por: s.sesion.correo })));
+    // Autorizaciones de externos: quita las de correos que ya no están y escribe las del archivo.
+    const nuevos = new Map(personas.filter((p) => p.correo && !esUnal(p.correo)).map((p) => [p.correo.toLowerCase(), p.id]));
+    s.datos.personas.forEach((p) => { const c = (p.correo || "").toLowerCase(); if (c && !esUnal(c) && !nuevos.has(c)) ops.push((b) => b.delete(refExterno(c))); });
+    nuevos.forEach((id, c) => ops.push((b) => b.set(refExterno(c), { persona: id, ...meta() })));
     ops.push((b) => b.set(fs.doc(db, "config", "estado"), { definidas: Object.keys(s.datos.definidas).length ? s.datos.definidas : { ...DEFINIDAS_INICIALES } }));
     for (let i = 0; i < ops.length; i += 400) { const b = fs.writeBatch(db); ops.slice(i, i + 400).forEach((f) => f(b)); await b.commit(); }
   };
