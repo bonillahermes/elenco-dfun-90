@@ -40,7 +40,7 @@ export const PROGRAMA = [
   { i: "7:20", e: "7:23", a: "Instalación DFUN – Jacinto" },
   { i: "7:23", e: "7:26", d: "Guabina", n: "Objeto articulador: mantilla" },
   { i: "7:26", e: "7:28", a: "Intervención / voz M. Sandino" },
-  { i: "7:28", e: "7:34", d: "Guaneña y Bambuco sureño", n: "Guaneña 7:28 · Danza de Nariño 7:31 (objeto: bebé)" },
+  { i: "7:28", e: "7:34", d: "Guaneña y Bambuco sureño", n: "Guaneña 7:28 (una sola pareja) · Danza de Nariño 7:31" },
   { i: "7:34", e: "7:39", d: "Fandanguillo", n: "Coplas para Marla Patricia" },
   { i: "7:39", e: "7:42", d: "Cortadeña" },
   { i: "7:42", e: "7:47", a: "Intervención Rafa" },
@@ -89,7 +89,7 @@ export const CUPOS = {
 };
 
 // Vestuario por danza y rol (fuente: matriz de vestuario). Cada prenda: [nombre, disponible hoy, necesarias].
-// Si falta "necesarias", se usa el cupo del rol. En Guaneña, el solista tiene vestuario propio.
+// Si falta "necesarias", se usa el cupo del rol. Guaneña es de una sola pareja, con vestuario propio (solista).
 // "pend" = pendientes anotados. Se compran faltantes el fin de semana.
 export const VESTUARIO = {
   "Guabina": {
