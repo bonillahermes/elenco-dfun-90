@@ -2,6 +2,9 @@
 // No contiene datos personales: los nombres y correos vienen del archivo que se le pasa al script.
 
 export const CORREO_UNAL = /^[^@\s]+@unal\.edu\.co$/;
+// Cualquier correo bien escrito. Los que no son UNAL (egresados con Gmail) necesitan además una autorización en externos/{correo}.
+export const CORREO_VALIDO = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+export const esExterno = (c) => !!c && !CORREO_UNAL.test(c);
 export const norm = (x) => String(x || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 const tokens = (x) => norm(x).split(" ").filter((t) => t.length > 1);
 
@@ -17,11 +20,11 @@ export function leerTSV(texto) {
 // Con aceptarSugeridos, un nombre incompleto se vincula solo si coincide con una única persona.
 export function cruzar(filas, personas, { aceptarSugeridos = false } = {}) {
   const porCorreo = new Map(personas.filter((p) => p.correo).map((p) => [p.correo.toLowerCase(), p]));
-  const cambios = [], sugeridos = [], problemas = [], iguales = [];
+  const cambios = [], sugeridos = [], problemas = [], iguales = [], externosIguales = [];
   const vistos = new Map(), asignadas = new Map();
   for (const f of filas) {
     const donde = `línea ${f.linea}: ${f.nombre || "(sin nombre)"}`;
-    if (!CORREO_UNAL.test(f.correo)) { problemas.push(`${donde}: correo no institucional o mal escrito (${f.correo || "vacío"})`); continue; }
+    if (!CORREO_VALIDO.test(f.correo)) { problemas.push(`${donde}: correo mal escrito (${f.correo || "vacío"})`); continue; }
     if (vistos.has(f.correo)) { problemas.push(`${donde}: ${f.correo} ya aparece en la línea ${vistos.get(f.correo)}`); continue; }
     vistos.set(f.correo, f.linea);
 
@@ -39,11 +42,12 @@ export function cruzar(filas, personas, { aceptarSugeridos = false } = {}) {
     if (asignadas.has(p.id)) { problemas.push(`${donde}: ${p.nombre} ya recibe otro correo en la línea ${asignadas.get(p.id)}`); continue; }
     const actual = (p.correo || "").toLowerCase(), otro = porCorreo.get(f.correo);
     if (otro && otro.id !== p.id) { problemas.push(`${donde}: ${f.correo} ya está vinculado a ${otro.nombre}`); continue; }
-    if (actual === f.correo) { iguales.push(p.nombre); asignadas.set(p.id, f.linea); continue; }
+    if (actual === f.correo) { iguales.push(p.nombre); asignadas.set(p.id, f.linea); if (esExterno(f.correo)) externosIguales.push({ p, correo: f.correo }); continue; }
     if (actual) { problemas.push(`${donde}: ${p.nombre} ya tiene ${actual}; no se reemplaza`); continue; }
     asignadas.set(p.id, f.linea);
     if (sugerido && !aceptarSugeridos) { sugeridos.push({ p, correo: f.correo, fila: f }); continue; }
-    cambios.push({ p, correo: f.correo, sugerido, fila: f });
+    cambios.push({ p, correo: f.correo, sugerido, fila: f, externo: esExterno(f.correo) });
   }
-  return { cambios, sugeridos, problemas, iguales };
+  // externosIguales: correos externos ya vinculados; el script les vuelve a escribir la autorización por si falta.
+  return { cambios, sugeridos, problemas, iguales, externosIguales };
 }

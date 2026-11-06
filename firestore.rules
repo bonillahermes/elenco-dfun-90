@@ -1,12 +1,27 @@
 rules_version = '2';
 // Reglas de seguridad del elenco DFUN 90 años.
-// Leen: cuentas @unal.edu.co verificadas. Escriben: solo los maestros listados abajo.
+// Leen: cuentas @unal.edu.co verificadas y egresados con correo externo (Gmail) autorizado por el administrador.
+// Escriben: solo los maestros listados abajo.
 service cloud.firestore {
   match /databases/{db}/documents {
+    function verificado() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function correo() {
+      return request.auth.token.email.lower();
+    }
     function unal() {
-      return request.auth != null
-        && request.auth.token.email_verified == true
-        && request.auth.token.email.matches('.*@unal[.]edu[.]co$');
+      return verificado() && correo().matches('.*@unal[.]edu[.]co$');
+    }
+    // Egresado sin correo UNAL: debe existir externos/{correo} y la persona que señala debe tener ese mismo correo.
+    // Si el administrador cambia o quita el correo de la persona, el acceso se pierde aunque quede la autorización.
+    function externo() {
+      return verificado()
+        && exists(/databases/$(db)/documents/externos/$(correo()))
+        && get(/databases/$(db)/documents/personas/$(get(/databases/$(db)/documents/externos/$(correo())).data.persona)).data.get('correo', '') == correo();
+    }
+    function lector() {
+      return unal() || externo();
     }
     // Deben coincidir con ADMINS y MAESTROS en public/js/config.js.
     function admin() {
@@ -17,21 +32,26 @@ service cloud.firestore {
     }
     // Vincular correos (quién es quién) es solo del administrador.
     match /personas/{id} {
-      allow read: if unal();
+      allow read: if lector();
       allow create: if admin() || (maestro() && request.resource.data.get('correo', '') == '');
       allow update: if admin() || (maestro()
         && request.resource.data.get('correo', '') == resource.data.get('correo', ''));
       allow delete: if admin();
     }
     match /elenco/{id} {
-      allow read: if unal();
+      allow read: if lector();
       allow delete: if maestro();
       allow create, update: if maestro()
         && request.resource.data.danzas is list
         && request.resource.data.danzas.size() <= 11;
     }
+    // Autorizaciones de correos externos: { persona, por, actualizado }. Cada quien puede consultar la suya.
+    match /externos/{c} {
+      allow get: if verificado() && correo() == c;
+      allow read, write: if admin();
+    }
     match /config/{doc} {
-      allow read: if unal();
+      allow read: if lector();
       allow write: if maestro();
     }
   }

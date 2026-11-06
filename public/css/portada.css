@@ -85,6 +85,9 @@
 #v-inicio .po-camino .po-dato{color:var(--po-tinta);font-size:clamp(19px,1.8vw,22px);font-weight:600}
 #v-inicio .po-link{color:var(--po-tinta);font-weight:600;text-decoration:underline;text-decoration-color:rgba(20,20,20,.35);text-underline-offset:4px}
 #v-inicio .po-link:hover{text-decoration-color:var(--po-tinta)}
+#v-inicio .po-link-btn{appearance:none;background:none;border:0;padding:0;font:inherit;font-weight:600;cursor:pointer;text-align:left}
+#v-inicio .po-link-btn:disabled{opacity:.6;cursor:default}
+#v-inicio .po-egresado{font-size:15px}
 #v-inicio .po-btn-oscuro{background:var(--po-tinta);color:#fff}
 #v-inicio .po-btn-oscuro:hover{background:#000}
 #v-inicio .po-msg-claro{color:var(--po-panoleta)}

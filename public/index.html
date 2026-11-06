@@ -68,6 +68,7 @@
           <h3 id="po-camino-elenco">Eres del elenco</h3>
           <p>Entra con tu correo de la universidad y mira qué bailas, a qué hora sales a escena, qué vestuario alistas y con quién bailas cada danza.</p>
           <div><button class="po-btn po-btn-oscuro" type="button" data-entrar>Ingresar con correo UNAL</button></div>
+          <p class="po-egresado" data-egresado>¿Eres egresado y no tienes correo UNAL? <button class="po-link po-link-btn" type="button" data-entrar="externo">Ingresa con tu cuenta de Google</button></p>
           <p class="msg po-msg po-msg-claro" data-eco-login aria-hidden="true"></p>
         </article>
       </div>
@@ -238,7 +239,7 @@
         <summary>Datos de la persona</summary>
         <form id="p-form" class="grid2 p-form" autocomplete="off">
           <div class="field"><label for="p-nombre">Nombre completo</label><input type="text" id="p-nombre" maxlength="120"></div>
-          <div class="field" data-admin><label for="p-correo">Correo UNAL</label><input type="text" id="p-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
+          <div class="field" data-admin><label for="p-correo">Correo (UNAL o Gmail de egresado)</label><input type="text" id="p-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
           <div class="field"><label for="p-rol">Rol</label><select id="p-rol"><option value="">Sin definir</option><option>Hombre</option><option>Mujer</option></select></div>
           <div class="field"><label for="p-vin">Vínculo</label><select id="p-vin"><option value="">Sin definir</option><option>Estudiante</option><option>Egresado</option></select></div>
           <div class="field" style="align-self:end"><button class="btn small ghost" type="submit">Guardar datos</button></div>
@@ -282,7 +283,7 @@
         <h2>Inscribir bailarín(a)</h2>
         <div class="grid2">
           <div class="field"><label for="f-nombre">Nombre completo</label><input type="text" id="f-nombre" maxlength="120"></div>
-          <div class="field" data-admin><label for="f-correo">Correo UNAL</label><input type="text" id="f-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
+          <div class="field" data-admin><label for="f-correo">Correo (UNAL o Gmail de egresado)</label><input type="text" id="f-correo" inputmode="email" placeholder="usuario@unal.edu.co"></div>
         </div>
         <div class="grid2">
           <div class="field"><span class="lbl">Rol</span><div class="chips"><label class="chip"><input type="radio" name="rol" value="Hombre"><span>Hombre</span></label><label class="chip"><input type="radio" name="rol" value="Mujer"><span>Mujer</span></label></div></div>
