@@ -386,7 +386,7 @@ function recomendaciones(p) {
     else if (c.min < REGLAS.margenRapido) out.push(`Cambio rápido de ${c.min} min entre ${DZ[c.de].label} y ${DZ[c.a].label}: deja el vestuario de ${DZ[c.a].label} listo en el camerino, en el orden en que te lo pones, antes de que empiece la función.`);
     else out.push(`Tienes ${c.min} min para cambiarte entre ${DZ[c.de].label} y ${DZ[c.a].label}.`);
   });
-  BLOQUES.forEach((b) => { const en = S.filter((d) => DZ[d].b === b.id); if (en.length > 1) out.push(`${en.map((d) => DZ[d].label).join(" y ")} usan el mismo vestuario: no te cambias entre ellas.`); });
+  BLOQUES.forEach((b) => { const en = S.filter((d) => DZ[d].b === b.id); if (en.length > 1) out.push(b.leve ? `Entre ${en.map((d) => DZ[d].label).join(" y ")} el cambio de vestuario es leve: ten a la mano las prendas de ${DZ[en[en.length - 1]].label}.` : `${en.map((d) => DZ[d].label).join(" y ")} usan el mismo vestuario: no te cambias entre ellas.`); });
   piezasAnalisis().forEach((x) => {
     if (x.A.has(p.id) && !x.B.has(p.id) && x.B.size) out.push(`Al terminar ${x.de.map((d) => DZ[d].label).join(" / ")}, entrega ${x.pieza.toLowerCase()} a quienes entran en ${x.a.map((d) => DZ[d].label).join(" / ")} (${x.min} min después).`);
     if (x.B.has(p.id) && !x.A.has(p.id) && x.A.size) out.push(`Recibes ${x.pieza.toLowerCase()} de quienes salen de ${x.de.map((d) => DZ[d].label).join(" / ")}: acuerda con ellos dónde te los dejan.`);

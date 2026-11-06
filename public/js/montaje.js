@@ -3,29 +3,29 @@
 // Cambiar aquí horas, bloques o reglas; el resto de la aplicación se recalcula.
 
 export const BLOQUES = [
-  { id: 1, nombre: "Guabina" },
-  { id: 2, nombre: "Sur", corto: "Sur" },
-  { id: 3, nombre: "Fandanguillo y Cortadeña", corto: "Fand. y Cort." },
-  { id: 4, nombre: "Rajaleña" },
-  { id: 5, nombre: "Arcos y Chicha" },
-  { id: 6, nombre: "Palo negro" },
-  { id: 7, nombre: "Costas" },
+  // leve: danzas del mismo bloque con vestuario distinto pero cambio leve (no cuenta como cambio entre bloques).
+  { id: 1, nombre: "Guabina y Sur", corto: "Guabina y Sur", leve: true },
+  { id: 2, nombre: "Fandanguillo y Cortadeña", corto: "Fand. y Cort." },
+  { id: 3, nombre: "Rajaleña" },
+  { id: 4, nombre: "Arcos y Chicha" },
+  { id: 5, nombre: "Palo negro" },
+  { id: 6, nombre: "Costas" },
 ];
 
 // id: clave estable en la base de datos. b: bloque. s/e: inicio y fin (p. m.).
-// Dentro de un bloque se comparte vestuario.
+// Dentro de un bloque se comparte vestuario (o el cambio es leve, ver BLOQUES.leve).
 export const DANZAS = [
   { id: "Guabina", label: "Guabina", b: 1, s: "7:23", e: "7:26", pareja: true },
-  { id: "Guaneña y Bambuco sureño", label: "Guaneña y Nariño", b: 2, s: "7:28", e: "7:34" },
-  { id: "Fandanguillo", label: "Fandanguillo", b: 3, s: "7:34", e: "7:39" },
-  { id: "Cortadeña", label: "Cortadeña", b: 3, s: "7:39", e: "7:42", requiere: "Fandanguillo" },
-  { id: "Rajaleña", label: "Rajaleña", b: 4, s: "7:47", e: "7:51" },
-  { id: "Arcos", label: "Arcos", b: 5, s: "7:56", e: "7:59" },
-  { id: "Chicha", label: "Chicha", b: 5, s: "8:02", e: "8:05" },
-  { id: "Palo negro", label: "Palo negro", b: 6, s: "8:05", e: "8:08", pareja: true },
-  { id: "Cumbia", label: "Cumbia", b: 7, s: "8:08", e: "8:12", pareja: true, excluye: "Bullerengue" },
-  { id: "Bullerengue", label: "Bullerengue", b: 7, s: "8:12", e: "8:15", soloMujeres: true, excluye: "Cumbia" },
-  { id: "Pilanderas", label: "Pilanderas", b: 7, s: "8:15", e: "8:19", sugeridaPor: "Cumbia" },
+  { id: "Guaneña y Bambuco sureño", label: "Guaneña y Nariño", b: 1, s: "7:28", e: "7:34" },
+  { id: "Fandanguillo", label: "Fandanguillo", b: 2, s: "7:34", e: "7:39" },
+  { id: "Cortadeña", label: "Cortadeña", b: 2, s: "7:39", e: "7:42", requiere: "Fandanguillo" },
+  { id: "Rajaleña", label: "Rajaleña", b: 3, s: "7:47", e: "7:51" },
+  { id: "Arcos", label: "Arcos", b: 4, s: "7:56", e: "7:59" },
+  { id: "Chicha", label: "Chicha", b: 4, s: "8:02", e: "8:05" },
+  { id: "Palo negro", label: "Palo negro", b: 5, s: "8:05", e: "8:08", pareja: true },
+  { id: "Cumbia", label: "Cumbia", b: 6, s: "8:08", e: "8:12", pareja: true, excluye: "Bullerengue" },
+  { id: "Bullerengue", label: "Bullerengue", b: 6, s: "8:12", e: "8:15", soloMujeres: true, excluye: "Cumbia" },
+  { id: "Pilanderas", label: "Pilanderas", b: 6, s: "8:15", e: "8:19", sugeridaPor: "Cumbia" },
 ];
 
 export const REGLAS = {

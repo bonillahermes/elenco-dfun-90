@@ -12,6 +12,11 @@ test("dentro de un bloque no hay cambio de vestuario", () => {
   assert.deepEqual(cambios(["Cumbia", "Pilanderas"]), []);
 });
 
+test("Guabina y Guaneña son un solo bloque: no cuenta como cambio", () => {
+  assert.deepEqual(cambios(["Guabina", "Guaneña y Bambuco sureño"]), []);
+  assert.equal(motor({ m: ["Guabina"] }).evaluar(M("m"), "Guaneña y Bambuco sureño").st, "ok");
+});
+
 test("bloques seguidos sin intervención: imposible para mujeres", () => {
   assert.equal(motor({ m: ["Guaneña y Bambuco sureño"] }).evaluar(M("m"), "Fandanguillo").st, "block");
   assert.equal(motor({ m: ["Chicha"] }).evaluar(M("m"), "Palo negro").st, "block");
@@ -35,7 +40,6 @@ test("por danza: Arcos y Palo negro sí, Palo negro y Pilanderas sí", () => {
 });
 
 test("cambios rápidos quedan en advertencia", () => {
-  assert.equal(motor({ h: ["Guabina"] }).evaluar(H("h"), "Guaneña y Bambuco sureño").st, "warn");
   assert.equal(motor({ h: ["Chicha"] }).evaluar(H("h"), "Cumbia").st, "warn");
 });
 
