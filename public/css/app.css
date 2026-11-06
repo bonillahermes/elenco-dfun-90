@@ -103,7 +103,6 @@ tr.sel td{background:var(--accent-soft)}
 .ttable th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;min-width:80px}
 .bar i{display:block;height:100%;background:var(--accent)}
-.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:14px;max-width:min(92vw,520px);z-index:20;box-shadow:0 6px 24px rgba(0,0,0,.2)}
 @media (max-width:640px){
   .wrap{padding-block:14px 48px;gap:14px}
   th.name,td.name{min-width:128px;max-width:140px;white-space:normal;line-height:1.2}

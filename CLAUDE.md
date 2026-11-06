@@ -17,6 +17,9 @@ Herramienta para que el maestro del Grupo de Danzas Folclóricas de la Universid
 - `public/js/excel.js`: lectura y escritura de Excel (hoja `Inscripción`).
 - `public/js/app.js`: interfaz. Portada pública con botón Ingresar. Tras ingresar, un panel de Inicio con una tarjeta por rol que explica lo que cada uno encuentra; navegación "Inicio | Elenco | Mi programa" según el rol. Maestro: Matriz, Por danza, Por persona, Logística, Vestuario, Programa, Datos. Bailarín: llamados, ficha por danza, recomendaciones y programa general. Un maestro sin nombre vinculado puede vincular su propio correo desde Inicio.
 - `scripts/correos.mjs`: vincula correos a personas existentes cruzando por nombre, desde un TSV en `datos/` (fuera de git). Simula por defecto; `--aplicar` escribe solo el campo correo y nunca reemplaza uno ya vinculado; `--aceptar-sugeridos` incluye nombres incompletos con un único candidato. La lógica está en `scripts/cruzar-correos.mjs`.
+- `public/css/`: `app.css` (aplicación), `portada.css` (portada pública, todo bajo `#v-inicio`), `inicio.css` (panel de Inicio y encabezado con el estilo de la portada), `elenco.css` (ayudas de la vista Elenco).
+- `public/js/portada.js`: telón, fotos que rotan en la apertura y carrusel de la portada. Las fotos web están en `public/img/portada/` con el mismo nombre que su original en `fotos/` (fuera de git).
+- Vista Elenco: cada acción muestra un aviso fijo abajo; asignar y quitar traen "Deshacer". Las cifras del resumen y los pendientes del Inicio llevan a la matriz filtrada (Con problemas, Sin danza, Postulaciones pendientes, Sin correo).
 - `scripts/sembrar.mjs`: carga inicial única a Firestore con firebase-admin y credenciales de `gcloud auth application-default login`. Lee `datos/semilla.json` (fuera de git).
 - `firestore.rules`: leen cuentas UNAL verificadas; escriben solo los maestros. La lista de maestros está en `firestore.rules` y en `MAESTROS` de `public/js/config.js`; deben coincidir.
 
