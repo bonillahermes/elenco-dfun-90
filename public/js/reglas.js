@@ -35,7 +35,7 @@ export function crearMotor(estado) {
     const add = [d];
     if (D.requiere && !S.includes(D.requiere)) add.push(D.requiere);
     for (const x of add) { const ex = DZ[x].excluye; if (ex && S.includes(ex)) return { st: "block", why: `No se combina con ${DZ[ex].label}` }; }
-    for (const x of add) { const c = cupo(x, p.rol); if (c !== null && ocupados(x, p.rol) >= c) return { st: "block", why: `Cupo lleno en ${DZ[x].label} (${c} ${p.rol === "Mujer" ? "mujeres" : "hombres"})` }; }
+    for (const x of add) { const c = cupo(x, p.rol); if (c !== null && ocupados(x, p.rol) >= c) return { st: "block", why: `Cupo lleno en ${DZ[x].label} (${c} ${p.rol === "Mujer" ? (c === 1 ? "mujer" : "mujeres") : (c === 1 ? "hombre" : "hombres")})` }; }
     const N = S.concat(add), mx = maxDe(p);
     if (mx && N.length > mx) return { st: "block", why: `Llegaría a ${N.length} danzas (máximo ${mx})` };
     const peor = peorDe(cambios(N).filter((c) => add.includes(c.de) || add.includes(c.a)));

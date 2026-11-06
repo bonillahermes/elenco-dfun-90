@@ -16,7 +16,8 @@ export const BLOQUES = [
 // Dentro de un bloque se comparte vestuario (o el cambio es leve, ver BLOQUES.leve).
 export const DANZAS = [
   { id: "Guabina", label: "Guabina", b: 1, s: "7:23", e: "7:26", pareja: true },
-  { id: "Guaneña y Bambuco sureño", label: "Guaneña y Nariño", b: 1, s: "7:28", e: "7:34" },
+  { id: "Guaneña", label: "Guaneña", b: 1, s: "7:28", e: "7:31", pareja: true }, // una sola pareja
+  { id: "Guaneña y Bambuco sureño", label: "Danza de Nariño", b: 1, s: "7:31", e: "7:34" }, // id antiguo de la columna conjunta: se conserva para no mover datos
   { id: "Fandanguillo", label: "Fandanguillo", b: 2, s: "7:34", e: "7:39" },
   { id: "Cortadeña", label: "Cortadeña", b: 2, s: "7:39", e: "7:42", requiere: "Fandanguillo" },
   { id: "Rajaleña", label: "Rajaleña", b: 3, s: "7:47", e: "7:51" },
@@ -40,7 +41,8 @@ export const PROGRAMA = [
   { i: "7:20", e: "7:23", a: "Instalación DFUN – Jacinto" },
   { i: "7:23", e: "7:26", d: "Guabina", n: "Objeto articulador: mantilla" },
   { i: "7:26", e: "7:28", a: "Intervención / voz M. Sandino" },
-  { i: "7:28", e: "7:34", d: "Guaneña y Bambuco sureño", n: "Guaneña 7:28 (una sola pareja) · Danza de Nariño 7:31" },
+  { i: "7:28", e: "7:31", d: "Guaneña", n: "Objeto articulador: bebé" },
+  { i: "7:31", e: "7:34", d: "Guaneña y Bambuco sureño" },
   { i: "7:34", e: "7:39", d: "Fandanguillo", n: "Coplas para Marla Patricia" },
   { i: "7:39", e: "7:42", d: "Cortadeña" },
   { i: "7:42", e: "7:47", a: "Intervención Rafa" },
@@ -76,7 +78,8 @@ export const BQ = Object.fromEntries(BLOQUES.map((b) => [b.id, b]));
 // Cupos fijos por danza (fuente: matriz de vestuario de la gala).
 export const CUPOS = {
   "Guabina": { Hombre: 8, Mujer: 8 },
-  "Guaneña y Bambuco sureño": { Hombre: 9, Mujer: 9 },
+  "Guaneña": { Hombre: 1, Mujer: 1 },
+  "Guaneña y Bambuco sureño": { Hombre: 8, Mujer: 8 },
   "Fandanguillo": { Hombre: 16, Mujer: 16 },
   "Cortadeña": { Hombre: 8, Mujer: 8 },
   "Rajaleña": { Hombre: 12, Mujer: 12 },
@@ -89,16 +92,20 @@ export const CUPOS = {
 };
 
 // Vestuario por danza y rol (fuente: matriz de vestuario). Cada prenda: [nombre, disponible hoy, necesarias].
-// Si falta "necesarias", se usa el cupo del rol. Guaneña es de una sola pareja, con vestuario propio (solista).
+// Si falta "necesarias", se usa el cupo del rol.
 // "pend" = pendientes anotados. Se compran faltantes el fin de semana.
 export const VESTUARIO = {
   "Guabina": {
     Mujer: { prendas: [["Mantilla", 7], ["Sombrero", 7], ["Blusa", 6], ["Falda", 9]], pend: ["Falta 1 sombrero", "Faltan 2 blusas"] },
     Hombre: { prendas: [["Pantalón gris", 10], ["Pañoleta roja", 15], ["Sombrero negro", 9], ["Camisa blanca", 5], ["Ruana", 0]], pend: ["Falta traer 8 ruanas"] },
   },
+  "Guaneña": {
+    Mujer: { prendas: [["Vestuario Guaneña completo", 1], ["Chal vinotinto", 1]], pend: [] },
+    Hombre: { prendas: [["Pantalón beige", 1], ["Camisa dorada con negro", 1]], pend: ["Falta el pantalón del solista de Guaneña"] },
+  },
   "Guaneña y Bambuco sureño": {
-    Mujer: { prendas: [["Falda", 8, 8], ["Blusa blanca", 6, 8], ["Chal negro", 8, 8], ["Chal vinotinto (solista)", 1, 1], ["Vestuario Guaneña completo (solista)", 1, 1]], pend: ["El inventario dice que hay 8 blusas de Nariño", "Coordinar accesorios: aretes y collares"] },
-    Hombre: { prendas: [["Pantalón café", 8, 8], ["Camisa", 4, 8], ["Pañoleta", 8, 8], ["Fajón", 8, 8], ["Pantalón beige (solista)", 1, 1], ["Camisa dorada con negro (solista)", 1, 1]], pend: ["El inventario dice que hay 8 camisas de Nariño", "Falta el pantalón del solista de Guaneña"] },
+    Mujer: { prendas: [["Falda", 8], ["Blusa blanca", 6], ["Chal negro", 8]], pend: ["El inventario dice que hay 8 blusas de Nariño", "Coordinar accesorios: aretes y collares"] },
+    Hombre: { prendas: [["Pantalón café", 8], ["Camisa", 4], ["Pañoleta", 8], ["Fajón", 8]], pend: ["El inventario dice que hay 8 camisas de Nariño"] },
   },
   "Fandanguillo": {
     Mujer: { prendas: [["Falda Antioquia vinotinto", 8], ["Blusa Antioquia vinotinto", 8]], pend: [] },

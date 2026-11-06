@@ -15,6 +15,13 @@ test("dentro de un bloque no hay cambio de vestuario", () => {
 test("Guabina y Guaneña son un solo bloque: no cuenta como cambio", () => {
   assert.deepEqual(cambios(["Guabina", "Guaneña y Bambuco sureño"]), []);
   assert.equal(motor({ m: ["Guabina"] }).evaluar(M("m"), "Guaneña y Bambuco sureño").st, "ok");
+  assert.equal(motor({ m: ["Guabina"] }).evaluar(M("m"), "Guaneña").st, "ok");
+});
+
+test("Guaneña es de una sola pareja y deja 3 min hasta Fandanguillo", () => {
+  const ps = [H("h"), M("m"), M("m2")];
+  assert.equal(motor({ m: ["Guaneña"] }, {}, ps).evaluar(M("m2"), "Guaneña").st, "block");
+  assert.equal(motor({ m: ["Guaneña"] }, {}, ps).evaluar(M("m"), "Fandanguillo").st, "warn");
 });
 
 test("bloques seguidos sin intervención: imposible para mujeres", () => {
